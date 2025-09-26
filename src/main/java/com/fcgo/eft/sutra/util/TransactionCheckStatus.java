@@ -28,7 +28,6 @@ public class TransactionCheckStatus {
                 nonRealTime.nonRealtimeCheckUpdate(date);
                 realTime.realTimeCheckByDate(date);
             });
-//            repository.findByPendingTransactionId().forEach(getRealTimeStatus::getRealTimeByBatch);
             repository.findByPushed("N").forEach(statusUpdate::update);
 
     }

@@ -1,12 +1,12 @@
 package com.fcgo.eft.sutra.service.nonrealtime;
 
 import com.fcgo.eft.sutra.dto.req.CipsFundTransfer;
-import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
 import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
-import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
 import com.fcgo.eft.sutra.token.TokenGenerate;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
@@ -15,7 +15,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
-import java.util.Date;
 import java.util.Objects;
 
 
@@ -29,6 +28,9 @@ public class BatchPaymentServiceServiceImpl implements BatchPaymentService {
     private final TokenGenerate tokenGenerate;
     private final WebClient webClient;
     private final EftBatchPaymentDetailRepository repository;
+    @Setter
+    @Getter
+    private int count = 0;
 
     @Override
     public void start(CipsFundTransfer cipsFundTransfer, BigInteger masterId) {
@@ -56,28 +58,11 @@ public class BatchPaymentServiceServiceImpl implements BatchPaymentService {
 
             assert res != null;
             repository.updateBatchBuild("SENT", masterId);
-            /*
-            if (res.getCipsBatchResponse().getDebitStatus().equals("000")) {
 
-                repository.updateBatchBuild(masterId);
-                res.getCipsTxnResponseList().forEach(d -> {
-                    long eftNo = Long.parseLong(d.getInstructionId());
-                    reconciledRepository.save(NchlReconciled.builder()
-                            .instructionId(eftNo)
-                            .debitStatus("000")
-                            .debitMessage(res.getCipsBatchResponse().getResponseMessage())
-                            .creditStatus(d.getCreditStatus())
-                            .creditMessage(d.getResponseMessage())
-                            .recDate(new Date())
-                            .transactionId(String.valueOf(d.getId()))
-                            .pushed("N")
-                            .build());
-                });
-            }
-            */
             log.info("PUSHED INTO NCHL POST BATCH ID: {} | Batch size: {}", batchId, cipsFundTransfer.getNchlIpsTransactionDetailList().size());
         } catch (Exception e) {
             log.info(e.getMessage());
         }
+        count--;
     }
 }

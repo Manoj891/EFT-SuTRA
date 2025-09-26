@@ -15,7 +15,9 @@ import com.fcgo.eft.sutra.service.realtime.response.CipsTxnResponse;
 import com.fcgo.eft.sutra.service.realtime.response.RealTimeResponse;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
 import com.fcgo.eft.sutra.token.TokenGenerate;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
@@ -40,7 +42,9 @@ public class RealTimeTransactionService {
     private final DecimalFormat df = new DecimalFormat("#.00");
     private final ObjectMapper mapper = new ObjectMapper();
 
-
+    @Setter
+    @Getter
+    private int count = 0;
     public void ipsDctTransaction(EftPaymentRequestDetailProjection m, String creditorBranch) {
 
         String amount = df.format(m.getAmount());
@@ -98,6 +102,7 @@ public class RealTimeTransactionService {
             } catch (Exception ignored) {
             }
         }
+        count--;
     }
 
     private void failure(String responseDescription, String instructionId, long eftNo) {

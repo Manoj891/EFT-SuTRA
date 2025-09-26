@@ -41,8 +41,7 @@ public class NonRealTimeTransactionStart {
                 started = false;
                 break;
             }
-            service.setCount(list.size());
-            started = true;
+              started = true;
             list.forEach(batch -> {
                 try {
                     BigInteger id = batch.getId();
@@ -84,13 +83,10 @@ public class NonRealTimeTransactionStart {
                     log.error(ex.getMessage());
                 }
             });
-            int count = 0;
-            while (service.getCount() <= 10 && count < 1000) {
-                count++;
-                try {
-                    Thread.sleep(1000);
-                } catch (Exception ignored) {
-                }
+
+            try {
+                Thread.sleep(300L * list.size());
+            } catch (Exception ignored) {
             }
         }
     }

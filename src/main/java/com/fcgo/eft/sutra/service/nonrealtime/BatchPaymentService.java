@@ -7,8 +7,4 @@ import java.math.BigInteger;
 
 public interface BatchPaymentService {
     void start(CipsFundTransfer cipsFundTransfer, BigInteger masterId);
-
-    void setCount(int count);
-
-    int getCount();
 }

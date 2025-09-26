@@ -26,7 +26,7 @@ public class BatchPaymentServiceServiceImpl implements BatchPaymentService {
     private final TokenGenerate tokenGenerate;
     private final WebClient webClient;
     private final EftBatchPaymentDetailRepository repository;
-    private int count = 0;
+
 
     @Override
     public void start(CipsFundTransfer cipsFundTransfer, BigInteger masterId) {
@@ -59,16 +59,5 @@ public class BatchPaymentServiceServiceImpl implements BatchPaymentService {
         } catch (Exception e) {
             log.info(e.getMessage());
         }
-        count--;
-    }
-
-    @Override
-    public void setCount(int count) {
-        this.count = count;
-    }
-
-    @Override
-    public int getCount() {
-        return count;
     }
 }

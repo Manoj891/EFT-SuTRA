@@ -37,7 +37,7 @@ public class RealTimeTransactionStart {
                 break;
             }
             started = true;
-            service.setCount(list.size());
+
             list.forEach(eftPaymentRequestDetailProjection -> {
                 try {
                     repository.updateNchlStatusByInstructionId("BUILD", eftPaymentRequestDetailProjection.getInstructionId());
@@ -47,13 +47,11 @@ public class RealTimeTransactionStart {
                 }
             });
 
-            while (service.getCount() <= 10) {
-                try {
-                    Thread.sleep(1000);
-                } catch (Exception ignored) {
-                }
-            }
 
+            try {
+                Thread.sleep(300L * list.size());
+            } catch (Exception ignored) {
+            }
 
         }
     }

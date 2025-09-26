@@ -36,18 +36,22 @@ public class TransactionStatusUpdate {
                     log.info("Message updated {} {} ", reconciled.getCreditMessage(), instructionId);
                     String message = reconciled.getCreditMessage() + " " + reconciled.getDebitMessage();
                     if (message.length() > 500) message = message.substring(0, 495);
-                    epaymentRepository.updateMessage(message, instructionId);
+                    if (message.equalsIgnoreCase("SUCCESS")) {
+                        updateSuccessStatus(reconciled.getCreditMessage(), reconciled.getRecDate(), instructionId);
+                    } else {
+                        epaymentRepository.updateMessage(message, instructionId);
+                    }
                 }
 
             } else if (debitStatus.equals("000")) {
-                    if (status.equals("1000") ||
+                if (status.equals("1000") ||
                         status.equals("1001") ||
                         status.equals("099") ||
                         status.equals("096") ||
                         status.equals("909") ||
                         status.equals("-01") ||
-                        status.equals("-04")||
-                        status.equals("119") ) {
+                        status.equals("-04") ||
+                        status.equals("119")) {
                     updateFailureStatus(reconciled.getCreditMessage() + " " + reconciled.getDebitMessage(), instructionId);
                 }
             }

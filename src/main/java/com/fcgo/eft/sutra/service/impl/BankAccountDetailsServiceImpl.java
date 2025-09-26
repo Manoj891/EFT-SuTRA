@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -61,7 +60,8 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
     }
 
 
-    @Scheduled(cron = "0 0 10,16,20 * * *")
+
+    @Override
     public void fetchBankAccountDetails() {
         try {
             String access_token = oauthToken.getAccessToken();

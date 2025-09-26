@@ -1,6 +1,7 @@
 package com.fcgo.eft.sutra.util;
 
 import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
+import com.fcgo.eft.sutra.service.BankAccountDetailsService;
 import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeCheckStatusByDate;
 import com.fcgo.eft.sutra.service.realtime.RealTimeStatusFromNchl;
 import lombok.RequiredArgsConstructor;
@@ -21,18 +22,23 @@ public class TransactionCheckStatus {
     private final TransactionStatusUpdate statusUpdate;
     private final ExecutorService executorService;
     private final RealTimeStatusFromNchl getRealTimeStatus;
+    private final BankAccountDetailsService bankAccountDetailsService;
 
     @Scheduled(cron = "0 10 10,12,14,15,16,17,18 * * *")
     public void executeCheckTransactionStatus() {
-            repository.findByPendingDate().forEach(date -> {
-                nonRealTime.nonRealtimeCheckUpdate(date);
-                realTime.realTimeCheckByDate(date);
-            });
-            repository.findByPushed("N").forEach(statusUpdate::update);
-
+        repository.findByPendingDate().forEach(date -> {
+            nonRealTime.nonRealtimeCheckUpdate(date);
+            realTime.realTimeCheckByDate(date);
+        });
+        repository.findByPushed("N").forEach(statusUpdate::update);
     }
 
-//    @Scheduled(cron = "0 45 * * * *")
+    @Scheduled(cron = "0 0 10,16,20 * * *")
+    public void fetchBankAccountDetails() {
+        bankAccountDetailsService.fetchBankAccountDetails();
+    }
+
+    //    @Scheduled(cron = "0 45 * * * *")
     public void executeEveryHour55Minute() {
         try {
             executorService.submit(() -> {

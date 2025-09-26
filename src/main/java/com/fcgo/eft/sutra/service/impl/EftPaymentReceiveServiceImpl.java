@@ -3,11 +3,13 @@ package com.fcgo.eft.sutra.service.impl;
 import com.fcgo.eft.sutra.dto.req.EftPaymentReceive;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
 import com.fcgo.eft.sutra.repository.oracle.BankHeadOfficeRepository;
+import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
 import com.fcgo.eft.sutra.service.BankHeadOfficeService;
 import com.fcgo.eft.sutra.service.EftPaymentReceiveService;
 import com.fcgo.eft.sutra.service.PaymentReceiveService;
 import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeTransactionStart;
 import com.fcgo.eft.sutra.service.realtime.RealTimeTransactionStart;
+import com.fcgo.eft.sutra.util.TransactionStatusUpdate;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,9 +63,12 @@ public class EftPaymentReceiveServiceImpl implements EftPaymentReceiveService {
     public void executePostConstruct() {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
-        headOfficeRepository.updatePaymentPendingStatusDetail();
-        headOfficeRepository.updatePaymentPendingStatusMaster();
-        new Thread(() -> startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
+        repository.findByPushed("N").forEach(statusUpdate::update);
+//        headOfficeRepository.updatePaymentPendingStatusDetail();
+//        headOfficeRepository.updatePaymentPendingStatusMaster();
+//        new Thread(() -> startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
 
     }
+    private final NchlReconciledRepository repository;
+    private final TransactionStatusUpdate statusUpdate;
 }

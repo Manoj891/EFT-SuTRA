@@ -24,13 +24,13 @@ public class NonRealTimeTransactionStart {
     private boolean started = false;
     private final ExecutorService executorService;
     private final EftBatchPaymentDetailRepository repository;
-    private final BatchPaymentService batch;
+    private final BatchPaymentService service;
     private final BankHeadOfficeService ho;
 
     public NonRealTimeTransactionStart(@Qualifier("nonRealTime") ExecutorService executorService, EftBatchPaymentDetailRepository repository, BatchPaymentService batch, BankHeadOfficeService ho) {
         this.executorService = executorService;
         this.repository = repository;
-        this.batch = batch;
+        this.service = batch;
         this.ho = ho;
     }
 
@@ -41,6 +41,7 @@ public class NonRealTimeTransactionStart {
                 started = false;
                 break;
             }
+            service.setCount(list.size());
             started = true;
             list.forEach(batch -> {
                 try {
@@ -78,14 +79,18 @@ public class NonRealTimeTransactionStart {
                     CipsFundTransfer transfer = CipsFundTransfer.builder().nchlIpsBatchDetail(batchDetail).nchlIpsTransactionDetailList(data).build();
                     repository.updateBatchBuild("BUILD", id);
                     repository.updateBatchBuild(id);
-                    executorService.execute(() -> this.batch.start(transfer, id));
+                    executorService.execute(() -> service.start(transfer, id));
                 } catch (Exception ex) {
                     log.error(ex.getMessage());
                 }
             });
-            try {
-                Thread.sleep((200L * list.size()));
-            } catch (Exception ignored) {
+            int count = 0;
+            while (service.getCount() <= 10 && count < 1000) {
+                count++;
+                try {
+                    Thread.sleep(1000);
+                } catch (Exception ignored) {
+                }
             }
         }
     }

@@ -4,9 +4,7 @@ import com.fcgo.eft.sutra.dto.req.CipsFundTransfer;
 import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
 import com.fcgo.eft.sutra.token.TokenGenerate;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
@@ -28,8 +26,6 @@ public class BatchPaymentServiceServiceImpl implements BatchPaymentService {
     private final TokenGenerate tokenGenerate;
     private final WebClient webClient;
     private final EftBatchPaymentDetailRepository repository;
-    @Setter
-    @Getter
     private int count = 0;
 
     @Override
@@ -64,5 +60,15 @@ public class BatchPaymentServiceServiceImpl implements BatchPaymentService {
             log.info(e.getMessage());
         }
         count--;
+    }
+
+    @Override
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    @Override
+    public int getCount() {
+        return count;
     }
 }

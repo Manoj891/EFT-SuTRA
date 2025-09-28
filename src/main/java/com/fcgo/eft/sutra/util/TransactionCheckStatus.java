@@ -48,8 +48,9 @@ public class TransactionCheckStatus {
     public void executePostConstruct() {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
+        new Thread(this::executeCheckTransactionStatus).start();
         new Thread(() -> {
-            executeCheckTransactionStatus();
+
             while (true) {
                 try {
                     epaymentRepository.updateSuccessEPayment()
@@ -94,16 +95,22 @@ public class TransactionCheckStatus {
 
     //    @Scheduled(cron = "0 10 10,12,14,15,16,17,18 * * *")
     public void executeCheckTransactionStatus() {
-        headOfficeRepository.updatePaymentPendingStatusDetail();
-        headOfficeRepository.updatePaymentPendingStatusMaster();
-        repository.findByPendingDate().forEach(date -> {
-            nonRealTime.nonRealtimeCheckUpdate(date);
-            realTime.realTimeCheckByDate(date);
-        });
-        repository.findByPushed("N").forEach(statusUpdate::update);
-        headOfficeRepository.updatePaymentSentPendingStatus();
-        headOfficeRepository.updatePaymentSentPendingOFFUSStatus();
-        headOfficeRepository.updatePaymentPendingStatusMaster();
+        while (true) {
+            headOfficeRepository.updatePaymentPendingStatusDetail();
+            headOfficeRepository.updatePaymentPendingStatusMaster();
+            repository.findByPendingDate().forEach(date -> {
+                nonRealTime.nonRealtimeCheckUpdate(date);
+                realTime.realTimeCheckByDate(date);
+            });
+            repository.findByPushed("N").forEach(statusUpdate::update);
+            headOfficeRepository.updatePaymentSentPendingStatus();
+            headOfficeRepository.updatePaymentSentPendingOFFUSStatus();
+            headOfficeRepository.updatePaymentPendingStatusMaster();
+            try {
+                Thread.sleep(1000 * 60 * 60);
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     //    @Scheduled(cron = "0 0 10,16,20 * * *")

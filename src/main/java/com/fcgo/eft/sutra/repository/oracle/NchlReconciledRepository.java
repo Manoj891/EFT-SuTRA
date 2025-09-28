@@ -13,8 +13,6 @@ import java.util.List;
 @Repository
 public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, String> {
 
-
-
     @Query(value = "SELECT M.BATCH_ID FROM NCHL_RECONCILED R join EFT_PAYMENT_BATCH_DETAIL B on B.INSTRUCTION_ID = R.INSTRUCTION_ID join EFT_PAYMENT_BATCH M on B.EFT_BATCH_PAYMENT_ID = M.ID where DEBIT_STATUS != '000' AND NCHL_TRANSACTION_TYPE = 'OFFUS' AND PUSHED='N' group by M.BATCH_ID ", nativeQuery = true)
     List<String> findByNonRealTimePendingTransactionId();
 

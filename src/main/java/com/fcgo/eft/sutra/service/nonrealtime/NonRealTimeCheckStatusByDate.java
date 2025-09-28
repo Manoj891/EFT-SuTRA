@@ -1,6 +1,7 @@
 package com.fcgo.eft.sutra.service.nonrealtime;
 
 import com.fcgo.eft.sutra.dto.PostCipsByDateResponseWrapper;
+import com.fcgo.eft.sutra.dto.nchlres.NonRealTimeBatch;
 import com.fcgo.eft.sutra.dto.res.NchlIpsBatchDetailRes;
 import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
 import com.fcgo.eft.sutra.service.impl.NchlReconciledService;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,6 +30,17 @@ public class NonRealTimeCheckStatusByDate {
     private final NchlOauthToken oauthToken;
     private final WebClient webClient;
     private final NchlReconciledService repository;
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    public void updateNonRealTimeStatus(NonRealTimeBatch batch) {
+        String date = sdf.format(new Date());
+        batch.getNchlIpsTransactionDetailList()
+                .forEach(detail -> {
+                    log.info("Update InstructionId: {}", detail.getInstructionId());
+                    repository.save(detail.getInstructionId(), batch.getDebitStatus(), batch.getDebitReasonDesc(), detail.getCreditStatus(), detail.getReasonDesc() + " " + date, batch.getBatchId(), detail.getRecDate());
+                });
+
+    }
 
 
     public void nonRealtimeCheckUpdate(String date) {
@@ -40,29 +54,28 @@ public class NonRealTimeCheckStatusByDate {
             if (td != null && td.getDebitStatus() != null && td.getDebitStatus().length() > 1) {
 
 
-                response.getNchlIpsTransactionDetailList()
-                        .forEach(detail -> {
+                response.getNchlIpsTransactionDetailList().forEach(detail -> {
+                    try {
+                        if (detail.getCreditStatus() != null && detail.getCreditStatus().length() > 1) {
                             try {
-                                if (detail.getCreditStatus() != null && detail.getCreditStatus().length() > 1) {
-                                    try {
-                                        log.info("InstructionId: {} status: {} {}", detail.getInstructionId(), detail.getCreditStatus(), detail.getReasonDesc());
-                                        String transactionId = "";
-                                        try {
-                                            transactionId = detail.getId();
-                                            if (transactionId != null) {
-                                                transactionId = "" + detail.getInstructionId();
-                                            }
-                                        } catch (Exception ignored) {
-                                        }
-                                        repository.save(detail.getInstructionId(), td.getDebitStatus(), td.getDebitReasonDesc(), detail.getCreditStatus(), detail.getReasonDesc(), transactionId, detail.getRecDate());
-
-                                    } catch (Exception i) {
-                                        log.info(i.getMessage());
+                                log.info("InstructionId: {} status: {} {}", detail.getInstructionId(), detail.getCreditStatus(), detail.getReasonDesc());
+                                String transactionId = "";
+                                try {
+                                    transactionId = detail.getId();
+                                    if (transactionId != null) {
+                                        transactionId = "" + detail.getInstructionId();
                                     }
+                                } catch (Exception ignored) {
                                 }
-                            } catch (Exception ignored) {
+                                repository.save(detail.getInstructionId(), td.getDebitStatus(), td.getDebitReasonDesc(), detail.getCreditStatus(), detail.getReasonDesc(), transactionId, detail.getRecDate());
+
+                            } catch (Exception i) {
+                                log.info(i.getMessage());
                             }
-                        });
+                        }
+                    } catch (Exception ignored) {
+                    }
+                });
 
             }
         });
@@ -79,30 +92,28 @@ public class NonRealTimeCheckStatusByDate {
             if (td != null && td.getDebitStatus() != null && td.getDebitStatus().length() > 1) {
 
 
-                response.getNchlIpsTransactionDetailList()
-                        .forEach(detail -> {
+                response.getNchlIpsTransactionDetailList().forEach(detail -> {
+                    try {
+                        if (detail.getCreditStatus() != null && detail.getCreditStatus().length() > 1) {
                             try {
-                                if (detail.getCreditStatus() != null && detail.getCreditStatus().length() > 1) {
-                                    try {
-                                        log.info("InstructionId: {} status: {} {}", detail.getInstructionId(), detail.getCreditStatus(), detail.getReasonDesc());
-                                        String transactionId = "";
-                                        try {
-                                            transactionId = detail.getId();
-                                            if (transactionId != null) {
-                                                transactionId = "" + detail.getInstructionId();
-                                            }
-                                        } catch (Exception ignored) {
-                                        }
-                                        repository.save(detail.getInstructionId(), td.getDebitStatus(), td.getDebitReasonDesc(), detail.getCreditStatus(), detail.getReasonDesc(), transactionId, detail.getRecDate());
-
-                                    } catch (Exception i) {
-                                        log.info(i.getMessage());
+                                log.info("InstructionId: {} status: {} {}", detail.getInstructionId(), detail.getCreditStatus(), detail.getReasonDesc());
+                                String transactionId = "";
+                                try {
+                                    transactionId = detail.getId();
+                                    if (transactionId != null) {
+                                        transactionId = "" + detail.getInstructionId();
                                     }
+                                } catch (Exception ignored) {
                                 }
-                            } catch (Exception ignored) {
-                            }
-                        });
+                                repository.save(detail.getInstructionId(), td.getDebitStatus(), td.getDebitReasonDesc(), detail.getCreditStatus(), detail.getReasonDesc(), transactionId, detail.getRecDate());
 
+                            } catch (Exception i) {
+                                log.info(i.getMessage());
+                            }
+                        }
+                    } catch (Exception ignored) {
+                    }
+                });
             }
         });
     }

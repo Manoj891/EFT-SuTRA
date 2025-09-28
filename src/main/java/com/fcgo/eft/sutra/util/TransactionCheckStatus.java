@@ -34,32 +34,29 @@ public class TransactionCheckStatus {
     private final PaymentReceiveService bankMapService;
     private final EftPaymentReceiveService paymentReceiveService;
 
-private final NonRealTimeStatusFromNchl nonRealTimeStatusFromNchl;
+    private final NonRealTimeStatusFromNchl nonRealTimeStatusFromNchl;
+    private final NonRealTimeCheckStatusByDate checkByBatchNonRealTime;
 
     @PostConstruct
     public void executePostConstruct() {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
+        updateNonRealTimeStatus();
 //        repository.findByPushed("N").forEach(statusUpdate::update);
-        NonRealTimeBatch nonRealTimeBatch= nonRealTimeStatusFromNchl.checkByBatchNonRealTime("SU7701522532159151");
-        System.out.println(nonRealTimeBatch.getDebitStatus());
-        System.out.println(nonRealTimeBatch.getDebitReasonCode());
-        nonRealTimeBatch.getNchlIpsTransactionDetailList().forEach(nonRealTimeBatchDetail -> {
-            System.out.println(nonRealTimeBatchDetail.getCreditStatus()+" "+nonRealTimeBatchDetail.getInstructionId());
-        });
 
-//        System.out.println("----------------------------------------------------------------------------------");
-//        bankAccountDetailsService.updateTransactionDetailByInstructionIdRealTime("81040382830000404");
-//        System.out.println("----------------------------------------------------------------------------------");
-//        System.out.println(bankAccountDetailsService.getTransactionDetailByInstructionId("83350682830000952"));
-//        System.out.println("----------------------------------------------------------------------------------");
-//        System.out.println(bankAccountDetailsService.getTransactionDetailByInstructionId("83350682830000954"));
-//        System.out.println("----------------------------------------------------------------------------------");
-//        System.out.println(bankAccountDetailsService.getTransactionDetailByInstructionId("83350682830000886"));
-//        System.out.println("----------------------------------------------------------------------------------");
+
 //        headOfficeRepository.updatePaymentPendingStatusDetail();
 //        headOfficeRepository.updatePaymentPendingStatusMaster();
 //        new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
+
+    }
+
+    private void updateNonRealTimeStatus() {
+        repository.findByNonRealTimePendingTransactionId().forEach(batchId -> {
+            log.info("Fetching Batch Id: {}", batchId);
+            checkByBatchNonRealTime.updateNonRealTimeStatus(nonRealTimeStatusFromNchl.checkByBatchNonRealTime(batchId));
+            repository.findByPushed("N").forEach(statusUpdate::update);
+        });
 
     }
 

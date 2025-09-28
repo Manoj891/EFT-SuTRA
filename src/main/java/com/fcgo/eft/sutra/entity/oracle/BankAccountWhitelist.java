@@ -32,7 +32,7 @@ public class BankAccountWhitelist {
     private String rcreTime;
 
     @Column(name = "UPDATED_AT")
-    private long updatedAt;
+    private Long updatedAt;
 
     @Column(name = "BANK_ID", length = 6, insertable = false, updatable = false)
     private String bankId;

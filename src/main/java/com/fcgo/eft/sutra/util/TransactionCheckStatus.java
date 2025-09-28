@@ -93,7 +93,7 @@ public class TransactionCheckStatus {
 
     }
 
-    //    @Scheduled(cron = "0 10 10,12,14,15,16,17,18 * * *")
+        @Scheduled(cron = "0 10 10,12,14,15,16,17,18 * * *")
     public void executeCheckTransactionStatus() {
         while (true) {
             headOfficeRepository.updatePaymentPendingStatusDetail();
@@ -113,7 +113,7 @@ public class TransactionCheckStatus {
         }
     }
 
-    //    @Scheduled(cron = "0 0 10,16,20 * * *")
+        @Scheduled(cron = "0 0 10,16,20 * * *")
     public void fetchBankAccountDetails() {
         bankAccountDetailsService.fetchBankAccountDetails();
     }

@@ -49,14 +49,9 @@ public class RealTimeTransactionStart {
 
 
             try {
-                Thread.sleep(1000L * (list.size() / 4));
+                Thread.sleep(5000);
             } catch (Exception ignored) {
-                try {
-                    Thread.sleep(1000L);
-                } catch (Exception ignoreds) {
-                }
-
-            }
+             }
         }
     }
 }

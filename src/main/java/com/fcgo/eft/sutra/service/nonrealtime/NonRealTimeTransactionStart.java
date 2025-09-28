@@ -85,7 +85,7 @@ public class NonRealTimeTransactionStart {
             });
 
             try {
-                Thread.sleep(100L * list.size());
+                Thread.sleep(5000);
             } catch (Exception ignored) {
             }
         }

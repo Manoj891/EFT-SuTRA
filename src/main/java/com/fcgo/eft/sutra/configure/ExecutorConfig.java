@@ -13,17 +13,17 @@ public class ExecutorConfig {
     @Primary
     @Bean
     public ExecutorService executorService() {
-        return Executors.newFixedThreadPool(25);
+        return Executors.newFixedThreadPool(100);
     }
 
     @Bean(name = "realTime")
     public ExecutorService realExecutorService() {
-        return Executors.newFixedThreadPool(25);
+        return Executors.newFixedThreadPool(100);
     }
 
     @Bean(name = "nonRealTime")
     public ExecutorService nonRealTimeExecutorService() {
-        return Executors.newFixedThreadPool(25);
+        return Executors.newFixedThreadPool(100);
     }
 
 

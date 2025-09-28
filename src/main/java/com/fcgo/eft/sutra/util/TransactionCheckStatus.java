@@ -49,6 +49,7 @@ public class TransactionCheckStatus {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
         new Thread(() -> {
+            executeCheckTransactionStatus();
             while (true) {
                 try {
                     epaymentRepository.updateSuccessEPayment()
@@ -100,6 +101,9 @@ public class TransactionCheckStatus {
             realTime.realTimeCheckByDate(date);
         });
         repository.findByPushed("N").forEach(statusUpdate::update);
+        headOfficeRepository.updatePaymentSentPendingStatus();
+        headOfficeRepository.updatePaymentSentPendingOFFUSStatus();
+        headOfficeRepository.updatePaymentPendingStatusMaster();
     }
 
     //    @Scheduled(cron = "0 0 10,16,20 * * *")

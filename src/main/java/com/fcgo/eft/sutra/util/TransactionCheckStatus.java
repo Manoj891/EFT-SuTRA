@@ -52,7 +52,7 @@ public class TransactionCheckStatus {
             while (true) {
                 executeCheckTransactionStatus();
                 try {
-                    Thread.sleep(1000 * 60 * 5);
+                    Thread.sleep(1000 * 60 * 60);
                 } catch (Exception ignored) {
                 }
             }

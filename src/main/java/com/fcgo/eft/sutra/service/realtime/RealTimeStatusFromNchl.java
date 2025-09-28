@@ -125,10 +125,6 @@ public class RealTimeStatusFromNchl {
                     .bodyValue("{\"batchId\":\"" + instructionId + "\"}")
                     .retrieve().bodyToMono(String.class)
                     .block();
-            assert response != null;
-            if (response.startsWith("[]")) {
-                repository.updateForResend(instructionId);
-            }
             return response;
         } catch (Exception e) {
             return e.getMessage();

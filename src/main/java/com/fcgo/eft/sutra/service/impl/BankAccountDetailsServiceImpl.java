@@ -1,6 +1,9 @@
 package com.fcgo.eft.sutra.service.impl;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fcgo.eft.sutra.dto.nchlres.RealTimeBatch;
 import com.fcgo.eft.sutra.dto.req.TransactionId;
 import com.fcgo.eft.sutra.dto.res.BankAccountDetailsRes;
 import com.fcgo.eft.sutra.entity.oracle.BankAccountWhitelist;
@@ -35,6 +38,7 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
     private final AccountWhiteListSave accountWhiteListSave;
     private final RealTimeStatusFromNchl getRealTimeStatus;
     private final NonRealTimeStatusFromNchl nonRealTimeStatusFromNchl;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public List<BankAccountWhitelist> getBankAccountDetails() {
@@ -54,11 +58,24 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
     }
 
     @Override
-    public Object updateTransactionDetailByInstructionIdRealTime(String instructionId) {
-        return getRealTimeStatus.getRealTimeByBatch(instructionId);
+    public void updateTransactionDetailByInstructionIdRealTime(String instructionId) {
+        String json = getRealTimeStatus.getRealTimeByBatch(instructionId);
+        System.out.println(json);
+        try {
+            if (json != null && json.length() > 10) {
+                RealTimeBatch batch = mapper.readValue(json, RealTimeBatch.class);
+
+                System.out.println(batch.getDebitStatus());
+
+
+            }
+        } catch (Exception e) {
+            System.out.println(json);
+            System.out.println(e.getMessage());
+        }
+
 
     }
-
 
 
     @Override

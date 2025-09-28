@@ -41,7 +41,8 @@ public class TransactionCheckStatus {
     public void executePostConstruct() {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
-        updateNonRealTimeStatus();
+        new Thread(this::updateNonRealTimeStatus).start();
+
 //        repository.findByPushed("N").forEach(statusUpdate::update);
 
 
@@ -54,7 +55,9 @@ public class TransactionCheckStatus {
     private void updateNonRealTimeStatus() {
         repository.findByNonRealTimePendingTransactionId().forEach(batchId -> {
             log.info("Fetching Batch Id: {}", batchId);
-            checkByBatchNonRealTime.updateNonRealTimeStatus(nonRealTimeStatusFromNchl.checkByBatchNonRealTime(batchId));
+            NonRealTimeBatch nonRealTimeBatch = nonRealTimeStatusFromNchl.checkByBatchNonRealTime(batchId);
+            checkByBatchNonRealTime.updateNonRealTimeStatus(nonRealTimeBatch);
+            log.info("Updating SuTRA---------------");
             repository.findByPushed("N").forEach(statusUpdate::update);
         });
 

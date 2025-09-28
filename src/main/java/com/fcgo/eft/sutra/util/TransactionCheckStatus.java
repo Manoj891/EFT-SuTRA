@@ -48,23 +48,20 @@ public class TransactionCheckStatus {
     public void executePostConstruct() {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
-        new Thread(this::executeCheckTransactionStatus).start();
+        headOfficeRepository.updatePaymentPendingStatusDetail();
+        headOfficeRepository.updatePaymentPendingStatusMaster();
+        new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
+
+    }
+
+    public void checkProcessing() {
+
+        log.info("Transaction Check Status started");
         new Thread(() -> {
 
             while (true) {
                 try {
-                    epaymentRepository.updateSuccessEPayment()
-                            .forEach(s -> {
-                                Optional<NchlReconciled> reconciled = repository.findById(s);
-                                if (reconciled.isPresent()) {
-                                    statusUpdate.update(reconciled.get());
-                                } else {
-                                    Optional<EftBatchPaymentDetail> detail = eftBatchPaymentDetailRepository.findById(s);
-                                    if (!detail.isPresent()) {
-                                        epaymentRepository.updateRevertInSuTra(Long.parseLong(s));
-                                    }
-                                }
-                            });
+                    checkSuTRAProcessing();
                 } catch (Exception ignored) {
                 }
                 try {
@@ -73,13 +70,21 @@ public class TransactionCheckStatus {
                 }
             }
         }).start();
-//        new Thread(this::updateNonRealTimeStatus).start();
+    }
 
-
-//        headOfficeRepository.updatePaymentPendingStatusDetail();
-//        headOfficeRepository.updatePaymentPendingStatusMaster();
-//        new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
-
+    private void checkSuTRAProcessing() {
+        epaymentRepository.updateSuccessEPayment()
+                .forEach(s -> {
+                    Optional<NchlReconciled> reconciled = repository.findById(s);
+                    if (reconciled.isPresent()) {
+                        statusUpdate.update(reconciled.get());
+                    } else {
+                        Optional<EftBatchPaymentDetail> detail = eftBatchPaymentDetailRepository.findById(s);
+                        if (!detail.isPresent()) {
+                            epaymentRepository.updateRevertInSuTra(Long.parseLong(s));
+                        }
+                    }
+                });
     }
 
     private void updateNonRealTimeStatus() {
@@ -93,27 +98,26 @@ public class TransactionCheckStatus {
 
     }
 
-        @Scheduled(cron = "0 10 10,12,14,15,16,17,18 * * *")
+    @Scheduled(cron = "0 10 10,12,14,15,16,17,18 * * *")
     public void executeCheckTransactionStatus() {
-        while (true) {
-            headOfficeRepository.updatePaymentPendingStatusDetail();
-            headOfficeRepository.updatePaymentPendingStatusMaster();
-            repository.findByPendingDate().forEach(date -> {
-                nonRealTime.nonRealtimeCheckUpdate(date);
-                realTime.realTimeCheckByDate(date);
-            });
-            repository.findByPushed("N").forEach(statusUpdate::update);
-            headOfficeRepository.updatePaymentSentPendingStatus();
-            headOfficeRepository.updatePaymentSentPendingOFFUSStatus();
-            headOfficeRepository.updatePaymentPendingStatusMaster();
-            try {
-                Thread.sleep(1000 * 60 * 60);
-            } catch (Exception ignored) {
-            }
-        }
+
+        headOfficeRepository.updatePaymentPendingStatusDetail();
+        headOfficeRepository.updatePaymentPendingStatusMaster();
+        repository.findByPendingDate().forEach(date -> {
+            nonRealTime.nonRealtimeCheckUpdate(date);
+            realTime.realTimeCheckByDate(date);
+        });
+        checkProcessing();
+        repository.findByPushed("N").forEach(statusUpdate::update);
+        updateNonRealTimeStatus();
+        headOfficeRepository.updatePaymentSentPendingStatus();
+        headOfficeRepository.updatePaymentSentPendingOFFUSStatus();
+        headOfficeRepository.updatePaymentPendingStatusMaster();
+
+
     }
 
-        @Scheduled(cron = "0 0 10,16,20 * * *")
+    @Scheduled(cron = "0 0 10,16,20 * * *")
     public void fetchBankAccountDetails() {
         bankAccountDetailsService.fetchBankAccountDetails();
     }

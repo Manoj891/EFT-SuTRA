@@ -45,6 +45,7 @@ public class TransactionCheckStatus {
     private final AccEpaymentRepository epaymentRepository;
 
     @PostConstruct
+    @Scheduled(cron = "0 0 * * * *")
     public void executePostConstruct() {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());

@@ -24,7 +24,7 @@ public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, 
     @Query(value = "SELECT TO_CHAR(B.NCHL_PUSHED_DATE, 'YYYY-MM-DD') FROM EFT_PAYMENT_BATCH_DETAIL B LEFT JOIN NCHL_RECONCILED R ON B.INSTRUCTION_ID = R.INSTRUCTION_ID WHERE B.NCHL_CREDIT_STATUS IN ('SENT','BUILD') AND (R.CREDIT_STATUS IS NULL OR R.CREDIT_STATUS NOT IN ('ACSE', '000', 'RJCT')) AND (R.PUSHED='N' OR R.PUSHED is null ) group by TO_CHAR(B.NCHL_PUSHED_DATE, 'YYYY-MM-DD')", nativeQuery = true)
     List<String> findByPendingDate();
 
-    @Query(value = "SELECT * FROM NCHL_RECONCILED WHERE PUSHED='N' AND CREDIT_STATUS NOT IN('ACTC','SENT','ENTR','999','ACSP')", nativeQuery = true)
+    @Query(value = "SELECT * FROM NCHL_RECONCILED WHERE PUSHED='N' AND CREDIT_STATUS NOT IN('ACTC','SENT','ACSP')", nativeQuery = true)
     List<NchlReconciled> findByPushed(String pushed);
 
     @Modifying

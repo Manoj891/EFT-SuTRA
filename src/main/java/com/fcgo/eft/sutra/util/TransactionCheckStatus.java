@@ -41,9 +41,9 @@ public class TransactionCheckStatus {
     public void executePostConstruct() {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
-        new Thread(this::updateNonRealTimeStatus).start();
+//        new Thread(this::updateNonRealTimeStatus).start();
 
-//        repository.findByPushed("N").forEach(statusUpdate::update);
+        repository.findByPushed("N").forEach(statusUpdate::update);
 
 
 //        headOfficeRepository.updatePaymentPendingStatusDetail();

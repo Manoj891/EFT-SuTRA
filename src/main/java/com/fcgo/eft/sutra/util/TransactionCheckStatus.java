@@ -107,8 +107,9 @@ public class TransactionCheckStatus {
             nonRealTime.nonRealtimeCheckUpdate(date);
             realTime.realTimeCheckByDate(date);
         });
-        checkProcessing();
+
         repository.findByPushed("N").forEach(statusUpdate::update);
+        checkProcessing();
         updateNonRealTimeStatus();
         headOfficeRepository.updatePaymentSentPendingStatus();
         headOfficeRepository.updatePaymentSentPendingOFFUSStatus();

@@ -14,8 +14,13 @@ import java.util.List;
 @Transactional
 public interface AccEpaymentRepository extends JpaRepository<AccEpayment, Long> {
 
-    @Query(value = "select eftno from acc_epayment where transtatus =2 and pstatus=2 and StatusMessage like '%SUCCESS%'", nativeQuery = true)
+    @Query(value = "select eftno from acc_epayment where transtatus =2 and pstatus=2", nativeQuery = true)
     List<String> updateSuccessEPayment();
+
+
+    @Modifying
+    @Query(value = "update acc_epayment set transtatus=1,pstatus=0 where eftno=?1", nativeQuery = true)
+    void updateRevertInSuTra(long instructionId);
 
 
     @Modifying

@@ -2,8 +2,11 @@ package com.fcgo.eft.sutra.util;
 
 import com.fcgo.eft.sutra.dto.nchlres.NonRealTimeBatch;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
+import com.fcgo.eft.sutra.entity.oracle.EftBatchPaymentDetail;
+import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
 import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.BankHeadOfficeRepository;
+import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
 import com.fcgo.eft.sutra.service.BankAccountDetailsService;
 import com.fcgo.eft.sutra.service.BankHeadOfficeService;
@@ -18,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 @Service
@@ -34,6 +38,7 @@ public class TransactionCheckStatus {
     private final BankHeadOfficeRepository headOfficeRepository;
     private final PaymentReceiveService bankMapService;
     private final EftPaymentReceiveService paymentReceiveService;
+    private final EftBatchPaymentDetailRepository eftBatchPaymentDetailRepository;
 
     private final NonRealTimeStatusFromNchl nonRealTimeStatusFromNchl;
     private final NonRealTimeCheckStatusByDate checkByBatchNonRealTime;
@@ -47,8 +52,17 @@ public class TransactionCheckStatus {
             while (true) {
                 try {
                     epaymentRepository.updateSuccessEPayment()
-                            .forEach(s -> repository.findById(s)
-                                    .ifPresent(statusUpdate::update));
+                            .forEach(s -> {
+                                Optional<NchlReconciled> reconciled = repository.findById(s);
+                                if (reconciled.isPresent()) {
+                                    statusUpdate.update(reconciled.get());
+                                } else {
+                                    Optional<EftBatchPaymentDetail> detail = eftBatchPaymentDetailRepository.findById(s);
+                                    if (!detail.isPresent()) {
+                                        epaymentRepository.updateRevertInSuTra(Long.parseLong(s));
+                                    }
+                                }
+                            });
                 } catch (Exception ignored) {
                 }
                 try {

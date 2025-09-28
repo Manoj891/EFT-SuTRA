@@ -23,7 +23,7 @@ public class TransactionStatusUpdate {
             long instructionId = reconciled.getInstructionId();
             String status = reconciled.getCreditStatus();
             String debitStatus = reconciled.getDebitStatus();
-            epaymentRepository.updateEPaymentLog(status, instructionId);
+
             if (!debitStatus.equals("000")) {
                 updateFailureStatus(reconciled.getCreditMessage() + " " + reconciled.getDebitMessage(), instructionId);
             } else if (status.equals("000") || status.equals("ACSC")) {
@@ -62,6 +62,7 @@ public class TransactionStatusUpdate {
     }
 
     private void updateSuccessStatus(String creditMessage, Date recDate, long instructionId) {
+        if (creditMessage != null && creditMessage.length() > 500) creditMessage = creditMessage.substring(0, 495);
         epaymentRepository.updateSuccessEPayment(creditMessage, recDate, instructionId);
         repository.updateStatus(String.valueOf(instructionId));
         log.info("Updated reconciled status: {} Success", instructionId);

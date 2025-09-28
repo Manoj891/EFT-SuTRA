@@ -76,8 +76,9 @@ public class RealTimeTransactionService {
                 if (nchl.getDebitStatus().equals("000") && txn.getCreditStatus().equals("000")) {
                     long eftNo = Long.parseLong(instructionId);
                     NchlReconciled reconciled = reconciledRepository.save(eftNo, "000", nchl.getResponseMessage(), txn.getCreditStatus(), txn.getResponseMessage(), String.valueOf(txn.getId()), new Date());
-                    epaymentRepository.updateEPaymentLog(reconciled.getCreditMessage(), eftNo);
-                    epaymentRepository.updateSuccessEPayment(reconciled.getCreditMessage(), reconciled.getRecDate(), eftNo);
+                    String message = reconciled.getCreditMessage();
+                    if (message != null && message.length() > 500) message = message.substring(0, 500);
+                    epaymentRepository.updateSuccessEPayment(message, reconciled.getRecDate(), eftNo);
                     reconciledRepository.updateStatus(instructionId);
                 }
             }
@@ -100,7 +101,7 @@ public class RealTimeTransactionService {
 
     private void failure(String responseDescription, String instructionId, long eftNo) {
         if (responseDescription.length() > 500) responseDescription = responseDescription.substring(0, 490);
-        epaymentRepository.updateEPaymentLog(responseDescription, eftNo);
+//        epaymentRepository.updateEPaymentLog(responseDescription, eftNo);
         epaymentRepository.updateFailureEPayment(responseDescription, eftNo);
         reconciledRepository.updateStatus(instructionId);
     }

@@ -2,6 +2,7 @@ package com.fcgo.eft.sutra.util;
 
 import com.fcgo.eft.sutra.dto.nchlres.NonRealTimeBatch;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
+import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.BankHeadOfficeRepository;
 import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
 import com.fcgo.eft.sutra.service.BankAccountDetailsService;
@@ -36,14 +37,27 @@ public class TransactionCheckStatus {
 
     private final NonRealTimeStatusFromNchl nonRealTimeStatusFromNchl;
     private final NonRealTimeCheckStatusByDate checkByBatchNonRealTime;
+    private final AccEpaymentRepository epaymentRepository;
 
     @PostConstruct
     public void executePostConstruct() {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
+        new Thread(() -> {
+            while (true) {
+                try {
+                    epaymentRepository.updateSuccessEPayment()
+                            .forEach(s -> repository.findById(s)
+                                    .ifPresent(statusUpdate::update));
+                } catch (Exception ignored) {
+                }
+                try {
+                    Thread.sleep(1000 * 60 * 5);
+                } catch (Exception ignored) {
+                }
+            }
+        }).start();
 //        new Thread(this::updateNonRealTimeStatus).start();
-
-        repository.findByPushed("N").forEach(statusUpdate::update);
 
 
 //        headOfficeRepository.updatePaymentPendingStatusDetail();

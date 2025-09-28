@@ -8,10 +8,16 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 
 @Repository
 @Transactional
 public interface AccEpaymentRepository extends JpaRepository<AccEpayment, Long> {
+
+    @Query(value = "select eftno from acc_epayment where transtatus =2 and pstatus=2 and StatusMessage like '%SUCCESS%'", nativeQuery = true)
+    List<String> updateSuccessEPayment();
+
+
     @Modifying
     @Query(value = "update acc_epayment set pstatus=1,StatusMessage=?1, paymentdate=?2 where eftno=?3", nativeQuery = true)
     void updateSuccessEPayment(String message, Date settelmentDate, long instructionId);

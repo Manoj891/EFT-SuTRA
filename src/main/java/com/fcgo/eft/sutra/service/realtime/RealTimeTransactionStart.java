@@ -33,6 +33,7 @@ public class RealTimeTransactionStart {
         while (true) {
             List<EftPaymentRequestDetailProjection> list = repository.findRealTimePending();
             if (list.isEmpty()) {
+                log.info("Real Time new record not found");
                 started = false;
                 break;
             }

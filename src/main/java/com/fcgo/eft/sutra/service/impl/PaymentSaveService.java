@@ -68,9 +68,8 @@ public class PaymentSaveService {
                 log.info("{} {}", e.getMessage(), detail.getInstructionId());
             }
             rowNo++;
-
         }
-
+        batch.setOffus(objDetail.size() + 1);
         repository.save(batch);
         detailRepository.saveAll(objDetail).forEach(detail -> epaymentRepository.updateStatusProcessing(Long.parseLong(detail.getInstructionId())));
 

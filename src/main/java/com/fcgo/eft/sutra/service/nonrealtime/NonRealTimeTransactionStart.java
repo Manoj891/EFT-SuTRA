@@ -84,7 +84,7 @@ public class NonRealTimeTransactionStart {
                     log.error(ex.getMessage());
                 }
             });
-            while (executor.getActiveCount() > 10) {
+            while (executor.getActiveCount() > 30) {
                 try {
                     log.info("Non real waiting for clearing pool. Active threads: {}", executor.getActiveCount());
                     Thread.sleep(500);

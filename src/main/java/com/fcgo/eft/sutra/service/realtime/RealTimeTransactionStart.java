@@ -48,7 +48,7 @@ public class RealTimeTransactionStart {
                 }
             });
 
-            while (executor.getActiveCount() > 10) {
+            while (executor.getActiveCount() > 30) {
                 try {
                     log.info("Realtime waiting for clearing pool. Active threads: {}", executor.getActiveCount());
                     Thread.sleep(500);

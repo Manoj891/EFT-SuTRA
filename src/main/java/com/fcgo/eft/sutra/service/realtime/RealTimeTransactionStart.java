@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 @Slf4j
@@ -18,15 +18,15 @@ public class RealTimeTransactionStart {
     private final RealTimeTransactionService service;
     private final BankHeadOfficeService ho;
 
-    private final ExecutorService executorService;
+    private final ThreadPoolExecutor executor;
     @Getter
     private boolean started = false;
 
-    public RealTimeTransactionStart(@Qualifier("realTime") ExecutorService executorService, EftBatchPaymentDetailRepository repository, RealTimeTransactionService service, BankHeadOfficeService ho) {
+    public RealTimeTransactionStart(@Qualifier("realTime") ThreadPoolExecutor executor, EftBatchPaymentDetailRepository repository, RealTimeTransactionService service, BankHeadOfficeService ho) {
         this.repository = repository;
         this.service = service;
         this.ho = ho;
-        this.executorService = executorService;
+        this.executor = executor;
     }
 
     public void start() {
@@ -41,17 +41,21 @@ public class RealTimeTransactionStart {
             list.forEach(eftPaymentRequestDetailProjection -> {
                 try {
                     repository.updateNchlStatusByInstructionId("BUILD", eftPaymentRequestDetailProjection.getInstructionId());
-                    executorService.submit(() -> service.ipsDctTransaction(eftPaymentRequestDetailProjection, ho.getHeadOfficeId(eftPaymentRequestDetailProjection.getCreditorAgent())));
+                    executor.submit(() -> service.ipsDctTransaction(eftPaymentRequestDetailProjection, ho.getHeadOfficeId(eftPaymentRequestDetailProjection.getCreditorAgent())));
                 } catch (Exception e) {
                     log.error("Real Time Transaction Start ERROR:{}", e.getMessage());
                 }
             });
 
-
-            try {
-                Thread.sleep(5000);
-            } catch (Exception ignored) {
-             }
+            while (executor.getActiveCount() > 10) {
+                try {
+                    log.info("Realtime waiting for clearing pool. Active threads: {}", executor.getActiveCount());
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // restore interrupt flag
+                    break;
+                }
+            }
         }
     }
 }

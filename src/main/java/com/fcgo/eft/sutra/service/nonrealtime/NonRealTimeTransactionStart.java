@@ -15,20 +15,20 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Slf4j
 @Service
 public class NonRealTimeTransactionStart {
     @Getter
     private boolean started = false;
-    private final ExecutorService executorService;
+    private final ThreadPoolExecutor executor;
     private final EftBatchPaymentDetailRepository repository;
     private final BatchPaymentService service;
     private final BankHeadOfficeService ho;
 
-    public NonRealTimeTransactionStart(@Qualifier("nonRealTime") ExecutorService executorService, EftBatchPaymentDetailRepository repository, BatchPaymentService batch, BankHeadOfficeService ho) {
-        this.executorService = executorService;
+    public NonRealTimeTransactionStart(@Qualifier("nonRealTime") ThreadPoolExecutor executor, EftBatchPaymentDetailRepository repository, BatchPaymentService batch, BankHeadOfficeService ho) {
+        this.executor = executor;
         this.repository = repository;
         this.service = batch;
         this.ho = ho;
@@ -41,7 +41,7 @@ public class NonRealTimeTransactionStart {
                 started = false;
                 break;
             }
-              started = true;
+            started = true;
             list.forEach(batch -> {
                 try {
                     BigInteger id = batch.getId();
@@ -78,15 +78,19 @@ public class NonRealTimeTransactionStart {
                     CipsFundTransfer transfer = CipsFundTransfer.builder().nchlIpsBatchDetail(batchDetail).nchlIpsTransactionDetailList(data).build();
                     repository.updateBatchBuild("BUILD", id);
                     repository.updateBatchBuild(id);
-                    executorService.execute(() -> service.start(transfer, id));
+                    executor.execute(() -> service.start(transfer, id));
                 } catch (Exception ex) {
                     log.error(ex.getMessage());
                 }
             });
-
-            try {
-                Thread.sleep(5000);
-            } catch (Exception ignored) {
+            while (executor.getActiveCount() > 10) {
+                try {
+                    log.info("Non real waiting for clearing pool. Active threads: {}", executor.getActiveCount());
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // restore interrupt flag
+                    break;
+                }
             }
         }
     }

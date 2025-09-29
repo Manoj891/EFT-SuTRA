@@ -11,9 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EftBatchPaymentDetailRepository extends JpaRepository<EftBatchPaymentDetail, String> {
+    Optional<EftBatchPaymentDetail> findByInstructionId(String instructionId);
+
     @Query(value = "SELECT M.DEBTOR_AGENT AS agent, M.DEBTOR_ACCOUNT AS account, W.BRANCH_ID AS branch, M.DEBTOR_NAME AS name, M.CATEGORY_PURPOSE AS purpose, M.BATCH_ID AS batchId, M.ID AS id,OFFUS AS offus FROM EFT_PAYMENT_BATCH M JOIN BANK_ACCOUNT_WHITELIST W on M.DEBTOR_ACCOUNT = W.ACCOUNT_ID and M.DEBTOR_AGENT = W.BANK_ID where OFFUS > 0 AND OFFUS_PUSHED = 'N' ORDER BY RECEIVE_TIME FETCH FIRST 50 ROWS ONLY", nativeQuery = true)
     List<PaymentBatchPendingRes> findPaymentNonRealPendingRes();
 

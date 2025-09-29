@@ -46,28 +46,21 @@ public class TransactionCheckStatus {
     private final AccEpaymentRepository epaymentRepository;
 
     @PostConstruct
-
     public void executePostConstruct() {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
-//        new Thread(() -> {
-//            while (true) {
-//                executeCheckTransactionStatus();
-//                try {
-//                    Thread.sleep(1000 * 60 * 60);
-//                } catch (Exception ignored) {
-//                }
-//            }
-//
-//        }).start();
-         }
+        executeEvery5MinPendingPaymentProcess();
+    }
+
     @Scheduled(cron = "0 */5 * * * *")
-    public void executeEvery5MinPendingPaymentProcess(){
+    public void executeEvery5MinPendingPaymentProcess() {
         headOfficeRepository.updatePaymentPendingStatusDetail();
         headOfficeRepository.updatePaymentPendingStatusMaster();
         new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
-   }
-    @Scheduled(cron = "0 10 10,12,14,15,16,17,18 * * *")
+    }
+
+    //    @Scheduled(cron = "0 10 10,12,14,15,16,17,18 * * *")
+    @Scheduled(cron = "0 10,35 * * * *")
     public void executeCheckTransactionStatus() {
 
         headOfficeRepository.updatePaymentPendingStatusDetail();
@@ -86,7 +79,6 @@ public class TransactionCheckStatus {
 
 
     }
-
 
 
     private void checkSuTRAProcessing() {
@@ -114,6 +106,7 @@ public class TransactionCheckStatus {
         });
 
     }
+
     @Scheduled(cron = "0 0 10,16,20 * * *")
     public void fetchBankAccountDetails() {
         bankAccountDetailsService.fetchBankAccountDetails();

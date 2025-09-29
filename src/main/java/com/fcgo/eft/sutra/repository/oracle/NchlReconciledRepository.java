@@ -30,6 +30,11 @@ public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, 
     @Query(value = "UPDATE NCHL_RECONCILED  SET PUSHED = 'Y' WHERE INSTRUCTION_ID = ?1", nativeQuery = true)
     void updateStatus(String id);
 
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL set NCHL_CREDIT_STATUS='SENT' WHERE ID IN( SELECT D.ID FROM EFT_PAYMENT_BATCH_DETAIL D join NCHL_RECONCILED R on D.INSTRUCTION_ID = R.INSTRUCTION_ID where NCHL_CREDIT_STATUS IS NULL)", nativeQuery = true)
+    void updateMissingStatusSent();
+
 
     @Modifying
     @Transactional

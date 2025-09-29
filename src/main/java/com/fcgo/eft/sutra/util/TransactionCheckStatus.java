@@ -69,7 +69,7 @@ public class TransactionCheckStatus {
             nonRealTime.nonRealtimeCheckUpdate(date);
             realTime.realTimeCheckByDate(date);
         });
-
+        repository.updateMissingStatusSent();
         repository.findByPushed("N").forEach(statusUpdate::update);
         checkSuTRAProcessing();
         updateNonRealTimeStatus();

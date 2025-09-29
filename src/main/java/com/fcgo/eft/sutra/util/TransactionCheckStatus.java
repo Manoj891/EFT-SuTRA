@@ -18,6 +18,7 @@ import com.fcgo.eft.sutra.service.realtime.RealTimeStatusFromNchl;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.sql.ast.tree.expression.Every;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +46,7 @@ public class TransactionCheckStatus {
     private final AccEpaymentRepository epaymentRepository;
 
     @PostConstruct
-    @Scheduled(cron = "0 0 * * * *")
+
     public void executePostConstruct() {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
@@ -59,12 +60,13 @@ public class TransactionCheckStatus {
 //            }
 //
 //        }).start();
+         }
+    @Scheduled(cron = "0 */5 * * * *")
+    public void executeEvery5MinPendingPaymentProcess(){
         headOfficeRepository.updatePaymentPendingStatusDetail();
         headOfficeRepository.updatePaymentPendingStatusMaster();
         new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
-
-    }
-
+   }
     @Scheduled(cron = "0 10 10,12,14,15,16,17,18 * * *")
     public void executeCheckTransactionStatus() {
 

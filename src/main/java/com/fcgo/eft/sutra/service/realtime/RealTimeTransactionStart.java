@@ -51,7 +51,7 @@ public class RealTimeTransactionStart {
             while (executor.getActiveCount() > 30) {
                 try {
                     log.info("Realtime waiting for clearing pool. Active threads: {}", executor.getActiveCount());
-                    Thread.sleep(500);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt(); // restore interrupt flag
                     break;

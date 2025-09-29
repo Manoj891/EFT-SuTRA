@@ -75,7 +75,7 @@ public class NonRealTimeTransactionStart {
                                             .remarks(d.getRemarks())
                                             .build()));
                     batchDetail.setBatchAmount(data.stream().map(NchlIpsTransactionDetailList::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add));
-
+                    batchDetail.setBatchCount(data.size());
                     CipsFundTransfer transfer = CipsFundTransfer.builder().nchlIpsBatchDetail(batchDetail).nchlIpsTransactionDetailList(data).build();
                     repository.updateBatchBuild("BUILD", id);
                     repository.updateBatchBuild(id);

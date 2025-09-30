@@ -22,6 +22,7 @@ import org.hibernate.sql.ast.tree.expression.Every;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
@@ -52,22 +53,25 @@ public class TransactionCheckStatus {
         executeEvery5MinPendingPaymentProcess();
     }
 
-    @Scheduled(cron = "0 */5 * * * *")
+    @Scheduled(cron = "0 5 * * * *")
     public void executeEvery5MinPendingPaymentProcess() {
         headOfficeRepository.updatePaymentPendingStatusDetail();
         headOfficeRepository.updatePaymentPendingStatusMaster();
         new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
     }
 
-    //    @Scheduled(cron = "0 10 10,12,14,15,16,17,18 * * *")
-    @Scheduled(cron = "0 10,35 * * * *")
+
+    @Scheduled(cron = "0 10 08,10,12,16,20,23 * * *")
     public void executeCheckTransactionStatus() {
 
         headOfficeRepository.updatePaymentPendingStatusDetail();
         headOfficeRepository.updatePaymentPendingStatusMaster();
         repository.findByPendingDate().forEach(date -> {
+            log.info("{} Non Real Time Status", date);
             nonRealTime.nonRealtimeCheckUpdate(date);
+            log.info("Non Real Time Status Completed {} Real Time Status", date);
             realTime.realTimeCheckByDate(date);
+            log.info("Non Real Time Status Completed {}", date);
         });
         repository.updateMissingStatusSent();
         repository.findByPushed("N").forEach(statusUpdate::update);

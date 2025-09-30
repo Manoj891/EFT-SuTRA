@@ -58,7 +58,7 @@ public class NonRealTimeCheckStatusByDate {
                     try {
                         if (detail.getCreditStatus() != null && detail.getCreditStatus().length() > 1) {
                             try {
-                                log.info("InstructionId: {} status: {} {}", detail.getInstructionId(), detail.getCreditStatus(), detail.getReasonDesc());
+                                log.info("InstructionId: {} status: {}", detail.getInstructionId(), detail.getCreditStatus());
                                 String transactionId = "";
                                 try {
                                     transactionId = detail.getId();

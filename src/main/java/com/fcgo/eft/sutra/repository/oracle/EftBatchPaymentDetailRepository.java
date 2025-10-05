@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +28,11 @@ public interface EftBatchPaymentDetailRepository extends JpaRepository<EftBatchP
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = ?1,NCHL_PUSHED_DATE=SYSDATE WHERE EFT_BATCH_PAYMENT_ID = ?2 AND NCHL_TRANSACTION_TYPE='OFFUS'", nativeQuery = true)
+    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = ?1,NCHL_PUSHED_DATE_TIME=?2 WHERE EFT_BATCH_PAYMENT_ID = ?3 AND NCHL_TRANSACTION_TYPE='OFFUS'", nativeQuery = true)
+    void updateBatchBuild(String status, long dateTime, BigInteger masterId);
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = ?1 WHERE EFT_BATCH_PAYMENT_ID = ?2 AND NCHL_TRANSACTION_TYPE='OFFUS'", nativeQuery = true)
     void updateBatchBuild(String status, BigInteger masterId);
 
     @Modifying
@@ -37,7 +42,13 @@ public interface EftBatchPaymentDetailRepository extends JpaRepository<EftBatchP
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = ?1,NCHL_PUSHED_DATE=SYSDATE WHERE  INSTRUCTION_ID = ?2", nativeQuery = true)
+    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = ?1 WHERE  INSTRUCTION_ID = ?2", nativeQuery = true)
     void updateNchlStatusByInstructionId(String status, String instructionId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = ?1,NCHL_PUSHED_DATE_TIME=?2 WHERE  INSTRUCTION_ID = ?3", nativeQuery = true)
+    void updateNchlStatusByInstructionId(String status,long dateTime, String instructionId);
+
 
 }

@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Service
@@ -37,6 +38,7 @@ public class RealTimeTransactionService {
     private final NchlReconciledService reconciledRepository;
     private final AccEpaymentRepository epaymentRepository;
     private final DecimalFormat df = new DecimalFormat("#.00");
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
     private final ObjectMapper mapper = new ObjectMapper();
 
     public void ipsDctTransaction(EftPaymentRequestDetailProjection m, String creditorBranch) {
@@ -57,6 +59,7 @@ public class RealTimeTransactionService {
         String instructionId = m.getInstructionId();
         String accessToken = oauthToken.getAccessToken();
         String apiUrl = url + "/api/postcipsbatch";
+        long dateTime = Long.parseLong(sdf.format(new Date()));
         try {
             RealTimeResponse response = webClient.post()
                     .uri(apiUrl)
@@ -67,7 +70,7 @@ public class RealTimeTransactionService {
                     .onStatus(HttpStatusCode::isError, clientResponse -> clientResponse.bodyToMono(String.class)
                             .map(CustomException::new))
                     .bodyToMono(RealTimeResponse.class).block();
-            repository.updateNchlStatusByInstructionId("SENT", instructionId);
+            repository.updateNchlStatusByInstructionId("SENT", dateTime, instructionId);
             assert response != null;
             CipsBatchResponse nchl = response.getCipsBatchResponse();
             if (!response.getCipsTxnResponseList().isEmpty()) {
@@ -84,7 +87,7 @@ public class RealTimeTransactionService {
             }
             log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {}", instructionId);
         } catch (Exception e) {
-            repository.updateNchlStatusByInstructionId("SENT", instructionId);
+            repository.updateNchlStatusByInstructionId("SENT", dateTime, instructionId);
 
             try {
                 long eftNo = Long.parseLong(instructionId);

@@ -50,10 +50,10 @@ public class TransactionCheckStatus {
     public void executePostConstruct() {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
-        executeEvery5MinPendingPaymentProcess();
+//        executeEvery5MinPendingPaymentProcess();
     }
 
-    @Scheduled(cron = "0 5 * * * *")
+//    @Scheduled(cron = "0 5 * * * *")
     public void executeEvery5MinPendingPaymentProcess() {
         headOfficeRepository.updatePaymentPendingStatusDetail();
         headOfficeRepository.updatePaymentPendingStatusMaster();
@@ -61,7 +61,7 @@ public class TransactionCheckStatus {
     }
 
 
-    @Scheduled(cron = "0 10 08,10,12,16,20,23 * * *")
+//    @Scheduled(cron = "0 10 08,10,12,16,20,23 * * *")
     public void executeCheckTransactionStatus() {
 
         headOfficeRepository.updatePaymentPendingStatusDetail();

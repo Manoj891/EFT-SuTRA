@@ -13,6 +13,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Objects;
 
 
@@ -26,6 +28,7 @@ public class BatchPaymentServiceServiceImpl implements BatchPaymentService {
     private final TokenGenerate tokenGenerate;
     private final WebClient webClient;
     private final EftBatchPaymentDetailRepository repository;
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 
 
     @Override
@@ -39,6 +42,7 @@ public class BatchPaymentServiceServiceImpl implements BatchPaymentService {
         }
         try {
             cipsFundTransfer.setToken(tokenGenerate.generateHash(cipsFundTransfer));
+            long dateTime = Long.parseLong(sdf.format(new Date()));
             String res = webClient.post()
                     .uri(apiUrl)
                     .header("Authorization", "Bearer " + accessToken)
@@ -53,7 +57,7 @@ public class BatchPaymentServiceServiceImpl implements BatchPaymentService {
                     .block();
 
             assert res != null;
-            repository.updateBatchBuild("SENT", masterId);
+            repository.updateBatchBuild("SENT", dateTime, masterId);
 
             log.info("PUSHED INTO NCHL POST BATCH ID: {} | Batch size: {}", batchId, cipsFundTransfer.getNchlIpsTransactionDetailList().size());
         } catch (Exception e) {

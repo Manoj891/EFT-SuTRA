@@ -44,7 +44,7 @@ public class DataSourceConfig {
         Map<String, Object> properties = new HashMap<>();
         properties.put("hibernate.dialect", "org.hibernate.dialect.OracleDialect");
         properties.put("hibernate.hbm2ddl.auto", "update");
-        properties.put("hibernate.show_sql", false);
+        properties.put("hibernate.show_sql", true);
         properties.put("hibernate.format_sql", false);
         properties.put("hibernate.default_schema", "EFT_SUTRA");
         properties.put("hibernate.jdbc.fetch_size", 100);

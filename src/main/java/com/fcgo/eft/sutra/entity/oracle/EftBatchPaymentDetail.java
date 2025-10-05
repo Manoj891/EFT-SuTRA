@@ -5,7 +5,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -15,9 +14,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "EFT_PAYMENT_BATCH_DETAIL",
         indexes = {
-                @Index(name = "INDEX_EFT_PAYMENT_BATCH_DETAIL_EFT_BATCH_PAYMENT_ID", columnList = "EFT_BATCH_PAYMENT_ID"),
                 @Index(name = "INDEX_EFT_PAYMENT_BATCH_DETAIL_INSTRUCTION_ID", columnList = "INSTRUCTION_ID", unique = true),
+                @Index(name = "INDEX_EFT_PAYMENT_BATCH_DETAIL_EFT_BATCH_PAYMENT_ID", columnList = "EFT_BATCH_PAYMENT_ID"),
                 @Index(name = "INDEX_EFT_PAYMENT_BATCH_DETAIL_STATUS", columnList = "NCHL_CREDIT_STATUS"),
+                @Index(name = "INDEX_EFT_PAYMENT_BATCH_DETAIL_NCHL_PUSHED_DATE_TIME", columnList = "NCHL_PUSHED_DATE_TIME"),
                 @Index(name = "INDEX_EFT_PAYMENT_BATCH_DETAIL_TRANSACTION_TYPE", columnList = "NCHL_TRANSACTION_TYPE")})
 public class EftBatchPaymentDetail {
     @Id
@@ -35,10 +35,7 @@ public class EftBatchPaymentDetail {
     private String creditorName;
     @Column(name = "END_TO_END_ID", length = 100, nullable = false)
     private String endToEndId;
-    @Column(name = "NCHL_TRANSACTION_TYPE", length = 10, nullable = false)
-    private String nchlTransactionType;
-    @Column(name = "NCHL_CREDIT_STATUS", length = 10)
-    private String nchlCreditStatus;
+
 
     @Column(name = "AMOUNT", precision = 19, scale = 2, nullable = false)
     private BigDecimal amount;
@@ -55,8 +52,15 @@ public class EftBatchPaymentDetail {
     private String refId;
     @Column(name = "REMARKS", length = 100)
     private String remarks;
-    @Column(name = "NCHL_PUSHED_DATE")
-    private LocalDateTime nchlPushedDate;
+    @Column(name = "NCHL_TRANSACTION_TYPE", length = 10, nullable = false, updatable = false)
+    private String nchlTransactionType;
+    @Column(name = "NCHL_CREDIT_STATUS", length = 10, updatable = false)
+    private String nchlCreditStatus;
+    @Column(name = "NCHL_PUSHED_DATE_TIME", columnDefinition = "NUMBER(14)", updatable = false)
+    private Long nchlPushedDateTime;
+
+//    @Column(name = "NCHL_PUSHED_DATE", updatable = false)
+//    private LocalDateTime nchlPushedDate;
 
     @Setter(AccessLevel.NONE)
     @Getter(AccessLevel.NONE)

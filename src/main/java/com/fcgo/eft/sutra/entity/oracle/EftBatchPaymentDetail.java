@@ -59,9 +59,6 @@ public class EftBatchPaymentDetail {
     @Column(name = "NCHL_PUSHED_DATE_TIME", columnDefinition = "NUMBER(14)", updatable = false)
     private Long nchlPushedDateTime;
 
-//    @Column(name = "NCHL_PUSHED_DATE", updatable = false)
-//    private LocalDateTime nchlPushedDate;
-
     @Setter(AccessLevel.NONE)
     @Getter(AccessLevel.NONE)
     @ManyToOne(fetch = FetchType.LAZY)

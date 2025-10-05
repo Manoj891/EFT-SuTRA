@@ -54,16 +54,21 @@ public class TransactionCheckStatus {
     public void executePostConstruct() {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
-        new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
+        executeCheckTransactionStatus();
+//        new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
     }
 
 
     @Scheduled(cron = "0 15 08,10,12,14,16,20,23 * * *")
     public void executeCheckTransactionStatus() {
-        long dateTime = Long.parseLong(dateFormat.format(new Date()))-50000;
+        long dateTime = Long.parseLong(dateFormat.format(new Date())) - 50000;
         headOfficeRepository.updatePaymentPendingStatusDetail(dateTime);
         headOfficeRepository.updatePaymentPendingStatusMaster();
-        repository.findByPendingDate().forEach(date -> {
+        repository.findByPendingDate().forEach(yyyyMMdd -> {
+            String year = yyyyMMdd.substring(0, 4);
+            String month = yyyyMMdd.substring(4, 6);
+            String day = yyyyMMdd.substring(6, 8);
+            String date = year + "-" + month + "-" + day;
             log.info("{} Non Real Time Status", date);
             nonRealTime.nonRealtimeCheckUpdate(date);
             log.info("Non Real Time Status Completed {} Real Time Status", date);
@@ -77,24 +82,20 @@ public class TransactionCheckStatus {
         headOfficeRepository.updatePaymentSentPendingStatus();
         headOfficeRepository.updatePaymentSentPendingOFFUSStatus();
         headOfficeRepository.updatePaymentPendingStatusMaster();
-
         new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
     }
 
 
     private void checkSuTRAProcessing() {
         epaymentRepository.updateSuccessEPayment()
-                .forEach(s -> {
-                    Optional<NchlReconciled> reconciled = repository.findById(s);
-                    if (reconciled.isPresent()) {
-                        statusUpdate.update(reconciled.get());
-                    } else {
-                        Optional<EftBatchPaymentDetail> detail = eftBatchPaymentDetailRepository.findById(s);
-                        if (!detail.isPresent()) {
-                            epaymentRepository.updateRevertInSuTra(Long.parseLong(s));
-                        }
-                    }
-                });
+                .forEach(instructionId -> repository.findById(instructionId)
+                        .ifPresentOrElse(
+                                statusUpdate::update,
+                                () -> eftBatchPaymentDetailRepository.findByInstructionId(instructionId).orElseGet(() -> {
+                                    epaymentRepository.updateRevertInSuTra(Long.parseLong(instructionId));
+                                    return null;
+                                })
+                        ));
     }
 
     private void updateNonRealTimeStatus() {

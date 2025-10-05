@@ -55,7 +55,7 @@ public class TransactionCheckStatus {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
         executeCheckTransactionStatus();
-//        new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
+        new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
     }
 
 

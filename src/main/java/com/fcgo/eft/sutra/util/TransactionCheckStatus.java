@@ -108,7 +108,7 @@ public class TransactionCheckStatus {
         new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
     }
 
-    @Scheduled(cron = "0 50 10,11,12,14,16,20 * * *")
+    @Scheduled(cron = "0 50 10,20 * * *")
     public void fetchBankAccountDetails() {
         bankAccountDetailsService.fetchBankAccountDetails();
     }

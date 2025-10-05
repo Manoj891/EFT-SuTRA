@@ -22,7 +22,9 @@ import org.hibernate.sql.ast.tree.expression.Every;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
@@ -45,19 +47,21 @@ public class TransactionCheckStatus {
     private final NonRealTimeStatusFromNchl nonRealTimeStatusFromNchl;
     private final NonRealTimeCheckStatusByDate checkByBatchNonRealTime;
     private final AccEpaymentRepository epaymentRepository;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+
 
     @PostConstruct
     public void executePostConstruct() {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
-        executeEvery5MinPendingPaymentProcess();
+        new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
     }
 
 
     @Scheduled(cron = "0 15 08,10,12,14,16,20,23 * * *")
     public void executeCheckTransactionStatus() {
-
-        headOfficeRepository.updatePaymentPendingStatusDetail();
+        long dateTime = Long.parseLong(dateFormat.format(new Date()))-50000;
+        headOfficeRepository.updatePaymentPendingStatusDetail(dateTime);
         headOfficeRepository.updatePaymentPendingStatusMaster();
         repository.findByPendingDate().forEach(date -> {
             log.info("{} Non Real Time Status", date);
@@ -74,7 +78,7 @@ public class TransactionCheckStatus {
         headOfficeRepository.updatePaymentSentPendingOFFUSStatus();
         headOfficeRepository.updatePaymentPendingStatusMaster();
 
-        executeEvery5MinPendingPaymentProcess();
+        new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
     }
 
 
@@ -104,9 +108,6 @@ public class TransactionCheckStatus {
 
     }
 
-    public void executeEvery5MinPendingPaymentProcess() {
-        new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
-    }
 
     @Scheduled(cron = "0 50 10,20 * * *")
     public void fetchBankAccountDetails() {

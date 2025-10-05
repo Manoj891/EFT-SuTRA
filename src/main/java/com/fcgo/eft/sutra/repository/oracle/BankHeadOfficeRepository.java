@@ -18,8 +18,8 @@ public interface BankHeadOfficeRepository extends JpaRepository<BankHeadOffice, 
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = NULL WHERE NCHL_CREDIT_STATUS = 'BUILD' AND NCHL_PUSHED_DATE <= SYSDATE - (5 / 24)", nativeQuery = true)
-    void updatePaymentPendingStatusDetail();
+    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = NULL WHERE NCHL_CREDIT_STATUS = 'BUILD' AND NCHL_PUSHED_DATE_TIME <= ?1", nativeQuery = true)
+    void updatePaymentPendingStatusDetail(long dateTime);
 
     @Modifying
     @Transactional

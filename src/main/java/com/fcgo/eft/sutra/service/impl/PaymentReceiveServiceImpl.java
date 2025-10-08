@@ -61,7 +61,7 @@ public class PaymentReceiveServiceImpl implements PaymentReceiveService {
 
         List<EftBatchPaymentDetail> details = new ArrayList<>();
         int onus = 0, offus = 0;
-        int sn = 1;
+
 
         for (EftPaymentRequestDetailReq dto : receive.getEftPaymentRequestDetail()) {
             String nchlTransactionType;
@@ -81,13 +81,13 @@ public class PaymentReceiveServiceImpl implements PaymentReceiveService {
             String addenda4 = (dto.getAddenda4() == null || dto.getAddenda4().isEmpty()) ? dto.getInstructionId() : dto.getAddenda4();
             String addenda3 = (dto.getAddenda3() == null || dto.getAddenda3().isEmpty()) ? dto.getInstructionId() : dto.getAddenda3();
             details.add(EftBatchPaymentDetail.builder().instructionId(dto.getInstructionId()).creditorAccount(creditorAccount.trim()).creditorAgent(creditorAgent.trim()).creditorName(creditorName.trim()).endToEndId(dto.getEndToEndId()).nchlTransactionType(nchlTransactionType).amount(dto.getAmount()).addenda1(now.getTime()).addenda2(dateFormat.format(now)).addenda3(addenda3).addenda4(addenda4).refId(dto.getRefId() == null ? dto.getInstructionId() : dto.getRefId()).remarks(dto.getRemarks() == null ? dto.getInstructionId() : dto.getRemarks()).nchlCreditStatus(null).build());
-            sn++;
         }
         batch.setOffus(offus);
         batch.setDeploymentType(user.getDeploymentType());
         batch.setCreatedBy(user.getAppName());
-        repository.save(batch, details).forEach(detail -> epaymentRepository.updateStatusProcessing(Long.parseLong(detail.getInstructionId())));
-        log.info("Commited. BATCH ID:{} {} ITEM RECEIVED", batch.getBatchId(), (sn - 1));
+        List<EftBatchPaymentDetail> list = repository.save(batch, details);
+        list.forEach(detail -> epaymentRepository.updateStatusProcessing(Long.parseLong(detail.getInstructionId())));
+        log.info("Commited. BATCH ID:{} {} ITEM RECEIVED", batch.getBatchId(), list.size());
         return PaymentReceiveStatus.builder().offus(offus).onus(onus).build();
     }
 }

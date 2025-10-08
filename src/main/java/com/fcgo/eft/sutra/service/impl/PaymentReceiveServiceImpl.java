@@ -9,6 +9,7 @@ import com.fcgo.eft.sutra.entity.oracle.EftBatchPayment;
 import com.fcgo.eft.sutra.entity.oracle.EftBatchPaymentDetail;
 import com.fcgo.eft.sutra.exception.CustomException;
 import com.fcgo.eft.sutra.exception.PermissionDeniedException;
+import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.security.AuthenticatedUser;
 import com.fcgo.eft.sutra.security.AuthenticationFacade;
 import com.fcgo.eft.sutra.service.PaymentReceiveService;
@@ -18,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -28,6 +28,7 @@ import java.util.*;
 public class PaymentReceiveServiceImpl implements PaymentReceiveService {
     private final AuthenticationFacade facade;
     private final PaymentSaveService repository;
+    private final AccEpaymentRepository epaymentRepository;
 
     private final Map<String, String> bankMap = new HashMap<>();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -85,7 +86,7 @@ public class PaymentReceiveServiceImpl implements PaymentReceiveService {
         batch.setOffus(offus);
         batch.setDeploymentType(user.getDeploymentType());
         batch.setCreatedBy(user.getAppName());
-        repository.save(batch, details);
+        repository.save(batch, details).forEach(detail -> epaymentRepository.updateStatusProcessing(Long.parseLong(detail.getInstructionId())));
         log.info("Commited. BATCH ID:{} {} ITEM RECEIVED", batch.getBatchId(), (sn - 1));
         return PaymentReceiveStatus.builder().offus(offus).onus(onus).build();
     }

@@ -32,7 +32,7 @@ public class PaymentSaveService {
     private final SimpleDateFormat yyMMdd = new SimpleDateFormat("yyMMdd");
     private final SimpleDateFormat yyyyMMddHHmmss = new SimpleDateFormat("yyyyMMddHHmmss");
 
-    public BigInteger save(EftBatchPayment batch, List<EftBatchPaymentDetail> details) {
+    public List<EftBatchPaymentDetail> save(EftBatchPayment batch, List<EftBatchPaymentDetail> details) {
         Optional<BankAccountWhitelist> whitelist = bankAccountWhitelistRepository.findByAccountIdAndBankId(batch.getDebtorAccount(), batch.getDebtorAgent());
         if (whitelist.isEmpty()) {
             throw new CustomException("Bank Account Whitelist not found. {" + batch.getDebtorAgent() + "} {" + batch.getDebtorAccount() + "}");
@@ -69,13 +69,13 @@ public class PaymentSaveService {
             }
             rowNo++;
         }
-        batch.setOffus(objDetail.size() + 1);
+        batch.setOffus(objDetail.size());
         repository.save(batch);
-        detailRepository.saveAll(objDetail).forEach(detail -> epaymentRepository.updateStatusProcessing(Long.parseLong(detail.getInstructionId())));
+        detailRepository.saveAll(objDetail);
 
         if (rowNo == 1) {
             throw new CustomException("Payment Detail not found");
         }
-        return id;
+        return objDetail;
     }
 }

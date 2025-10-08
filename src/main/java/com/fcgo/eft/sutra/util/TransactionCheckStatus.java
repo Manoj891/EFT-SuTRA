@@ -2,8 +2,6 @@ package com.fcgo.eft.sutra.util;
 
 import com.fcgo.eft.sutra.dto.nchlres.NonRealTimeBatch;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
-import com.fcgo.eft.sutra.entity.oracle.EftBatchPaymentDetail;
-import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
 import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.BankHeadOfficeRepository;
 import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
@@ -18,15 +16,11 @@ import com.fcgo.eft.sutra.service.realtime.RealTimeStatusFromNchl;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.sql.ast.tree.expression.Every;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +37,6 @@ public class TransactionCheckStatus {
     private final PaymentReceiveService bankMapService;
     private final EftPaymentReceiveService paymentReceiveService;
     private final EftBatchPaymentDetailRepository eftBatchPaymentDetailRepository;
-
     private final NonRealTimeStatusFromNchl nonRealTimeStatusFromNchl;
     private final NonRealTimeCheckStatusByDate checkByBatchNonRealTime;
     private final AccEpaymentRepository epaymentRepository;

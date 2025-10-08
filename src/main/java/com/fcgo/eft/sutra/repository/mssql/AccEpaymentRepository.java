@@ -9,10 +9,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Transactional
 public interface AccEpaymentRepository extends JpaRepository<AccEpayment, Long> {
+
+
+    Optional<AccEpayment> findByEftNo(long eftNo);
 
     @Query(value = "select eftno from acc_epayment where transtatus =2 and pstatus=2", nativeQuery = true)
     List<String> updateSuccessEPayment();

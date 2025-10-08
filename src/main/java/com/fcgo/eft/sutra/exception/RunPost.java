@@ -13,11 +13,15 @@ import org.springframework.stereotype.Service;
 public class RunPost {
     private final RemoteIpRepository remoteIpRepository;
     private final AccEpaymentRepository epaymentRepository;
-    @PostConstruct
-    public void executePostConstruct() {
 
+//    @PostConstruct
+    public void executePostConstruct() {
         remoteIpRepository.findByPendingTransactionId().forEach(ins -> {
-            System.out.println( epaymentRepository.findByEftNo(Long.parseLong(ins)));
+            try {
+                System.out.println(epaymentRepository.findByEftNo(Long.parseLong(ins)));
+            } catch (Exception e) {
+                log.info(e.getMessage());
+            }
         });
 
     }

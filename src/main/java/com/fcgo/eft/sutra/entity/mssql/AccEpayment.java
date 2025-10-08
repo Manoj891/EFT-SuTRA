@@ -18,156 +18,190 @@ public class AccEpayment {
     @Column(name = "eftno")
     private Long eftNo;
 
+    @Column(name = "fyid", nullable = false)
+    private Long fyId;
+
+    @Column(name = "adminid", nullable = false)
+    private Long adminId;
+
+    @Column(name = "orgid", nullable = false)
+    private Long orgId;
+
+    @Column(name = "journalid", nullable = false)
+    private Long journalId;
+
+
+    @Column(name = "senderbankcode", nullable = false)
+    private Long senderBankCode;
+
+    @Column(name = "senderbankname", nullable = false, length = 100)
+    private String senderBankName;
+
+    @Column(name = "senderbranchcode", nullable = false)
+    private Long senderBranchCode;
+
+    @Column(name = "senderbranch", nullable = false, length = 50)
+    private String senderBranch;
+
+    @Column(name = "senderaccountno", nullable = false, length = 50)
+    private String senderAccountNo;
+
+    @Column(name = "senderaccountname", nullable = false, length = 150)
+    private String senderAccountName;
+
+    @Column(name = "receivertype", nullable = false)
+    private Long receiverType;
+
+    @Column(name = "receiverid", nullable = false)
+    private Long receiverId;
+
+    @Column(name = "receiverbankcode", nullable = false)
+    private Long receiverBankCode;
+
+    @Column(name = "receiverbankid", nullable = false)
+    private Long receiverBankId;
+
+    @Column(name = "receiverbank", nullable = false, length = 100)
+    private String receiverBank;
+
+    @Column(name = "receiverbranchcode", nullable = false)
+    private Long receiverBranchCode;
+
+    @Column(name = "receiverbranch", nullable = false, length = 50)
+    private String receiverBranch;
+
+    @Column(name = "receiveraccountno", nullable = false, length = 50)
+    private String receiverAccountNo;
+
+    @Column(name = "receivername", nullable = false, length = 150)
+    private String receiverName;
+
+    @Column(name = "tamount", precision = 18, scale = 2, nullable = false)
+    private BigDecimal tAmount;
+
+    @Column(name = "entrydate", nullable = false)
+    private LocalDateTime entryDate;
+
+    @Column(name = "enterby", nullable = false, length = 50)
+    private String enterBy;
+
+    @Column(name = "transtatus", nullable = false)
+    private Integer tranStatus;
 
     @Column(name = "pstatus", nullable = false)
     private Integer pStatus;
 
+    @Column(name = "ptranid", length = 100)
+    private String pTranId;
+
+    @Column(name = "paymentdate")
+    private LocalDateTime paymentDate;
+
+    @Column(name = "paymentdateint", nullable = false)
+    private Integer paymentDateInt;
+
+    @Column(name = "pmonth")
+    private Integer pMonth;
+
+    @Column(name = "paymentby", length = 50)
+    private String paymentBy;
+
+    @Column(name = "approveruser1", length = 50)
+    private String approverUser1;
+
+    @Column(name = "approveruser2", length = 50)
+    private String approverUser2;
+
+    @Column(name = "approveddate1")
+    private LocalDateTime approvedDate1;
+
+    @Column(name = "approveddate2")
+    private LocalDateTime approvedDate2;
+
+    @Column(name = "approveddate2int", nullable = false)
+    private Integer approvedDate2Int;
+
+    @Column(name = "treasury", nullable = false)
+    private Integer treasury;
 
     @Column(name = "StatusMessage", length = 500)
     private String statusMessage;
 
+    @Column(name = "categoryPurpose")
+    private Integer categoryPurpose;
+
+    @Column(name = "paymentreverse", nullable = false)
+    private Integer paymentReverse;
 
     @Column(name = "successSN", nullable = false)
-    private Long successSn;
+    private Long successSN;
 
+    @Column(name = "tag", nullable = false)
+    private Long tag;
 
+    @Column(name = "kattirefid", nullable = false)
+    private Long kattiRefId;
 
-    @Column(nullable = false)
-    private Long adminid = 0L;
+    @Column(name = "ebpcode", length = 50)
+    private String ebpCode;
 
-    @Column(nullable = false)
-    private Long orgid = 0L;
+    @Column(name = "rkattiid", nullable = false)
+    private Long rKattiId;
 
-
-    @Column(nullable = false)
-    private Long journalid = 0L;
-
-    @Column(nullable = false)
-    private LocalDateTime trandate = LocalDateTime.now();
-
-
-
-
-    @Column(length = 100, nullable = false)
-    private String senderbankname = "";
-
-
-
-
-
-    @Column(length = 50, nullable = false)
-    private String senderaccountno;
-
-    @Column(length = 150, nullable = false)
-    private String senderaccountname;
-
-    @Column(nullable = false)
-    private Long receivertype;
-
-    @Column(nullable = false)
-    private Long receiverid;
-
-    @Column(nullable = false)
-    private Long receiverbankcode = 0L;
-
-    @Column(nullable = false)
-    private Long receiverbankid = 0L;
-
-    @Column(length = 100, nullable = false)
-    private String receiverbank;
-
-    @Column(nullable = false)
-    private Long receiverbranchcode = 0L;
-
-    @Column(length = 50, nullable = false)
-    private String receiverbranch = "";
-
-    @Column(length = 50, nullable = false)
-    private String receiveraccountno;
-
-    @Column(length = 150, nullable = false)
-    private String receivername;
-
-    @Column(precision = 18, scale = 2, nullable = false)
-    private BigDecimal tamount = BigDecimal.ZERO;
-
-    @Column(nullable = false)
-    private LocalDateTime entrydate ;
-
-    @Column(length = 50, nullable = false)
-    private String enterby;
-
-    @Column(nullable = false)
-    private Integer transtatus = 0;
-
-    @Column(nullable = false)
-    private Integer pstatus = 0;
-
-    @Column(length = 100)
-    private String ptranid;
-
-    private LocalDateTime paymentdate;
-
-    @Column(nullable = false)
-    private Integer paymentdateint = 0;
-
-    private Integer pmonth;
-
-    @Column(length = 50)
-    private String paymentby;
-
-    @Column(length = 50)
-    private String approveruser1;
-
-    @Column(length = 50)
-    private String approveruser2;
-
-
-    @Column(nullable = false)
-    private Integer treasury = 1;
-
-
-    @Column(nullable = false)
-    private Long successSN = 0L;
+    @Column(name = "parentcode", nullable = false)
+    private Long parentCode;
 
 
     @Override
     public String toString() {
         return "{" +
-                "eftNo=" + eftNo +
-                ", pStatus=" + pStatus +
-                ", statusMessage='" + statusMessage + '\'' +
-                ", successSn=" + successSn +
-                ", adminid=" + adminid +
-                ", orgid=" + orgid +
-                ", journalid=" + journalid +
-                ", trandate=" + trandate +
-                ", senderbankname='" + senderbankname + '\'' +
-                ", senderaccountno='" + senderaccountno + '\'' +
-                ", senderaccountname='" + senderaccountname + '\'' +
-                ", receivertype=" + receivertype +
-                ", receiverid=" + receiverid +
-                ", receiverbankcode=" + receiverbankcode +
-                ", receiverbankid=" + receiverbankid +
-                ", receiverbank='" + receiverbank + '\'' +
-                ", receiverbranchcode=" + receiverbranchcode +
-                ", receiverbranch='" + receiverbranch + '\'' +
-                ", receiveraccountno='" + receiveraccountno + '\'' +
-                ", receivername='" + receivername + '\'' +
-                ", tamount=" + tamount +
-                ", entrydate=" + entrydate +
-                ", enterby='" + enterby + '\'' +
-                ", transtatus=" + transtatus +
-                ", pstatus=" + pstatus +
-                ", ptranid='" + ptranid + '\'' +
-                ", paymentdate=" + paymentdate +
-                ", paymentdateint=" + paymentdateint +
-                ", pmonth=" + pmonth +
-                ", paymentby='" + paymentby + '\'' +
-                ", approveruser1='" + approveruser1 + '\'' +
-                ", approveruser2='" + approveruser2 + '\'' +
-                ", treasury=" + treasury +
-                ", successSN=" + successSN +
-                '}';
+                "\"eftNo\":" + eftNo + "," +
+                "\"fyId\":" + fyId + "," +
+                "\"adminId\":" + adminId + "," +
+                "\"orgId\":" + orgId + "," +
+                "\"journalId\":" + journalId + "," +
+                "\"senderBankCode\":" + senderBankCode + "," +
+                "\"senderBankName\":\"" + senderBankName + "\"," +
+                "\"senderBranchCode\":" + senderBranchCode + "," +
+                "\"senderBranch\":\"" + senderBranch + "\"," +
+                "\"senderAccountNo\":\"" + senderAccountNo + "\"," +
+                "\"senderAccountName\":\"" + senderAccountName + "\"," +
+                "\"receiverType\":" + receiverType + "," +
+                "\"receiverId\":" + receiverId + "," +
+                "\"receiverBankCode\":" + receiverBankCode + "," +
+                "\"receiverBankId\":" + receiverBankId + "," +
+                "\"receiverBank\":\"" + receiverBank + "\"," +
+                "\"receiverBranchCode\":" + receiverBranchCode + "," +
+                "\"receiverBranch\":\"" + receiverBranch + "\"," +
+                "\"receiverAccountNo\":\"" + receiverAccountNo + "\"," +
+                "\"receiverName\":\"" + receiverName + "\"," +
+                "\"tAmount\":" + tAmount + "," +
+                "\"entryDate\":\"" + entryDate + "\"," +
+                "\"enterBy\":\"" + enterBy + "\"," +
+                "\"tranStatus\":" + tranStatus + "," +
+                "\"pStatus\":" + pStatus + "," +
+                "\"pTranId\":\"" + pTranId + "\"," +
+                "\"paymentDate\":\"" + paymentDate + "\"," +
+                "\"paymentDateInt\":" + paymentDateInt + "," +
+                "\"pMonth\":" + pMonth + "," +
+                "\"paymentBy\":\"" + paymentBy + "\"," +
+                "\"approverUser1\":\"" + approverUser1 + "\"," +
+                "\"approverUser2\":\"" + approverUser2 + "\"," +
+                "\"approvedDate1\":\"" + approvedDate1 + "\"," +
+                "\"approvedDate2\":\"" + approvedDate2 + "\"," +
+                "\"approvedDate2Int\":" + approvedDate2Int + "," +
+                "\"treasury\":" + treasury + "," +
+                "\"statusMessage\":\"" + statusMessage + "\"," +
+                "\"categoryPurpose\":" + categoryPurpose + "," +
+                "\"paymentReverse\":" + paymentReverse + "," +
+                "\"successSN\":" + successSN + "," +
+                "\"tag\":" + tag + "," +
+                "\"kattiRefId\":" + kattiRefId + "," +
+                "\"ebpCode\":\"" + ebpCode + "\"," +
+                "\"rKattiId\":" + rKattiId + "," +
+                "\"parentCode\":" + parentCode + "," +
+                           "}";
     }
+
 }
+

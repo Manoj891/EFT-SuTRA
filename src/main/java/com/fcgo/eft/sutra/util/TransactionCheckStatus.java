@@ -14,17 +14,13 @@ import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeCheckStatusByDate;
 import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeStatusFromNchl;
 import com.fcgo.eft.sutra.service.realtime.RealTimeStatusFromNchl;
 import jakarta.annotation.PostConstruct;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Enumeration;
 
 @Service
 @RequiredArgsConstructor
@@ -44,33 +40,16 @@ public class TransactionCheckStatus {
     private final NonRealTimeStatusFromNchl nonRealTimeStatusFromNchl;
     private final NonRealTimeCheckStatusByDate checkByBatchNonRealTime;
     private final AccEpaymentRepository epaymentRepository;
+    private final IsProdService isProdService;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-    @Getter
-    private boolean isProdService = false;
 
 
     @PostConstruct
     public void executePostConstruct() {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
-
-        try {
-            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                NetworkInterface iface = interfaces.nextElement();
-                if (iface.isLoopback() || !iface.isUp())
-                    continue; // skip loopback and down interfaces
-
-                Enumeration<InetAddress> addresses = iface.getInetAddresses();
-                while (addresses.hasMoreElements()) {
-                    InetAddress addr = addresses.nextElement();
-                    if (addr.getHostAddress().contains("10.100.193.76")) isProdService = true;
-                    System.out.println("Local IP Address: " + addr.getHostAddress());
-                }
-            }
-        } catch (Exception ignored) {
-        }
-        if (isProdService) {
+        isProdService.init();
+        if (isProdService.isProdService()) {
             executeCheckTransactionStatus();
             new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
         }
@@ -79,7 +58,7 @@ public class TransactionCheckStatus {
 
     @Scheduled(cron = "0 15 08,10,12,14,16,20,23 * * *")
     public void executeCheckTransactionStatus() {
-        if (!isProdService) {
+        if (!isProdService.isProdService()) {
             return;
         }
         long dateTime = Long.parseLong(dateFormat.format(new Date())) - 50000;
@@ -133,7 +112,7 @@ public class TransactionCheckStatus {
 
     @Scheduled(cron = "0 50 10,20 * * *")
     public void fetchBankAccountDetails() {
-        if (!isProdService) {
+        if (!isProdService.isProdService()) {
             return;
         }
         bankAccountDetailsService.fetchBankAccountDetails();

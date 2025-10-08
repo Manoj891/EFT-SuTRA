@@ -7,7 +7,7 @@ import com.fcgo.eft.sutra.service.EftPaymentReceiveService;
 import com.fcgo.eft.sutra.service.PaymentReceiveService;
 import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeTransactionStart;
 import com.fcgo.eft.sutra.service.realtime.RealTimeTransactionStart;
-import com.fcgo.eft.sutra.util.TransactionCheckStatus;
+import com.fcgo.eft.sutra.util.IsProdService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,13 +17,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EftPaymentReceiveServiceImpl implements EftPaymentReceiveService {
     private final PaymentReceiveService service;
-    private final TransactionCheckStatus transactionCheckStatus;
+    private final IsProdService isProdService;
     private final NonRealTimeTransactionStart nonRealTimeThread;
     private final RealTimeTransactionStart realTimeThread;
 
     @Override
     public void paymentReceive(EftPaymentReceive receive) {
-        if (!transactionCheckStatus.isProdService()) throw new CustomException("Prod service not supported");
+        if (!isProdService.isProdService()) throw new CustomException("Prod service not supported");
         startTransactionThread(service.paymentReceive(receive));
     }
 

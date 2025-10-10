@@ -24,13 +24,13 @@ public class WebClientConfig {
                 .sslContext(SslContextBuilder.forClient()
                         .trustManager(InsecureTrustManagerFactory.INSTANCE) // trust-all (testing only)
                         .build())  // build SslContext here
-                .handshakeTimeout(Duration.ofSeconds(30)) // handshake timeout
+                .handshakeTimeout(Duration.ofSeconds(300)) // handshake timeout
                 .build();
 
         HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000) // TCP connect timeout
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000 * 60 * 5) // TCP connect timeout
                 .secure(sslProvider)                                // custom SSL provider
-                .responseTimeout(Duration.ofSeconds(60));           // response timeout
+                .responseTimeout(Duration.ofSeconds(300));           // response timeout
 
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))

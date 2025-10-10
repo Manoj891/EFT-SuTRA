@@ -1,13 +1,14 @@
 package com.fcgo.eft.sutra.service.impl;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fcgo.eft.sutra.dto.nchlres.RealTimeBatch;
 import com.fcgo.eft.sutra.dto.req.TransactionId;
 import com.fcgo.eft.sutra.dto.res.BankAccountDetailsRes;
 import com.fcgo.eft.sutra.entity.oracle.BankAccountWhitelist;
+import com.fcgo.eft.sutra.entity.oracle.BankAccountWhitelistError;
 import com.fcgo.eft.sutra.exception.CustomException;
+import com.fcgo.eft.sutra.repository.oracle.BankAccountWhitelistErrorRepository;
 import com.fcgo.eft.sutra.repository.oracle.BankAccountWhitelistRepository;
 import com.fcgo.eft.sutra.service.BankAccountDetailsService;
 import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeStatusFromNchl;
@@ -38,6 +39,7 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
     private final AccountWhiteListSave accountWhiteListSave;
     private final RealTimeStatusFromNchl getRealTimeStatus;
     private final NonRealTimeStatusFromNchl nonRealTimeStatusFromNchl;
+    private final BankAccountWhitelistErrorRepository whitelistErrorRepository;
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
@@ -105,6 +107,7 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
                         }
                     });
         } catch (Exception e) {
+            whitelistErrorRepository.save(BankAccountWhitelistError.builder().id(1).error(e.getMessage()).build());
             log.info(e.getMessage());
         }
     }

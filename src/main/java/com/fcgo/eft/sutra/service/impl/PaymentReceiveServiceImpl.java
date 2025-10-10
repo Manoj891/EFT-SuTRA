@@ -60,9 +60,7 @@ public class PaymentReceiveServiceImpl implements PaymentReceiveService {
         EftBatchPayment batch = EftBatchPayment.builder().batchId(batchId).poCode(b.getPoCode()).debtorAccount(debtorAccount).debtorName(debtorName).debtorAgent(debtorAgent).categoryPurpose(CategoryPurpose.get(b.getCategoryPurpose())).offus(0).offusPushed("N").build();
 
         List<EftBatchPaymentDetail> details = new ArrayList<>();
-        int onus = 0, offus = 0;
-
-
+        int offus = 0, onus = 0;
         for (EftPaymentRequestDetailReq dto : receive.getEftPaymentRequestDetail()) {
             String nchlTransactionType;
             String creditorAgent = bankMap.get(dto.getCreditorAgent().trim());
@@ -82,10 +80,10 @@ public class PaymentReceiveServiceImpl implements PaymentReceiveService {
             String addenda3 = (dto.getAddenda3() == null || dto.getAddenda3().isEmpty()) ? dto.getInstructionId() : dto.getAddenda3();
             details.add(EftBatchPaymentDetail.builder().instructionId(dto.getInstructionId()).creditorAccount(creditorAccount.trim()).creditorAgent(creditorAgent.trim()).creditorName(creditorName.trim()).endToEndId(dto.getEndToEndId()).nchlTransactionType(nchlTransactionType).amount(dto.getAmount()).addenda1(now.getTime()).addenda2(dateFormat.format(now)).addenda3(addenda3).addenda4(addenda4).refId(dto.getRefId() == null ? dto.getInstructionId() : dto.getRefId()).remarks(dto.getRemarks() == null ? dto.getInstructionId() : dto.getRemarks()).nchlCreditStatus(null).build());
         }
-        batch.setOffus(offus);
+
         batch.setDeploymentType(user.getDeploymentType());
         batch.setCreatedBy(user.getAppName());
-        List<EftBatchPaymentDetail> list = repository.save(batch, details);
+        List<EftBatchPaymentDetail> list = repository.save(batch, details, offus);
         list.forEach(detail -> epaymentRepository.updateStatusProcessing(Long.parseLong(detail.getInstructionId())));
         log.info("Commited. BATCH ID:{} {} ITEM RECEIVED", batch.getBatchId(), list.size());
         return PaymentReceiveStatus.builder().offus(offus).onus(onus).build();

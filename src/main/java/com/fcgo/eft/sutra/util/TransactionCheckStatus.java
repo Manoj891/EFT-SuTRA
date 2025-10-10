@@ -50,7 +50,6 @@ public class TransactionCheckStatus {
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
         isProdService.init();
         if (isProdService.isProdService()) {
-            executeCheckTransactionStatus();
             new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
         }
     }

@@ -109,20 +109,9 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
                     .forEach(d -> {
                         log.info("{} {} {}", d.getAccountId(), d.getBankId(), d.getAccountName());
                         try {
-                            accountWhiteListSave.save(
-                                    d.getAccountId(),
-                                    username,
-                                    d.getBankId(),
-                                    d.getBranchId(),
-                                    d.getAccountName(),
-                                    d.getStatus(),
-                                    d.getRcreTime(),
-                                    d.getBankName()
-                            );
+                            accountWhiteListSave.save(d.getAccountId(), username, d.getBankId(), d.getBranchId(), d.getAccountName(), d.getStatus(), d.getRcreTime(), d.getBankName());
                         } catch (Exception e) {
-                            log.error("Account No:{} Bank:{} Save Error: {}",
-                                    d.getAccountId(), d.getBankId(), e.getMessage(), e);
-                            throw new RuntimeException("Error saving account: " + d.getAccountId(), e);
+                            log.error("Account No:{} Bank:{} Save Error: {}", d.getAccountId(), d.getBankId(), e.getMessage(), e);
                         }
                     });
 

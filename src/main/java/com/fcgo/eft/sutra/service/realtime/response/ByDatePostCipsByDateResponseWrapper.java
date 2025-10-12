@@ -12,4 +12,4 @@ import java.util.List;
 public class ByDatePostCipsByDateResponseWrapper {
     private ByDateCipsBatchDetail cipsBatchDetail;
     private List<ByDateCipsTransactionDetail> cipsTransactionDetailList;
- }
+  }

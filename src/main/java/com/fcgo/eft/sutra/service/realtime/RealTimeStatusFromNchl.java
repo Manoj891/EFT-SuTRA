@@ -32,6 +32,7 @@ public class RealTimeStatusFromNchl {
         String payload = "{\"txnDateFrom\":\"" + date + "\",\"txnDateTo\":\"" + date + "\"}";
 
         try {
+
             List<ByDatePostCipsByDateResponseWrapper> res = webClient.post()
                     .uri(apiUrl)
                     .header("Authorization", "Bearer " + accessToken)

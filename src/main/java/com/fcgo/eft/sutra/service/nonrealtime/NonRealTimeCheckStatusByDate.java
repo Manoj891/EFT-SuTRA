@@ -3,10 +3,8 @@ package com.fcgo.eft.sutra.service.nonrealtime;
 import com.fcgo.eft.sutra.dto.PostCipsByDateResponseWrapper;
 import com.fcgo.eft.sutra.dto.nchlres.NonRealTimeBatch;
 import com.fcgo.eft.sutra.dto.res.NchlIpsBatchDetailRes;
-import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
 import com.fcgo.eft.sutra.service.impl.NchlReconciledService;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
-import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,9 +44,20 @@ public class NonRealTimeCheckStatusByDate {
     public void nonRealtimeCheckUpdate(String date) {
         String apiUrl = url + "/api/getnchlipstxnlistbydate";
         String accessToken = oauthToken.getAccessToken();
+
         String payload = "{\"txnDateFrom\":\"" + date + "\",\"txnDateTo\":\"" + date + "\"} ";
-        List<PostCipsByDateResponseWrapper> list = Objects.requireNonNull(webClient.post().uri(apiUrl).header("Authorization", "Bearer " + accessToken).header("Content-Type", "application/json").bodyValue(payload).retrieve().bodyToMono(new ParameterizedTypeReference<List<PostCipsByDateResponseWrapper>>() {
-        }).block());
+
+
+        List<PostCipsByDateResponseWrapper> list = Objects.requireNonNull(
+                webClient.post()
+                        .uri(apiUrl)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Content-Type", "application/json")
+                        .bodyValue(payload)
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<List<PostCipsByDateResponseWrapper>>() {
+                        }).block());
+
         list.forEach(response -> {
             NchlIpsBatchDetailRes td = response.getNchlIpsBatchDetail();
             if (td != null && td.getDebitStatus() != null && td.getDebitStatus().length() > 1) {

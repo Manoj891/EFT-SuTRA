@@ -11,19 +11,54 @@ import java.util.Date;
 @Builder
 public class NchlIpsTransactionDetail {
     private String id;
-    private Long batchId;
+    private String batchId;
     private Date recDate;
-    private Long instructionId;
+    private long instructionId;
     private String endToEndId;
-    private Double amount;
-    private Double chargeAmount;
+    private String amount;
+    private String chargeAmount;
+    private String chargeLiability;
     private String creditorAgent;
-    private String creditorBranch;
+    private String creditorBranc;
     private String creditorName;
     private String creditorAccount;
+    private String addenda1;
+    private String addenda2;
+    private String addenda3;
+    private String addenda4;
     private String creditStatus;
-    private String reasonCode;
-    private String reversalStatus;
+    private String refId;
+    private String remarks;
+    private String ipsBatchId;
+    private String rcreTime;
     private String reasonDesc;
-    private String txnResponse;
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":\"" + id + "\"," +
+                "\"batchId\":\"" + batchId + "\"," +
+                "\"recDate\":\"" + recDate + "\"," +
+                "\"instructionId\":\"" + instructionId + "\"," +
+                "\"endToEndId\":\"" + endToEndId + "\"," +
+                "\"amount\":\"" + amount + "\"," +
+                "\"chargeAmount\":\"" + chargeAmount + "\"," +
+                "\"chargeLiability\":\"" + chargeLiability + "\"," +
+                "\"creditorAgent\":\"" + creditorAgent + "\"," +
+                "\"creditorBranc\":\"" + creditorBranc + "\"," +
+                "\"creditorName\":\"" + creditorName + "\"," +
+                "\"creditorAccount\":\"" + creditorAccount + "\"," +
+                "\"addenda1\":\"" + addenda1 + "\"," +
+                "\"addenda2\":\"" + addenda2 + "\"," +
+                "\"addenda3\":\"" + addenda3 + "\"," +
+                "\"addenda4\":\"" + addenda4 + "\"," +
+                "\"creditStatus\":\"" + creditStatus + "\"," +
+                "\"refId\":\"" + refId + "\"," +
+                "\"remarks\":\"" + remarks + "\"," +
+                "\"ipsBatchId\":\"" + ipsBatchId + "\"," +
+                "\"rcreTime\":\"" + rcreTime + "\"," +
+                "\"reasonDesc\":\"" + reasonDesc + "\"" +
+                "}";
+    }
+
+
 }

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -22,12 +23,12 @@ public class SuTRAProcessingStatus {
     private final TransactionStatusUpdate statusUpdate;
     private final EftBatchPaymentDetailRepository detailRepository;
     private final AccEpaymentRepository epaymentRepository;
-    public void check(long eftNo){
+
+    public void check(long eftNo) {
         try {
             Optional<NchlReconciled> reconciled = reconciledRepository.findByInstructionId(eftNo);
             if (reconciled.isPresent()) {
                 statusUpdate.update(reconciled.get());
-                log.info("reconciled {}", reconciled.get().getInstructionId());
             } else {
                 String instructionId = String.valueOf(eftNo);
                 Optional<EftBatchPaymentDetail> batchPaymentDetail =
@@ -39,6 +40,8 @@ public class SuTRAProcessingStatus {
                     log.info("Transaction found in EftBatchPaymentDetail: {}", instructionId);
                 }
             }
-        }catch (Exception e){log.info(e.getMessage());}
+        } catch (Exception e) {
+            log.info(e.getMessage());
+        }
     }
 }

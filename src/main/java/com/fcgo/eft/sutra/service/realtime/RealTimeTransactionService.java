@@ -71,6 +71,7 @@ public class RealTimeTransactionService {
                             .map(CustomException::new))
                     .bodyToMono(RealTimeResponse.class).block();
             repository.updateNchlStatusByInstructionId("SENT", dateTime, instructionId);
+
             assert response != null;
             CipsBatchResponse nchl = response.getCipsBatchResponse();
             if (!response.getCipsTxnResponseList().isEmpty()) {
@@ -83,12 +84,15 @@ public class RealTimeTransactionService {
                     if (message != null && message.length() > 500) message = message.substring(0, 500);
                     epaymentRepository.updateSuccessEPayment(message, reconciled.getRecDate(), eftNo);
                     reconciledRepository.updateStatus(instructionId);
+                    log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} Success", instructionId);
+                } else {
+                    log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} Not Success", instructionId);
                 }
             }
-            log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {}", instructionId);
+
         } catch (Exception e) {
             repository.updateNchlStatusByInstructionId("SENT", dateTime, instructionId);
-
+            log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} {}", instructionId, e.getMessage());
             try {
                 long eftNo = Long.parseLong(instructionId);
                 JsonNode jsonNode = mapper.readTree(e.getMessage());

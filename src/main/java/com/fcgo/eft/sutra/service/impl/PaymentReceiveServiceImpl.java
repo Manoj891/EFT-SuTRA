@@ -14,6 +14,7 @@ import com.fcgo.eft.sutra.security.AuthenticatedUser;
 import com.fcgo.eft.sutra.security.AuthenticationFacade;
 import com.fcgo.eft.sutra.service.PaymentReceiveService;
 import com.fcgo.eft.sutra.util.CategoryPurpose;
+import com.fcgo.eft.sutra.util.IsProdService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class PaymentReceiveServiceImpl implements PaymentReceiveService {
     private final AuthenticationFacade facade;
     private final PaymentSaveService repository;
     private final AccEpaymentRepository epaymentRepository;
-
+    private final IsProdService isProdService;
     private final Map<String, String> bankMap = new HashMap<>();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -77,7 +78,7 @@ public class PaymentReceiveServiceImpl implements PaymentReceiveService {
                 offus++;
             }
             String addenda4 = (dto.getAddenda4() == null || dto.getAddenda4().isEmpty()) ? dto.getInstructionId() : dto.getAddenda4();
-            String addenda3 = (dto.getAddenda3() == null || dto.getAddenda3().isEmpty()) ? dto.getInstructionId() : dto.getAddenda3();
+            String addenda3 = "10.100.193.76";
             details.add(EftBatchPaymentDetail.builder().instructionId(dto.getInstructionId()).creditorAccount(creditorAccount.trim()).creditorAgent(creditorAgent.trim()).creditorName(creditorName.trim()).endToEndId(dto.getEndToEndId()).nchlTransactionType(nchlTransactionType).amount(dto.getAmount()).addenda1(now.getTime()).addenda2(dateFormat.format(now)).addenda3(addenda3).addenda4(addenda4).refId(dto.getRefId() == null ? dto.getInstructionId() : dto.getRefId()).remarks(dto.getRemarks() == null ? dto.getInstructionId() : dto.getRemarks()).nchlCreditStatus(null).build());
         }
 

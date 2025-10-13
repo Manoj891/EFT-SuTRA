@@ -1,6 +1,5 @@
 package com.fcgo.eft.sutra.util;
 
-import com.fcgo.eft.sutra.dto.nchlres.NonRealTimeBatch;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
 import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.BankHeadOfficeRepository;
@@ -11,7 +10,6 @@ import com.fcgo.eft.sutra.service.EftPaymentReceiveService;
 import com.fcgo.eft.sutra.service.PaymentReceiveService;
 import com.fcgo.eft.sutra.service.impl.SuTRAProcessingStatus;
 import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeCheckStatusByDate;
-import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeStatusFromNchl;
 import com.fcgo.eft.sutra.service.realtime.RealTimeStatusFromNchl;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -38,8 +36,6 @@ public class TransactionCheckStatus {
     private final PaymentReceiveService bankMapService;
     private final EftPaymentReceiveService paymentReceiveService;
     private final SuTRAProcessingStatus suTRAProcessingStatus;
-    private final NonRealTimeStatusFromNchl nonRealTimeStatusFromNchl;
-    private final NonRealTimeCheckStatusByDate checkByBatchNonRealTime;
     private final AccEpaymentRepository epaymentRepository;
     private final IsProdService isProdService;
     private final ThreadPoolExecutor executor;

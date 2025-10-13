@@ -1,7 +1,6 @@
 package com.fcgo.eft.sutra.service.nonrealtime;
 
 import com.fcgo.eft.sutra.dto.PostCipsByDateResponseWrapper;
-import com.fcgo.eft.sutra.dto.nchlres.NonRealTimeBatch;
 import com.fcgo.eft.sutra.dto.res.NchlIpsBatchDetailRes;
 import com.fcgo.eft.sutra.entity.oracle.ReconciledTransaction;
 import com.fcgo.eft.sutra.entity.oracle.ReconciledTransactionDetail;
@@ -9,7 +8,6 @@ import com.fcgo.eft.sutra.repository.oracle.ReconciledTransactionDetailRepositor
 import com.fcgo.eft.sutra.repository.oracle.ReconciledTransactionRepository;
 import com.fcgo.eft.sutra.service.impl.NchlReconciledService;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
-import jakarta.persistence.Column;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,9 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 

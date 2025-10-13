@@ -101,6 +101,7 @@ public class NonRealTimeTransactionStart {
                         sleep = 2000;
                     }
                     Thread.sleep(sleep);
+                    activeThread = executor.getActiveCount();
                 } catch (InterruptedException e) {
                     break;
                 }

@@ -62,9 +62,11 @@ public class RealTimeTransactionStart {
                         sleep = 2000;
                     }
                     Thread.sleep(sleep);
+                    activeThread = executor.getActiveCount();
                 } catch (InterruptedException e) {
                     break;
                 }
+
             }
         }
     }

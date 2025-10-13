@@ -4,12 +4,12 @@ import com.fcgo.eft.sutra.dto.nchlres.NonRealTimeBatch;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
 import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.BankHeadOfficeRepository;
-import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
 import com.fcgo.eft.sutra.service.BankAccountDetailsService;
 import com.fcgo.eft.sutra.service.BankHeadOfficeService;
 import com.fcgo.eft.sutra.service.EftPaymentReceiveService;
 import com.fcgo.eft.sutra.service.PaymentReceiveService;
+import com.fcgo.eft.sutra.service.impl.SuTRAProcessingStatus;
 import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeCheckStatusByDate;
 import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeStatusFromNchl;
 import com.fcgo.eft.sutra.service.realtime.RealTimeStatusFromNchl;
@@ -36,7 +36,7 @@ public class TransactionCheckStatus {
     private final BankHeadOfficeRepository headOfficeRepository;
     private final PaymentReceiveService bankMapService;
     private final EftPaymentReceiveService paymentReceiveService;
-    private final EftBatchPaymentDetailRepository eftBatchPaymentDetailRepository;
+    private final SuTRAProcessingStatus suTRAProcessingStatus;
     private final NonRealTimeStatusFromNchl nonRealTimeStatusFromNchl;
     private final NonRealTimeCheckStatusByDate checkByBatchNonRealTime;
     private final AccEpaymentRepository epaymentRepository;
@@ -76,7 +76,7 @@ public class TransactionCheckStatus {
         });
         repository.updateMissingStatusSent();
         repository.findByPushed("N").forEach(statusUpdate::update);
-        checkSuTRAProcessing();
+        epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
         updateNonRealTimeStatus();
         headOfficeRepository.updatePaymentSentPendingStatus();
         headOfficeRepository.updatePaymentSentPendingOFFUSStatus();
@@ -85,17 +85,6 @@ public class TransactionCheckStatus {
     }
 
 
-    private void checkSuTRAProcessing() {
-        epaymentRepository.updateSuccessEPayment()
-                .forEach(instructionId -> repository.findById(instructionId)
-                        .ifPresentOrElse(
-                                statusUpdate::update,
-                                () -> eftBatchPaymentDetailRepository.findByInstructionId(instructionId).orElseGet(() -> {
-                                    epaymentRepository.updateRevertInSuTra(Long.parseLong(instructionId));
-                                    return null;
-                                })
-                        ));
-    }
 
     private void updateNonRealTimeStatus() {
         repository.findByNonRealTimePendingTransactionId().forEach(batchId -> {

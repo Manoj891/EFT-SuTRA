@@ -18,17 +18,11 @@ public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, 
     @Query(value = "SELECT M.BATCH_ID FROM NCHL_RECONCILED R join EFT_PAYMENT_BATCH_DETAIL B on B.INSTRUCTION_ID = R.INSTRUCTION_ID join EFT_PAYMENT_BATCH M on B.EFT_BATCH_PAYMENT_ID = M.ID where DEBIT_STATUS != '000' AND NCHL_TRANSACTION_TYPE = 'OFFUS' AND PUSHED='N' group by M.BATCH_ID ", nativeQuery = true)
     List<String> findByNonRealTimePendingTransactionId();
 
-    @Query(value = "SELECT INSTRUCTION_ID FROM EFT_PAYMENT_BATCH_DETAIL D where D.NCHL_TRANSACTION_TYPE = 'ONUS' AND NCHL_PUSHED_DATE_TIME <=?1 and not exists (select 1 from NCHL_RECONCILED R where R.INSTRUCTION_ID = D.INSTRUCTION_ID) FETCH FIRST 100 ROWS ONLY", nativeQuery = true)
-    List<String> findByPendingTransactionId(long dateTime);
-
     @Query(value = "SELECT SUBSTR(TO_CHAR(B.NCHL_PUSHED_DATE_TIME), 1, 8) AS PUSH_DATE FROM EFT_PAYMENT_BATCH_DETAIL B LEFT JOIN NCHL_RECONCILED R ON B.INSTRUCTION_ID = R.INSTRUCTION_ID WHERE B.NCHL_CREDIT_STATUS IN ('SENT', 'BUILD') AND (R.CREDIT_STATUS IS NULL OR R.CREDIT_STATUS NOT IN ('ACSE', '000', 'RJCT')) AND (R.PUSHED = 'N' OR R.PUSHED IS NULL) GROUP BY SUBSTR(TO_CHAR(B.NCHL_PUSHED_DATE_TIME), 1, 8) ORDER BY PUSH_DATE", nativeQuery = true)
     List<String> findByPendingDate();
 
     @Query(value = "SELECT * FROM NCHL_RECONCILED WHERE PUSHED='N' AND CREDIT_STATUS NOT IN('ACTC','SENT','ACSP')", nativeQuery = true)
     List<NchlReconciled> findByPushed(String pushed);
-
-    @Query(value = "SELECT * FROM NCHL_RECONCILED WHERE CREDIT_STATUS NOT IN('ACTC','SENT','ACSP')", nativeQuery = true)
-    List<NchlReconciled> findByPushed();
 
     @Modifying
     @Transactional

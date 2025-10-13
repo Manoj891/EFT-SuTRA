@@ -83,7 +83,7 @@ public class TransactionCheckStatus {
         headOfficeRepository.updatePaymentSentPendingStatus();
         headOfficeRepository.updatePaymentSentPendingOFFUSStatus();
         headOfficeRepository.updatePaymentPendingStatusMaster();
-        new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
+        executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
     }
 
 

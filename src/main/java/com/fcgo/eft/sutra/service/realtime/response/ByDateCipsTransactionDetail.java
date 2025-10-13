@@ -1,7 +1,9 @@
 package com.fcgo.eft.sutra.service.realtime.response;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 
 import java.util.Date;
@@ -11,8 +13,8 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-//@Entity
-//@Table(name = "RECONCILED_TRANSACTION_DETAIL")
+@Entity
+@Table(name = "RECONCILED_TRANSACTION_DETAIL")
 public class ByDateCipsTransactionDetail {
     @Id
     @Column(name = "ENTITY_ID", length = 50)

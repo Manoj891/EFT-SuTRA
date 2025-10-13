@@ -7,7 +7,8 @@ import java.util.List;
 
 @Getter
 @Setter
-public class NonRealTimeBatch { private Long id;
+public class NonRealTimeBatch {
+    private Long id;
     private String batchId;
     private Long isoTxnId;
     private String debitStatus;

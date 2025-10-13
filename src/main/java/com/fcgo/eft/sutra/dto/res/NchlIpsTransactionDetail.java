@@ -19,13 +19,14 @@ public class NchlIpsTransactionDetail {
     private double chargeAmount;
     private String chargeLiability;
     private String creditorAgent;
-    private String creditorBranc;
+    private String creditorBranch;
     private String creditorName;
     private String creditorAccount;
     private long addenda1;
     private String addenda2;
     private String addenda3;
     private String addenda4;
+    private String purpose;
     private String creditStatus;
     private String refId;
     private String remarks;
@@ -44,7 +45,7 @@ public class NchlIpsTransactionDetail {
                 "\"chargeAmount\":\"" + chargeAmount + "\"," +
                 "\"chargeLiability\":\"" + chargeLiability + "\"," +
                 "\"creditorAgent\":\"" + creditorAgent + "\"," +
-                "\"creditorBranc\":\"" + creditorBranc + "\"," +
+                "\"creditorBranch\":\"" + creditorBranch + "\"," +
                 "\"creditorName\":\"" + creditorName + "\"," +
                 "\"creditorAccount\":\"" + creditorAccount + "\"," +
                 "\"addenda1\":\"" + addenda1 + "\"," +

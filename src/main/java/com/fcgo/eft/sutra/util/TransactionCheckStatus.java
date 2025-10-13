@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +42,7 @@ public class TransactionCheckStatus {
     private final NonRealTimeCheckStatusByDate checkByBatchNonRealTime;
     private final AccEpaymentRepository epaymentRepository;
     private final IsProdService isProdService;
+    private final ThreadPoolExecutor executor;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 
 
@@ -50,7 +52,7 @@ public class TransactionCheckStatus {
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
         isProdService.init();
         if (isProdService.isProdService()) {
-            new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
+            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
         }
     }
 
@@ -83,7 +85,6 @@ public class TransactionCheckStatus {
         headOfficeRepository.updatePaymentPendingStatusMaster();
         new Thread(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build())).start();
     }
-
 
 
     private void updateNonRealTimeStatus() {

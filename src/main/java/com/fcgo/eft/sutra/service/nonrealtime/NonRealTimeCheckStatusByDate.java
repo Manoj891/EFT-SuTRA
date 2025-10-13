@@ -3,8 +3,13 @@ package com.fcgo.eft.sutra.service.nonrealtime;
 import com.fcgo.eft.sutra.dto.PostCipsByDateResponseWrapper;
 import com.fcgo.eft.sutra.dto.nchlres.NonRealTimeBatch;
 import com.fcgo.eft.sutra.dto.res.NchlIpsBatchDetailRes;
+import com.fcgo.eft.sutra.entity.oracle.ReconciledTransaction;
+import com.fcgo.eft.sutra.entity.oracle.ReconciledTransactionDetail;
+import com.fcgo.eft.sutra.repository.oracle.ReconciledTransactionDetailRepository;
+import com.fcgo.eft.sutra.repository.oracle.ReconciledTransactionRepository;
 import com.fcgo.eft.sutra.service.impl.NchlReconciledService;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
+import jakarta.persistence.Column;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -28,18 +34,8 @@ public class NonRealTimeCheckStatusByDate {
     private final NchlOauthToken oauthToken;
     private final WebClient webClient;
     private final NchlReconciledService repository;
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    public void updateNonRealTimeStatus(NonRealTimeBatch batch) {
-        String date = sdf.format(new Date());
-        batch.getNchlIpsTransactionDetailList()
-                .forEach(detail -> {
-                    log.info("Update InstructionId: {}", detail.getInstructionId());
-                    repository.save(detail.getInstructionId(), batch.getDebitStatus(), batch.getDebitReasonDesc(), detail.getCreditStatus(), detail.getReasonDesc() + " " + date, batch.getBatchId(), detail.getRecDate());
-                });
-
-    }
-
+    private final ReconciledTransactionRepository transactionRepository;
+    private final ReconciledTransactionDetailRepository detailRepository;
 
     public void nonRealtimeCheckUpdate(String date) {
         String apiUrl = url + "/api/getnchlipstxnlistbydate";
@@ -59,9 +55,28 @@ public class NonRealTimeCheckStatusByDate {
                         }).block());
 
         list.forEach(response -> {
+
+
             NchlIpsBatchDetailRes td = response.getNchlIpsBatchDetail();
             if (td != null && td.getDebitStatus() != null && td.getDebitStatus().length() > 1) {
-
+                List<ReconciledTransactionDetail> transactionDetails = new ArrayList<>();
+                String id = td.getBatchId() + "-" + td.getId();
+                ReconciledTransaction transaction = ReconciledTransaction.builder()
+                        .entityId(id)
+                        .id(td.getId())
+                        .batchId(td.getBatchId())
+                        .recDate(td.getRecDate())
+                        .batchCrncy(td.getBatchCrncy())
+                        .categoryPurpose(td.getCategoryPurpose())
+                        .debtorAgent(td.getDebtorAgent())
+                        .debtorBranch(td.getDebtorBranch())
+                        .debtorName(td.getDebtorName())
+                        .debtorAccount(td.getDebtorAccount())
+                        .debitStatus(td.getDebitStatus())
+                        .debitReasonDesc(td.getDebitReasonDesc())
+                        .settlementDate(td.getRecDate())
+                        .txnResponse(td.getDebitReasonDesc())
+                        .build();
 
                 response.getNchlIpsTransactionDetailList().forEach(detail -> {
                     try {
@@ -76,6 +91,32 @@ public class NonRealTimeCheckStatusByDate {
                                     }
                                 } catch (Exception ignored) {
                                 }
+                                transactionDetails.add(ReconciledTransactionDetail.builder()
+                                        .entityId(id + "-" + detail.getId())
+                                        .id(detail.getId())
+                                        .recDate(detail.getRecDate())
+                                        .instructionId(detail.getInstructionId())
+                                        .endToEndId(detail.getEndToEndId())
+                                        .chargeLiability(detail.getChargeLiability())
+                                        .purpose("")
+                                        .creditStatus(detail.getCreditStatus())
+                                        .reasonCode(detail.getCreditStatus())
+                                        .remarks(detail.getRemarks())
+                                        .particulars(detail.getReasonDesc())
+                                        .reasonDesc(detail.getReasonDesc())
+                                        .amount(detail.getAmount())
+                                        .chargeAmount(detail.getChargeAmount())
+                                        .creditorAgent(detail.getCreditorAgent())
+                                        .creditorBranch(detail.getCreditorAccount())
+                                        .creditorName(detail.getCreditorName())
+                                        .creditorAccount(detail.getCreditorAccount())
+                                        .addenda1(detail.getAddenda1())
+                                        .addenda2(detail.getAddenda2())
+                                        .addenda3(detail.getAddenda3())
+                                        .addenda4(detail.getAddenda4())
+                                        .refId(detail.getRefId())
+                                        .reconciledTransactionId(id)
+                                        .build());
                                 repository.save(detail.getInstructionId(), td.getDebitStatus(), td.getDebitReasonDesc(), detail.getCreditStatus(), detail.getReasonDesc(), transactionId, detail.getRecDate());
 
                             } catch (Exception i) {
@@ -85,7 +126,8 @@ public class NonRealTimeCheckStatusByDate {
                     } catch (Exception ignored) {
                     }
                 });
-
+                transactionRepository.save(transaction);
+                detailRepository.saveAll(transactionDetails);
             }
         });
     }

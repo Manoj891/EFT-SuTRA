@@ -15,14 +15,14 @@ public class NchlIpsTransactionDetail {
     private Date recDate;
     private long instructionId;
     private String endToEndId;
-    private String amount;
-    private String chargeAmount;
+    private double amount;
+    private double chargeAmount;
     private String chargeLiability;
     private String creditorAgent;
     private String creditorBranc;
     private String creditorName;
     private String creditorAccount;
-    private String addenda1;
+    private long addenda1;
     private String addenda2;
     private String addenda3;
     private String addenda4;

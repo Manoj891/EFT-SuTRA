@@ -16,8 +16,8 @@ public class ReconciledTransactionDetail {
     @Id
     @Column(name = "ENTITY_ID", length = 100)
     private String entityId;
-    @Column(name = "ID")
-    private Long id;
+    @Column(name = "ID",length = 50)
+    private String id;
     @Column(name = "REC_DATE")
     private Date recDate;
     @Column(name = "INSTRUCTION_ID")

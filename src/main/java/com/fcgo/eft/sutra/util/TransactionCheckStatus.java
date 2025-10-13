@@ -54,6 +54,14 @@ public class TransactionCheckStatus {
         if (isProdService.isProdService()) {
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
         }
+
+      /*  executor.submit(() -> {
+            String date = "2025-10-20";
+            nonRealTime.nonRealtimeCheckUpdate(date);
+            log.info("Non Real Time Status Completed {} Real Time Status", date);
+            realTime.realTimeCheckByDate(date);
+            log.info("Real Time Status Completed {} Real Time Status", date);
+        });*/
     }
 
 
@@ -79,22 +87,24 @@ public class TransactionCheckStatus {
         repository.updateMissingStatusSent();
         repository.findByPushed("N").forEach(statusUpdate::update);
         epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
-        updateNonRealTimeStatus();
+        repository.findByPushed("N").forEach(statusUpdate::update);
         headOfficeRepository.updatePaymentSentPendingStatus();
         headOfficeRepository.updatePaymentSentPendingOFFUSStatus();
         headOfficeRepository.updatePaymentPendingStatusMaster();
+        repository.findByPushed("N").forEach(statusUpdate::update);
         executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
     }
 
 
     private void updateNonRealTimeStatus() {
-        repository.findByNonRealTimePendingTransactionId().forEach(batchId -> {
-            log.info("Fetching Batch Id: {}", batchId);
-            NonRealTimeBatch nonRealTimeBatch = nonRealTimeStatusFromNchl.checkByBatchNonRealTime(batchId);
-            checkByBatchNonRealTime.updateNonRealTimeStatus(nonRealTimeBatch);
-            log.info("Updating SuTRA---------------");
-            repository.findByPushed("N").forEach(statusUpdate::update);
-        });
+        repository.findByPushed("N").forEach(statusUpdate::update);
+//        repository.findByNonRealTimePendingTransactionId().forEach(batchId -> {
+//            log.info("Fetching Batch Id: {}", batchId);
+//            NonRealTimeBatch nonRealTimeBatch = nonRealTimeStatusFromNchl.checkByBatchNonRealTime(batchId);
+//            checkByBatchNonRealTime.updateNonRealTimeStatus(nonRealTimeBatch);
+//            log.info("Updating SuTRA---------------");
+
+//        });
 
     }
 

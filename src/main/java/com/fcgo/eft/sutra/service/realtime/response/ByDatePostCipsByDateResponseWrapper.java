@@ -1,5 +1,7 @@
 package com.fcgo.eft.sutra.service.realtime.response;
 
+import com.fcgo.eft.sutra.entity.oracle.ReconciledTransaction;
+import com.fcgo.eft.sutra.entity.oracle.ReconciledTransactionDetail;
 import lombok.*;
 
 import java.util.List;

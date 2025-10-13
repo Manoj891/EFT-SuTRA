@@ -1,4 +1,4 @@
-package com.fcgo.eft.sutra.service.realtime.response;
+package com.fcgo.eft.sutra.entity.oracle;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

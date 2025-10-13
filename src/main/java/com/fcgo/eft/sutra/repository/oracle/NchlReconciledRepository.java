@@ -8,9 +8,12 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, String> {
+
+    Optional<NchlReconciled> findByInstructionId(long instructionId);
 
     @Query(value = "SELECT M.BATCH_ID FROM NCHL_RECONCILED R join EFT_PAYMENT_BATCH_DETAIL B on B.INSTRUCTION_ID = R.INSTRUCTION_ID join EFT_PAYMENT_BATCH M on B.EFT_BATCH_PAYMENT_ID = M.ID where DEBIT_STATUS != '000' AND NCHL_TRANSACTION_TYPE = 'OFFUS' AND PUSHED='N' group by M.BATCH_ID ", nativeQuery = true)
     List<String> findByNonRealTimePendingTransactionId();

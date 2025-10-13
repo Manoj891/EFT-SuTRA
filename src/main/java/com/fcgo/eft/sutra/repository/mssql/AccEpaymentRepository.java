@@ -20,7 +20,7 @@ public interface AccEpaymentRepository extends JpaRepository<AccEpayment, Long> 
     Optional<AccEpayment> findByEftNo(long eftNo);
 
     @Query(value = "select eftno from acc_epayment where transtatus =2 and pstatus=2", nativeQuery = true)
-    List<String> updateSuccessEPayment();
+    List<Long> updateSuccessEPayment();
 
     @Modifying
     @Query(value = "update acc_epayment set transtatus=2,pstatus=2 where eftno=?1", nativeQuery = true)
@@ -34,10 +34,6 @@ public interface AccEpaymentRepository extends JpaRepository<AccEpayment, Long> 
     @Modifying
     @Query(value = "update acc_epayment set pstatus=1,StatusMessage=?1, paymentdate=?2 where eftno=?3", nativeQuery = true)
     void updateSuccessEPayment(String message, Date settelmentDate, long instructionId);
-
-//    @Modifying
-//    @Query(value = "update epayment_trans_log set crStatusCode=?1 where instructionId=?2", nativeQuery = true)
-//    void updateEPaymentLog(String message, long instructionId);
 
     @Modifying
     @Query(value = "update acc_epayment set pstatus=-1, StatusMessage=?1 where eftno=?2", nativeQuery = true)

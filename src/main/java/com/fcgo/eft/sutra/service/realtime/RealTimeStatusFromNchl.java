@@ -1,7 +1,7 @@
 package com.fcgo.eft.sutra.service.realtime;
 
-import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
-import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
+import com.fcgo.eft.sutra.repository.oracle.ReconciledTransactionDetailRepository;
+import com.fcgo.eft.sutra.repository.oracle.ReconciledTransactionRepository;
 import com.fcgo.eft.sutra.service.impl.NchlReconciledService;
 import com.fcgo.eft.sutra.service.realtime.response.ByDatePostCipsByDateResponseWrapper;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
@@ -25,6 +25,8 @@ public class RealTimeStatusFromNchl {
     private final NchlOauthToken oauthToken;
     private final WebClient webClient;
     private final NchlReconciledService repository;
+    private final ReconciledTransactionRepository transactionRepository;
+    private final ReconciledTransactionDetailRepository detailRepository;
 
     public void realTimeCheckByDate(String date) {
         String apiUrl = url + "/api/getcipstxnlistbydate";
@@ -52,11 +54,17 @@ public class RealTimeStatusFromNchl {
                         response.getCipsTransactionDetailList()
                                 .forEach(detail -> {
                                     try {
-                                        if (detail.getCreditStatus() != null) {
-                                            log.info("InstructionId: {} status: {} {}", detail.getInstructionId(), detail.getCreditStatus(), detail.getReasonDesc());
-                                            repository.save(detail.getInstructionId(), debitResponseCode, debitResponseMessage, detail.getCreditStatus(), detail.getReasonDesc(), detail.getInstructionId() + "", detail.getRecDate());
-                                        }
-                                    } catch (Exception e) {
+                                        String id = "ONOS-" + detail.getId();
+                                        response.getCipsBatchDetail().setEntityId(id);
+                                        detail.setEntityId(id + "-" + detail.getInstructionId());
+                                        detail.setReconciledTransactionId(id);
+                                        transactionRepository.save(response.getCipsBatchDetail());
+                                        detailRepository.save(detail);
+                                        repository.save(detail.getInstructionId(), debitResponseCode, debitResponseMessage, detail.getCreditStatus(), detail.getReasonDesc(), detail.getInstructionId() + "", detail.getRecDate());
+                                        log.info("InstructionId: {} status: {} {}", detail.getInstructionId(), detail.getCreditStatus(), detail.getReasonDesc());
+
+                                    } catch (Exception ex) {
+                                        log.info(ex.getMessage());
                                     }
                                 });
                     } catch (Exception ex) {

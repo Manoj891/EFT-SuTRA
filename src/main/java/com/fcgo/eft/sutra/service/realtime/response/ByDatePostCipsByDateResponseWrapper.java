@@ -10,6 +10,6 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class ByDatePostCipsByDateResponseWrapper {
-    private ByDateCipsBatchDetail cipsBatchDetail;
-    private List<ByDateCipsTransactionDetail> cipsTransactionDetailList;
+    private ReconciledTransaction cipsBatchDetail;
+    private List<ReconciledTransactionDetail> cipsTransactionDetailList;
   }

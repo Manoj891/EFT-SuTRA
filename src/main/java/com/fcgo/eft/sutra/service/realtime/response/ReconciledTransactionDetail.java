@@ -1,9 +1,6 @@
 package com.fcgo.eft.sutra.service.realtime.response;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
@@ -15,9 +12,9 @@ import java.util.Date;
 @Builder
 @Entity
 @Table(name = "RECONCILED_TRANSACTION_DETAIL")
-public class ByDateCipsTransactionDetail {
+public class ReconciledTransactionDetail {
     @Id
-    @Column(name = "ENTITY_ID", length = 50)
+    @Column(name = "ENTITY_ID", length = 100)
     private String entityId;
     @Column(name = "ID")
     private Long id;
@@ -63,5 +60,14 @@ public class ByDateCipsTransactionDetail {
     private String addenda4;
     @Column(name = "REF_ID", length = 100)
     private String refId;
+
+    @Column(name = "RECONCILED_TRANSACTION_Id",length = 50, nullable = false)
+    private String reconciledTransactionId;
+
+    @Setter(AccessLevel.NONE)
+    @Getter(AccessLevel.NONE)
+    @JoinColumn(name = "RECONCILED_TRANSACTION_Id", referencedColumnName = "ENTITY_ID", insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ReconciledTransaction reconciledTransaction;
 
 }

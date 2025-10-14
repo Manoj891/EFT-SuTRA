@@ -34,21 +34,18 @@ public class NonRealTimeCheckStatusServiceImpl implements NonRealTimeCheckStatus
     public void checkStatusByDate(String date) {
         String apiUrl = url + "/api/getnchlipstxnlistbydate";
         String accessToken = oauthToken.getAccessToken();
-
         String payload = "{\"txnDateFrom\":\"" + date + "\",\"txnDateTo\":\"" + date + "\"} ";
-
         long time = new Date().getTime();
-        List<PostCipsByDateResponseWrapper> list = Objects.requireNonNull(
-                webClient.post()
-                        .uri(apiUrl)
-                        .header("Authorization", "Bearer " + accessToken)
-                        .header("Content-Type", "application/json")
-                        .bodyValue(payload)
-                        .retrieve()
-                        .bodyToMono(new ParameterizedTypeReference<List<PostCipsByDateResponseWrapper>>() {
-                        }).block());
-
-        list.parallelStream()
+        Objects.requireNonNull(
+                        webClient.post()
+                                .uri(apiUrl)
+                                .header("Authorization", "Bearer " + accessToken)
+                                .header("Content-Type", "application/json")
+                                .bodyValue(payload)
+                                .retrieve()
+                                .bodyToMono(new ParameterizedTypeReference<List<PostCipsByDateResponseWrapper>>() {
+                                }).block())
+                .parallelStream()
                 .forEach(response -> reconciledTransactionService.save(response.getNchlIpsBatchDetail(), response.getNchlIpsTransactionDetailList(), time));
     }
 

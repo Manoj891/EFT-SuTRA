@@ -16,7 +16,7 @@ import java.util.Date;
 public class NchlToken {
     @Id
     @Column(name = "ID")
-    private int id;
+    private Integer id;
     @Column(name = "ACCESS_TOKEN")
     private String access_token;
     @Column(name = "TOKEN_TYPE")
@@ -26,7 +26,7 @@ public class NchlToken {
     @Column(name = "SCOPE")
     private String scope;
     @Column(name = "EXPIRES_IN")
-    private int expiresIn;
+    private Integer expiresIn;
     @Column(name = "EXPIRED_AT")
     @Temporal(TemporalType.TIMESTAMP)
     private Date expiredAt;

@@ -12,7 +12,7 @@ import java.util.Date;
 @Builder
 public class RealTimeTransactionDetail {
 
-    private String id;
+    private Long id;
     private Date recDate;
     private Long instructionId;
     private String endToEndId;

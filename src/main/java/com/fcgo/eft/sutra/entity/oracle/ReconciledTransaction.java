@@ -14,7 +14,6 @@ import lombok.*;
 @Entity
 @Table(name = "RECONCILED_TRANSACTION")
 public class ReconciledTransaction {
-
     @Id
     @Column(name = "ENTITY_ID", length = 50)
     private String entityId;
@@ -44,4 +43,9 @@ public class ReconciledTransaction {
     private String settlementDate;
     @Column(name = "TXN_RESPONSE", length = 150)
     private String txnResponse;
+
+    @Column(name = "CREATED_AT", updatable = false)
+    private Long createdAt;
+    @Column(name = "UPDATED_AT")
+    private Long updatedAt;
 }

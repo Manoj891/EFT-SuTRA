@@ -1,9 +1,9 @@
 package com.fcgo.eft.sutra.service.realtime;
 
-import com.fcgo.eft.sutra.repository.oracle.ReconciledTransactionDetailRepository;
-import com.fcgo.eft.sutra.repository.oracle.ReconciledTransactionRepository;
+import com.fcgo.eft.sutra.service.ReconciledTransactionService;
 import com.fcgo.eft.sutra.service.impl.NchlReconciledService;
 import com.fcgo.eft.sutra.service.realtime.response.ByDatePostCipsByDateResponseWrapper;
+import com.fcgo.eft.sutra.service.realtime.response.RealTimeTransaction;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -25,58 +26,41 @@ public class RealTimeStatusFromNchl {
     private final NchlOauthToken oauthToken;
     private final WebClient webClient;
     private final NchlReconciledService repository;
-    private final ReconciledTransactionRepository transactionRepository;
-    private final ReconciledTransactionDetailRepository detailRepository;
+    private final ReconciledTransactionService reconciledTransactionService;
 
     public void realTimeCheckByDate(String date) {
         String apiUrl = url + "/api/getcipstxnlistbydate";
         String accessToken = oauthToken.getAccessToken();
         String payload = "{\"txnDateFrom\":\"" + date + "\",\"txnDateTo\":\"" + date + "\"}";
 
-        try {
+        List<ByDatePostCipsByDateResponseWrapper> res = webClient.post()
+                .uri(apiUrl)
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .bodyValue(payload)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<ByDatePostCipsByDateResponseWrapper>>() {
+                })
+                .block();
 
-            List<ByDatePostCipsByDateResponseWrapper> res = webClient.post()
-                    .uri(apiUrl)
-                    .header("Authorization", "Bearer " + accessToken)
-                    .header("Content-Type", "application/json")
-                    .bodyValue(payload)
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<ByDatePostCipsByDateResponseWrapper>>() {
-                    })
-                    .block();
+        res.parallelStream().forEach(response -> {
+            RealTimeTransaction batch = response.getCipsBatchDetail();
+            String debitResponseCode = batch.getDebitStatus();
+            long time = new Date().getTime();
+            if (debitResponseCode != null && debitResponseCode.length() > 1) {
+                response.getCipsTransactionDetailList()
+                        .forEach(detail -> {
+                            try {
+                                reconciledTransactionService.save(batch, detail, time);
+                            } catch (Exception ex) {
+                                log.info(ex.getMessage());
+                            }
+                        });
 
-            assert res != null;
-            res.forEach(response -> {
-                String debitResponseCode = response.getCipsBatchDetail().getDebitStatus();
-                String debitResponseMessage = response.getCipsBatchDetail().getDebitReasonDesc();
-                if (debitResponseCode != null && debitResponseCode.length() > 1) {
-                    try {
-                        response.getCipsTransactionDetailList()
-                                .forEach(detail -> {
-                                    try {
-                                        String id = "ONOS-" + detail.getId();
-                                        response.getCipsBatchDetail().setEntityId(id);
-                                        detail.setEntityId(id + "-" + detail.getInstructionId());
-                                        detail.setReconciledTransactionId(id);
-                                        transactionRepository.save(response.getCipsBatchDetail());
-                                        detailRepository.save(detail);
-                                        repository.save(detail.getInstructionId(), debitResponseCode, debitResponseMessage, detail.getCreditStatus(), detail.getReasonDesc(), detail.getInstructionId() + "", detail.getRecDate());
-                                        log.info("InstructionId: {} status: {} {}", detail.getInstructionId(), detail.getCreditStatus(), detail.getReasonDesc());
-
-                                    } catch (Exception ex) {
-                                        log.info(ex.getMessage());
-                                    }
-                                });
-                    } catch (Exception ex) {
-                        log.error(ex.getMessage());
-                    }
-                }
-            });
+            }
+        });
 
 
-        } catch (Exception e) {
-            log.info(" {}", e.getMessage());
-        }
     }
 
 

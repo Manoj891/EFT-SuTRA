@@ -4,6 +4,8 @@ import com.fcgo.eft.sutra.dto.PostCipsByDateResponseWrapper;
 import com.fcgo.eft.sutra.dto.res.NchlIpsBatchDetailRes;
 import com.fcgo.eft.sutra.entity.oracle.ReconciledTransaction;
 import com.fcgo.eft.sutra.entity.oracle.ReconciledTransactionDetail;
+import com.fcgo.eft.sutra.service.realtime.response.RealTimeTransaction;
+import com.fcgo.eft.sutra.service.realtime.response.RealTimeTransactionDetail;
 import com.fcgo.eft.sutra.repository.oracle.ReconciledTransactionDetailRepository;
 import com.fcgo.eft.sutra.repository.oracle.ReconciledTransactionRepository;
 import com.fcgo.eft.sutra.service.impl.NchlReconciledService;

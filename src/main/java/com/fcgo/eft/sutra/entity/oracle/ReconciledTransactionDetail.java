@@ -68,6 +68,6 @@ public class ReconciledTransactionDetail {
     @Getter(AccessLevel.NONE)
     @JoinColumn(name = "RECONCILED_TRANSACTION_Id", referencedColumnName = "ENTITY_ID", insertable = false, updatable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    private ReconciledTransaction reconciledTransaction;
+    private ReconciledTransaction realTimeTransaction;
 
 }

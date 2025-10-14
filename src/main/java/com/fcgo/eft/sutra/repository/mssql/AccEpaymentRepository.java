@@ -14,8 +14,6 @@ import java.util.Optional;
 @Repository
 @Transactional
 public interface AccEpaymentRepository extends JpaRepository<AccEpayment, Long> {
-    @Query(value = "SELECT session_id FROM sys.dm_exec_sessions WHERE session_id <> 71 AND session_id <> @@SPID AND is_user_process = 1 AND DATEDIFF(MINUTE, login_time, GETDATE()) < 15;", nativeQuery = true)
-    List<String> findSespendId();
 
     Optional<AccEpayment> findByEftNo(long eftNo);
 

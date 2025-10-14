@@ -26,10 +26,14 @@ public class NchlToken {
     @Column(name = "SCOPE")
     private String scope;
     @Column(name = "EXPIRES_IN")
-    private Integer expiresIn;
+    private Integer expires_in;
     @Column(name = "EXPIRED_AT")
     @Temporal(TemporalType.TIMESTAMP)
     private Date expiredAt;
+
+    public Integer getExpiresIn() {
+        return expires_in;
+    }
 
     public String getAccessToken() {
         return access_token;
@@ -41,7 +45,7 @@ public class NchlToken {
 
     @Override
     public String toString() {
-        return "{\"access_token\":\"" + access_token + "\",\"token_type\":\"" + token_type + "\",\"refresh_token\":\"" + refresh_token + "\",\"scope\":\"" + scope + "\",\"scope\":\"" + scope + "\",\"expiresIn\":\"" + expiresIn + "\",\"expiredAt\":\"" + expiredAt + "\"}";
+        return "{\"access_token\":\"" + access_token + "\",\"token_type\":\"" + token_type + "\",\"refresh_token\":\"" + refresh_token + "\",\"scope\":\"" + scope + "\",\"scope\":\"" + scope + "\",\"expiresIn\":\"" + expires_in + "\",\"expiredAt\":\"" + expiredAt + "\"}";
     }
 
 }

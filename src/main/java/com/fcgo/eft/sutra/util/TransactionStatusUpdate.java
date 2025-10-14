@@ -55,14 +55,16 @@ public class TransactionStatusUpdate {
 
 
     private void updateFailureStatus(String creditMessage, long instructionId) {
-        if (creditMessage.length() > 500) creditMessage = creditMessage.substring(0, 495);
+        if (creditMessage == null || creditMessage.length() < 3) creditMessage = "Clearly message not found.";
+        else if (creditMessage.length() > 500) creditMessage = creditMessage.substring(0, 495);
         epaymentRepository.updateFailureEPayment(creditMessage, instructionId);
         repository.updateStatus(String.valueOf(instructionId));
         log.info("Updated reconciled status: {} failure", instructionId);
     }
 
     private void updateSuccessStatus(String creditMessage, Date recDate, long instructionId) {
-        if (creditMessage != null && creditMessage.length() > 500) creditMessage = creditMessage.substring(0, 495);
+        if (creditMessage == null || creditMessage.length() < 3) creditMessage = "Success";
+        else if (creditMessage.length() > 500) creditMessage = creditMessage.substring(0, 495);
         epaymentRepository.updateSuccessEPayment(creditMessage, recDate, instructionId);
         repository.updateStatus(String.valueOf(instructionId));
         log.info("Updated reconciled status: {} Success", instructionId);

@@ -1,5 +1,6 @@
 package com.fcgo.eft.sutra.service.realtime;
 
+import com.fcgo.eft.sutra.service.RealTimeCheckStatusService;
 import com.fcgo.eft.sutra.service.ReconciledTransactionService;
 import com.fcgo.eft.sutra.service.impl.NchlReconciledService;
 import com.fcgo.eft.sutra.service.realtime.response.ByDatePostCipsByDateResponseWrapper;
@@ -21,7 +22,7 @@ import java.util.Objects;
 @Slf4j
 @RequiredArgsConstructor
 @Transactional(rollbackFor = RuntimeException.class)
-public class RealTimeStatusFromNchl {
+public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusService {
     @Value("${nchl.npi.url}")
     private String url;
     private final NchlOauthToken oauthToken;
@@ -29,7 +30,8 @@ public class RealTimeStatusFromNchl {
     private final NchlReconciledService repository;
     private final ReconciledTransactionService reconciledTransactionService;
 
-    public void realTimeCheckByDate(String date) {
+    @Override
+    public void checkStatusByDate(String date) {
         String apiUrl = url + "/api/getcipstxnlistbydate";
         String accessToken = oauthToken.getAccessToken();
         String payload = "{\"txnDateFrom\":\"" + date + "\",\"txnDateTo\":\"" + date + "\"}";

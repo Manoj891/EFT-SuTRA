@@ -12,7 +12,7 @@ import com.fcgo.eft.sutra.repository.oracle.BankAccountWhitelistErrorRepository;
 import com.fcgo.eft.sutra.repository.oracle.BankAccountWhitelistRepository;
 import com.fcgo.eft.sutra.service.BankAccountDetailsService;
 import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeStatusFromNchl;
-import com.fcgo.eft.sutra.service.realtime.RealTimeStatusFromNchl;
+import com.fcgo.eft.sutra.service.realtime.RealTimeCheckStatusServiceImpl;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +40,7 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
     private final WebClient webClient;
     private final BankAccountWhitelistRepository whitelistRepository;
     private final AccountWhiteListSave accountWhiteListSave;
-    private final RealTimeStatusFromNchl getRealTimeStatus;
+    private final RealTimeCheckStatusServiceImpl getRealTimeStatus;
     private final NonRealTimeStatusFromNchl nonRealTimeStatusFromNchl;
     private final BankAccountWhitelistErrorRepository whitelistErrorRepository;
     private final ObjectMapper mapper = new ObjectMapper();

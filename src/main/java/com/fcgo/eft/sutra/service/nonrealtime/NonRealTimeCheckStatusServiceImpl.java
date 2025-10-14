@@ -2,13 +2,8 @@ package com.fcgo.eft.sutra.service.nonrealtime;
 
 import com.fcgo.eft.sutra.dto.PostCipsByDateResponseWrapper;
 import com.fcgo.eft.sutra.dto.res.NchlIpsBatchDetailRes;
-import com.fcgo.eft.sutra.entity.oracle.ReconciledTransaction;
-import com.fcgo.eft.sutra.entity.oracle.ReconciledTransactionDetail;
+import com.fcgo.eft.sutra.service.NonRealTimeCheckStatusService;
 import com.fcgo.eft.sutra.service.ReconciledTransactionService;
-import com.fcgo.eft.sutra.service.realtime.response.RealTimeTransaction;
-import com.fcgo.eft.sutra.service.realtime.response.RealTimeTransactionDetail;
-import com.fcgo.eft.sutra.repository.oracle.ReconciledTransactionDetailRepository;
-import com.fcgo.eft.sutra.repository.oracle.ReconciledTransactionRepository;
 import com.fcgo.eft.sutra.service.impl.NchlReconciledService;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -28,7 +22,7 @@ import java.util.Objects;
 @Slf4j
 @RequiredArgsConstructor
 @Transactional(rollbackFor = RuntimeException.class)
-public class NonRealTimeCheckStatusByDate {
+public class NonRealTimeCheckStatusServiceImpl implements NonRealTimeCheckStatusService {
     @Value("${nchl.npi.url}")
     private String url;
     private final NchlOauthToken oauthToken;
@@ -36,7 +30,8 @@ public class NonRealTimeCheckStatusByDate {
     private final NchlReconciledService repository;
     private final ReconciledTransactionService reconciledTransactionService;
 
-    public void nonRealtimeCheckUpdate(String date) {
+    @Override
+    public void checkStatusByDate(String date) {
         String apiUrl = url + "/api/getnchlipstxnlistbydate";
         String accessToken = oauthToken.getAccessToken();
 

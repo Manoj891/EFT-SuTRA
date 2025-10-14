@@ -4,13 +4,8 @@ import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
 import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.BankHeadOfficeRepository;
 import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
-import com.fcgo.eft.sutra.service.BankAccountDetailsService;
-import com.fcgo.eft.sutra.service.BankHeadOfficeService;
-import com.fcgo.eft.sutra.service.EftPaymentReceiveService;
-import com.fcgo.eft.sutra.service.PaymentReceiveService;
+import com.fcgo.eft.sutra.service.*;
 import com.fcgo.eft.sutra.service.impl.SuTRAProcessingStatus;
-import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeCheckStatusByDate;
-import com.fcgo.eft.sutra.service.realtime.RealTimeStatusFromNchl;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +21,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Slf4j
 public class TransactionCheckStatus {
 
-    private final NonRealTimeCheckStatusByDate nonRealTime;
-    private final RealTimeStatusFromNchl realTime;
+    private final NonRealTimeCheckStatusService nonRealTime;
+    private final RealTimeCheckStatusService realTime;
     private final NchlReconciledRepository repository;
     private final TransactionStatusUpdate statusUpdate;
     private final BankAccountDetailsService bankAccountDetailsService;
@@ -75,9 +70,9 @@ public class TransactionCheckStatus {
             String day = yyyyMMdd.substring(6, 8);
             String date = year + "-" + month + "-" + day;
             log.info("{} Non Real Time Status", date);
-            nonRealTime.nonRealtimeCheckUpdate(date);
+            nonRealTime.checkStatusByDate(date);
             log.info("Non Real Time Status Completed {} Real Time Status", date);
-            realTime.realTimeCheckByDate(date);
+            realTime.checkStatusByDate(date);
             log.info("Non Real Time Status Completed {}", date);
         });
         repository.updateMissingStatusSent();

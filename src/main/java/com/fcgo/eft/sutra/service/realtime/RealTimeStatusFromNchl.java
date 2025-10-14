@@ -15,6 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -33,32 +34,31 @@ public class RealTimeStatusFromNchl {
         String accessToken = oauthToken.getAccessToken();
         String payload = "{\"txnDateFrom\":\"" + date + "\",\"txnDateTo\":\"" + date + "\"}";
 
-        List<ByDatePostCipsByDateResponseWrapper> res = webClient.post()
-                .uri(apiUrl)
-                .header("Authorization", "Bearer " + accessToken)
-                .header("Content-Type", "application/json")
-                .bodyValue(payload)
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<ByDatePostCipsByDateResponseWrapper>>() {
-                })
-                .block();
-
-        res.parallelStream().forEach(response -> {
-            RealTimeTransaction batch = response.getCipsBatchDetail();
-            String debitResponseCode = batch.getDebitStatus();
-            long time = new Date().getTime();
-            if (debitResponseCode != null && debitResponseCode.length() > 1) {
-                response.getCipsTransactionDetailList()
-                        .forEach(detail -> {
-                            try {
-                                reconciledTransactionService.save(batch, detail, time);
-                            } catch (Exception ex) {
-                                log.info(ex.getMessage());
-                            }
-                        });
-
-            }
-        });
+        Objects.requireNonNull(webClient.post()
+                        .uri(apiUrl)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Content-Type", "application/json")
+                        .bodyValue(payload)
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<List<ByDatePostCipsByDateResponseWrapper>>() {
+                        })
+                        .block())
+                .parallelStream()
+                .forEach(response -> {
+                    RealTimeTransaction batch = response.getCipsBatchDetail();
+                    String debitResponseCode = batch.getDebitStatus();
+                    long time = new Date().getTime();
+                    if (debitResponseCode != null && debitResponseCode.length() > 1) {
+                        response.getCipsTransactionDetailList()
+                                .forEach(detail -> {
+                                    try {
+                                        reconciledTransactionService.save(batch, detail, time);
+                                    } catch (Exception ex) {
+                                        log.info(ex.getMessage());
+                                    }
+                                });
+                    }
+                });
 
 
     }

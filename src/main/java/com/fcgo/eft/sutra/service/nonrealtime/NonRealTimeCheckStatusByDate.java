@@ -34,8 +34,6 @@ public class NonRealTimeCheckStatusByDate {
     private final NchlOauthToken oauthToken;
     private final WebClient webClient;
     private final NchlReconciledService repository;
-    private final ReconciledTransactionRepository transactionRepository;
-    private final ReconciledTransactionDetailRepository detailRepository;
     private final ReconciledTransactionService reconciledTransactionService;
 
     public void nonRealtimeCheckUpdate(String date) {
@@ -44,7 +42,7 @@ public class NonRealTimeCheckStatusByDate {
 
         String payload = "{\"txnDateFrom\":\"" + date + "\",\"txnDateTo\":\"" + date + "\"} ";
 
-long time=new Date().getTime();
+        long time = new Date().getTime();
         List<PostCipsByDateResponseWrapper> list = Objects.requireNonNull(
                 webClient.post()
                         .uri(apiUrl)
@@ -55,11 +53,8 @@ long time=new Date().getTime();
                         .bodyToMono(new ParameterizedTypeReference<List<PostCipsByDateResponseWrapper>>() {
                         }).block());
 
-        list.forEach(response -> {
-
-            reconciledTransactionService.save(response.getNchlIpsBatchDetail(),response.getNchlIpsTransactionDetailList(),time);
-
-        });
+        list.parallelStream()
+                .forEach(response -> reconciledTransactionService.save(response.getNchlIpsBatchDetail(), response.getNchlIpsTransactionDetailList(), time));
     }
 
     public void nonRealtimeCheckUpdate(String dateFrom, String dateTo) {

@@ -52,7 +52,13 @@ public class NchlOauthToken {
             Thread.sleep(1000);
         } catch (InterruptedException ignored) {
         }
-        String token = getRefreshToken(this.token.getRefreshToken());
+
+        String token = null;
+        try {
+            if (this.token != null) token = getRefreshToken(this.token.getRefreshToken());
+            else token = callNCHLToken();
+        } catch (Exception ignored) {
+        }
         if (token == null || token.isEmpty()) {
             throw new CustomException("NCHL token expired");
         }
@@ -100,7 +106,8 @@ public class NchlOauthToken {
     }
 
     public synchronized String callNCHLToken() {
-        if (isValidToken()) return token.getAccess_token();
+
+        if (token != null && isValidToken()) return token.getAccess_token();
         String authentication = Base64.getEncoder().encodeToString(((cliendId + ":" + clientSecret).getBytes()));
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("grant_type", grant_type);

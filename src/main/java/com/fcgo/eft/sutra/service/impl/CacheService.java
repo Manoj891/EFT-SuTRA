@@ -18,7 +18,7 @@ public class CacheService implements CacheRepo {
     @Override
     public void save(NchlToken dto) {
         dto.setId(1);
-        nchlTokenRepository.save(dto);
+        nchlTokenRepository.saveAndFlush(dto);
         nchlRefreshToken = dto;
     }
 

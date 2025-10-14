@@ -24,6 +24,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -90,6 +91,7 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
                 throw new RuntimeException("access_token is null: NCHL Connection issued.");
             }
             log.info("Fetching Bank Account Details: {}/api/bank-account/details", url);
+            accountWhiteListSave.setSetDate(new Date().getTime());
             webClient.post()
                     .uri(url + "/api/bank-account/details")
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + access_token)

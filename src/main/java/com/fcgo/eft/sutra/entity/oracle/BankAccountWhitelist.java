@@ -39,9 +39,5 @@ public class BankAccountWhitelist {
     @Column(name = "ACCOUNT_ID", length = 20, insertable = false, updatable = false)
     private String accountId;
 
-    @PrePersist
-    @PreUpdate
-    public void setUpdatedAt() {
-        this.updatedAt = new Date().getTime();
-    }
+
 }

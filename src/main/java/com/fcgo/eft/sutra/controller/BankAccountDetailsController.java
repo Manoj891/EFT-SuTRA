@@ -18,14 +18,14 @@ public class BankAccountDetailsController {
     private final BankAccountDetailsService service;
 
 
-    @GetMapping("/api/bank-account/details")
-    public ResponseEntity<List<BankAccountWhitelist>> getBankAccountDetails() {
-        return ResponseEntity.status(HttpStatus.OK).body(service.getBankAccountDetails());
-    }
-
-    @GetMapping("/api/transaction-detail-by-instruction")
-    public ResponseEntity<Object> getTransactionDetailByInstructionId(@RequestParam String instructionId) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.getTransactionDetailByInstructionId(instructionId));
-    }
+//    @GetMapping("/api/bank-account/details")
+//    public ResponseEntity<List<BankAccountWhitelist>> getBankAccountDetails() {
+//        return ResponseEntity.status(HttpStatus.OK).body(service.getBankAccountDetails());
+//    }
+//
+//    @GetMapping("/api/transaction-detail-by-instruction")
+//    public ResponseEntity<Object> getTransactionDetailByInstructionId(@RequestParam String instructionId) {
+//        return ResponseEntity.status(HttpStatus.OK).body(service.getTransactionDetailByInstructionId(instructionId));
+//    }
 
 }

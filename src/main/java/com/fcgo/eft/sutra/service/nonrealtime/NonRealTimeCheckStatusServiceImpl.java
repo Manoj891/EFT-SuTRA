@@ -45,7 +45,6 @@ public class NonRealTimeCheckStatusServiceImpl implements NonRealTimeCheckStatus
                                 .retrieve()
                                 .bodyToMono(new ParameterizedTypeReference<List<PostCipsByDateResponseWrapper>>() {
                                 }).block())
-                .parallelStream()
                 .forEach(response -> reconciledTransactionService.save(response.getNchlIpsBatchDetail(), response.getNchlIpsTransactionDetailList(), time));
     }
 

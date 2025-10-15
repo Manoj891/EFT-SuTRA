@@ -45,7 +45,6 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
                         .bodyToMono(new ParameterizedTypeReference<List<ByDatePostCipsByDateResponseWrapper>>() {
                         })
                         .block())
-                .parallelStream()
                 .forEach(response -> {
                     RealTimeTransaction batch = response.getCipsBatchDetail();
                     String debitResponseCode = batch.getDebitStatus();

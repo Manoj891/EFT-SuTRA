@@ -55,8 +55,6 @@ public class PaymentSaveService {
         Optional<BankAccountWhitelist> whitelist = bankAccountWhitelistRepository.findByAccountIdAndBankId(debtorAccount, debtorAgent);
         if (whitelist.isEmpty()) {
             throw new CustomException("Bank Account not Whitelisted.");
-        } else if (!whitelist.get().getAccountName().equalsIgnoreCase(debtorName)) {
-            throw new CustomException("Debtor Account miss matched. You provided  " + debtorName + " but found " + whitelist.get().getAccountName());
         }
         String batchId = b.getBatchId();
         int date = Integer.parseInt(yyMMdd.format(now));

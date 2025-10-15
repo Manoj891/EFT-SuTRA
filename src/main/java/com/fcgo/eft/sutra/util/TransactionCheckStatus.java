@@ -45,14 +45,6 @@ public class TransactionCheckStatus {
         if (isProdService.isProdService()) {
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
         }
-/*
-      executor.submit(() -> {
-            String date = "2025-10-12";
-            nonRealTime.nonRealtimeCheckUpdate(date);
-            log.info("Non Real Time Status Completed {} Real Time Status", date);
-            realTime.realTimeCheckByDate(date);
-            log.info("Real Time Status Completed {} Real Time Status", date);
-        });*/
     }
 
 
@@ -74,15 +66,10 @@ public class TransactionCheckStatus {
             log.info("Non Real Time Status Completed {} Real Time Status", date);
             realTime.checkStatusByDate(date);
             log.info("Non Real Time Status Completed {}", date);
+            repository.updateMissingStatusSent();
+            repository.findByPushed("N").forEach(statusUpdate::update);
+            epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
         });
-        repository.updateMissingStatusSent();
-        repository.findByPushed("N").forEach(statusUpdate::update);
-        epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
-        repository.findByPushed("N").forEach(statusUpdate::update);
-        headOfficeRepository.updatePaymentSentPendingStatus();
-        headOfficeRepository.updatePaymentSentPendingOFFUSStatus();
-        headOfficeRepository.updatePaymentPendingStatusMaster();
-        repository.findByPushed("N").forEach(statusUpdate::update);
         executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
     }
 

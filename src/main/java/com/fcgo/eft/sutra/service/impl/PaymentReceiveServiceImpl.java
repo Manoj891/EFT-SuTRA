@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,18 +23,18 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PaymentReceiveServiceImpl implements PaymentReceiveService {
     private final AuthenticationFacade facade;
-    private final PaymentSaveService repository;
+    private final PaymentSaveService service;
     private final AccEpaymentRepository epaymentRepository;
 
 
     @Override
     public void setBankMaps(List<BankMap> bankMaps) {
-        repository.setBankMaps(bankMaps);
+        service.setBankMaps(bankMaps);
     }
 
     @Override
     public Map<String, String> getBankMap() {
-        return repository.getBankMap();
+        return service.getBankMap();
     }
 
     @Override
@@ -42,8 +43,10 @@ public class PaymentReceiveServiceImpl implements PaymentReceiveService {
         AuthenticatedUser user = facade.getAuthentication();
         if (!(user.getPaymentUser().equals("Y") && user.getAppName().equals("SuTRA")))
             throw new PermissionDeniedException();
-
-        List<EftBatchPaymentDetail> list = repository.save(receive, user);
+        long poCode = receive.getPaymentRequest().getPoCode();
+        waitResourcesBusy(poCode);
+        List<EftBatchPaymentDetail> list = service.save(receive, user);
+        service.busy(poCode, false);
         log.info("Commited. BATCH ID:{} {} ITEM RECEIVED", receive.getPaymentRequest().getBatchId(), list.size());
         int offus = 0, onus = 0;
         for (EftBatchPaymentDetail detail : list) {
@@ -55,5 +58,22 @@ public class PaymentReceiveServiceImpl implements PaymentReceiveService {
             }
         }
         return PaymentReceiveStatus.builder().offus(offus).onus(onus).build();
+    }
+
+    private void waitResourcesBusy(long poCode) {
+        try {
+            Boolean status = service.getStatus().get(poCode);
+            if (status != null) {
+                while (status) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ignored) {
+                    }
+                    status = service.getStatus().get(poCode);
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        service.busy(poCode, true);
     }
 }

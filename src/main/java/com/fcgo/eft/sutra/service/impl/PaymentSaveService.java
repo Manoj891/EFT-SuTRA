@@ -15,6 +15,7 @@ import com.fcgo.eft.sutra.security.AuthenticatedUser;
 import com.fcgo.eft.sutra.util.CategoryPurpose;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,28 +33,37 @@ public class PaymentSaveService {
     private final EftBatchPaymentDetailRepository detailRepository;
     private final BankAccountWhitelistRepository bankAccountWhitelistRepository;
     private final AccEpaymentRepository epaymentRepository;
+    @Getter
+    private Map<Long, Boolean> status = new HashMap<>();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final SimpleDateFormat yyMMdd = new SimpleDateFormat("yyMMdd");
     private final SimpleDateFormat yyyyMMddHHmmss = new SimpleDateFormat("yyyyMMddHHmmss");
     @Getter
     private final Map<String, String> bankMap = new HashMap<>();
 
+    public void busy(long poCode, boolean busy) {
+        status.put(poCode, busy);
+    }
+
+
     public void setBankMaps(List<BankMap> bankMaps) {
         bankMaps.forEach(b -> bankMap.put(b.getNrbCode().trim(), b.getNchlCode().trim()));
     }
 
     public List<EftBatchPaymentDetail> save(EftPaymentReceive receive, AuthenticatedUser user) {
-        Date now = new Date();
         PaymentRequest b = receive.getPaymentRequest();
+        Date now = new Date();
         String debtorAgent = bankMap.get(b.getDebtorAgent());
         String debtorName = b.getDebtorName().trim();
         String debtorAccount = b.getDebtorAccount().trim();
         int offus = 0;
         if (debtorAgent == null) {
+            status.put(b.getPoCode(), false);
             throw new CustomException("Debtor Bank Code " + b.getDebtorAgent() + " Name: " + debtorAccount + " Not Found");
         }
         Optional<BankAccountWhitelist> whitelist = bankAccountWhitelistRepository.findByAccountIdAndBankId(debtorAccount, debtorAgent);
         if (whitelist.isEmpty()) {
+            status.put(b.getPoCode(), false);
             throw new CustomException("Bank Account not Whitelisted.");
         }
         String batchId = b.getBatchId();
@@ -100,6 +110,7 @@ public class PaymentSaveService {
                 String creditorName = dto.getCreditorName().trim();
 
                 if (creditorAgent == null) {
+                    status.put(b.getPoCode(), false);
                     throw new CustomException("Creditor Bank Code " + dto.getCreditorAgent().trim() + " Name " + creditorName + " Not Found");
                 }
                 String nchlTransactionType;

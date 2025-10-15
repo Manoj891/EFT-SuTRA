@@ -31,13 +31,12 @@ public class SuTRAProcessingStatus {
                 statusUpdate.update(reconciled.get());
             } else {
                 String instructionId = String.valueOf(eftNo);
-                Optional<EftBatchPaymentDetail> batchPaymentDetail =
-                        detailRepository.findByInstructionId(instructionId);
-                if (batchPaymentDetail.isEmpty()) {
+                Optional<EftBatchPaymentDetail> batchPaymentDetail = detailRepository.findByInstructionId(instructionId);
+                if (batchPaymentDetail.isPresent()) {
+                    log.info("Transaction found in EftBatchPaymentDetail: {}", instructionId);
+                } else {
                     epaymentRepository.updateRevertInSuTra(eftNo);
                     log.info("EFT No. {} has been reverted to sutra", eftNo);
-                } else {
-                    log.info("Transaction found in EftBatchPaymentDetail: {}", instructionId);
                 }
             }
         } catch (Exception e) {

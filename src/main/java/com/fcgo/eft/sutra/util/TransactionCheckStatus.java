@@ -49,7 +49,7 @@ public class TransactionCheckStatus {
     }
 
 
-    @Scheduled(cron = "0 15 08,10,12,14,16,20,23 * * *")
+    @Scheduled(cron = "0 15 08,12,16,20,23 * * *")
     public void executeCheckTransactionStatus() {
         if (!isProdService.isProdService()) {
             return;
@@ -79,7 +79,7 @@ public class TransactionCheckStatus {
         executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
     }
 
-    @Scheduled(cron = "0 50 10,20 * * *")
+    @Scheduled(cron = "0 50 21 * * *")
     public void fetchBankAccountDetails() {
         if (!isProdService.isProdService()) {
             return;

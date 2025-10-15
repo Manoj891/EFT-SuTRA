@@ -41,6 +41,7 @@ public class TransactionCheckStatus {
     public void executePostConstruct() {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
+        repository.findByPushed("N").forEach(statusUpdate::update);
         isProdService.init();
         if (isProdService.isProdService()) {
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
@@ -53,8 +54,8 @@ public class TransactionCheckStatus {
         if (!isProdService.isProdService()) {
             return;
         }
-        long startTime = 20251015160000L;
-        long dateTime = Long.parseLong(dateFormat.format(new Date())) - 50000;
+        long startTime = 20251016000000L;
+        long dateTime = Long.parseLong(dateFormat.format(new Date())) - (50000 * 4);
 
         repository.findByPendingDate().forEach(yyyyMMdd -> {
             String year = yyyyMMdd.substring(0, 4);
@@ -69,8 +70,11 @@ public class TransactionCheckStatus {
             repository.updateMissingStatusSent();
             repository.findByPushed("N").forEach(statusUpdate::update);
             epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
-            headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
-            headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
+            if (dateTime > startTime) {
+                headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
+                headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
+                headOfficeRepository.updatePaymentPendingStatusDetail();
+            }
         });
         executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
     }

@@ -56,7 +56,7 @@ public class NonRealTimeTransactionStart {
                     NchlIpsBatchDetail batchDetail = NchlIpsBatchDetail.builder().categoryPurpose(purpose).debtorAgent(agent).debtorBranch(branch).debtorName(name).debtorAccount(account).batchId(batchId).batchCount(batch.getOffus()).batchCrncy("NPR").build();
                     List<NchlIpsTransactionDetailList> data = new ArrayList<>();
 
-                    repository.findByEftBatchPaymentIdAndNchlTransactionTypeAndNchlCreditStatusNull(id, "OFFUS")
+                    repository.findByEftBatchPaymentIdAndNchlTransactionTypeAndNchlCreditStatusNullAndNchlPushedDateTimeNull(id, "OFFUS")
                             .forEach(d ->
                                     data.add(NchlIpsTransactionDetailList.builder()
                                             .instructionId(d.getInstructionId())

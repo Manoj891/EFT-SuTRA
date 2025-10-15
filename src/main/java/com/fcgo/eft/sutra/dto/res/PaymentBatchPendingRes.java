@@ -17,5 +17,7 @@ public interface PaymentBatchPendingRes {
 
     BigInteger getId();
 
+    Long getPoCode();
+
     int getOffus();
 }

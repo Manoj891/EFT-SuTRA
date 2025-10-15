@@ -51,7 +51,7 @@ public class BatchPaymentServiceServiceImpl implements BatchPaymentService {
                     .onStatus(HttpStatusCode::isError, clientResponse ->
                             clientResponse.bodyToMono(String.class)
                                     .doOnNext(errorBody -> log.error("Error Code {} received from NCHL: {}", clientResponse.statusCode(), errorBody))
-                                    .then(Mono.empty()) // <-- no exception, just complete
+                                    .then(Mono.empty())
                     )
                     .bodyToMono(String.class)
                     .block();

@@ -36,7 +36,9 @@ public class TransactionStatusUpdate {
                     || status.equals("909")
                     || status.equals("-01")
                     || status.equals("-04")
+                    || status.equals("030")
                     || status.equals("119")) {
+
                 updateFailureStatus(reconciled.getCreditMessage() + " " + reconciled.getDebitMessage(), instructionId);
             } else {
                 log.info("Message updated {} {} ", reconciled.getCreditMessage(), instructionId);

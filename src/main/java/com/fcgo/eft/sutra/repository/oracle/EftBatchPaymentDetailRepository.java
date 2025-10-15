@@ -50,5 +50,4 @@ public interface EftBatchPaymentDetailRepository extends JpaRepository<EftBatchP
     void updateNchlStatusByInstructionId(String status,long dateTime, String instructionId);
 
 
-    Iterable<Object> findByEftBatchPaymentIdAndNchlTransactionTypeAndNchlCreditStatusNull(BigInteger eftBatchPaymentId, String nchlTransactionType, String nchlCreditStatus);
-}
+   }

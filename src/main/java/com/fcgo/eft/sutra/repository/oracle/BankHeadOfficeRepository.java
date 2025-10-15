@@ -18,13 +18,13 @@ public interface BankHeadOfficeRepository extends JpaRepository<BankHeadOffice, 
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = NULL WHERE NCHL_CREDIT_STATUS = 'BUILD' AND NCHL_PUSHED_DATE_TIME <= ?1", nativeQuery = true)
-    void updatePaymentPendingStatusDetail(long dateTime);
+    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = NULL WHERE NCHL_CREDIT_STATUS = 'BUILD' AND NCHL_PUSHED_DATE_TIME BETWEEN ?1 AND ?2", nativeQuery = true)
+    void updatePaymentPendingStatusDetail(long startTime,long dateTime);
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE EFT_PAYMENT_BATCH M SET M.OFFUS_PUSHED = 'N' WHERE M.OFFUS_PUSHED = 'Y' AND M.OFFUS > 0 AND EXISTS ( SELECT 1 FROM EFT_PAYMENT_BATCH_DETAIL D WHERE D.EFT_BATCH_PAYMENT_ID = M.ID AND D.NCHL_CREDIT_STATUS IS NULL)", nativeQuery = true)
-    void updatePaymentPendingStatusMaster();
+    @Query(value = "UPDATE EFT_PAYMENT_BATCH M SET M.OFFUS_PUSHED = 'N' WHERE M.OFFUS_PUSHED = 'Y' AND M.OFFUS > 0 AND EXISTS ( SELECT 1 FROM EFT_PAYMENT_BATCH_DETAIL D WHERE D.EFT_BATCH_PAYMENT_ID = M.ID AND D.NCHL_CREDIT_STATUS IS NULL AND NCHL_PUSHED_DATE_TIME BETWEEN ?1 AND ?2)", nativeQuery = true)
+    void updatePaymentPendingStatusMaster(long startTime,long dateTime);
 
     @Modifying
     @Transactional

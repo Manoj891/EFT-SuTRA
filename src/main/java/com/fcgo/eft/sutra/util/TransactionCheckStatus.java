@@ -53,9 +53,9 @@ public class TransactionCheckStatus {
         if (!isProdService.isProdService()) {
             return;
         }
+        long startTime = 20251015160000L;
         long dateTime = Long.parseLong(dateFormat.format(new Date())) - 50000;
-        headOfficeRepository.updatePaymentPendingStatusDetail(dateTime);
-        headOfficeRepository.updatePaymentPendingStatusMaster();
+
         repository.findByPendingDate().forEach(yyyyMMdd -> {
             String year = yyyyMMdd.substring(0, 4);
             String month = yyyyMMdd.substring(4, 6);
@@ -69,6 +69,8 @@ public class TransactionCheckStatus {
             repository.updateMissingStatusSent();
             repository.findByPushed("N").forEach(statusUpdate::update);
             epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
+            headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
+            headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
         });
         executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
     }

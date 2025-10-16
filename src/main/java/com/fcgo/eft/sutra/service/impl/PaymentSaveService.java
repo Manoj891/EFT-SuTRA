@@ -5,18 +5,18 @@ import com.fcgo.eft.sutra.dto.req.EftPaymentReceive;
 import com.fcgo.eft.sutra.dto.req.EftPaymentRequestDetailReq;
 import com.fcgo.eft.sutra.dto.req.PaymentRequest;
 import com.fcgo.eft.sutra.dto.res.PaymentSaved;
-import com.fcgo.eft.sutra.entity.oracle.*;
+import com.fcgo.eft.sutra.entity.oracle.BankAccountWhitelist;
+import com.fcgo.eft.sutra.entity.oracle.EftBatchPayment;
+import com.fcgo.eft.sutra.entity.oracle.EftBatchPaymentDetail;
 import com.fcgo.eft.sutra.exception.CustomException;
 import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.BankAccountWhitelistRepository;
-import com.fcgo.eft.sutra.repository.oracle.BankHeadOfficeRepository;
 import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.repository.oracle.EftPaymentRequestRepository;
 import com.fcgo.eft.sutra.security.AuthenticatedUser;
 import com.fcgo.eft.sutra.util.CategoryPurpose;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +36,7 @@ public class PaymentSaveService {
     private final AccEpaymentRepository epaymentRepository;
     @Getter
     private Map<Long, Boolean> status = new HashMap<>();
+
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final SimpleDateFormat yyMMdd = new SimpleDateFormat("yyMMdd");
     private final SimpleDateFormat yyyyMMddHHmmss = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -53,7 +54,7 @@ public class PaymentSaveService {
 
     public PaymentSaved save(EftPaymentReceive receive, AuthenticatedUser user) {
         PaymentRequest b = receive.getPaymentRequest();
-        Date now = new Date();
+
         String debtorAgent = bankMap.get(b.getDebtorAgent());
         String debtorName = b.getDebtorName().trim();
         String debtorAccount = b.getDebtorAccount().trim();
@@ -68,18 +69,14 @@ public class PaymentSaveService {
             throw new CustomException("Bank Account not Whitelisted.");
         }
         String batchId = b.getBatchId();
+        Date now = new Date();
         int date = Integer.parseInt(yyMMdd.format(now));
         long time = Long.parseLong(yyyyMMddHHmmss.format(now));
-        int sn = repository.findMaxSn(date, b.getPoCode());
-        BigInteger id = sn < 10 ?
-                new BigInteger(date + b.getPoCode() + "00" + sn) :
-                sn < 100 ? new BigInteger(date + b.getPoCode() + "0" + sn) :
-                        new BigInteger(date + "" + b.getPoCode() + sn);
+
 
         EftBatchPayment batch = EftBatchPayment
                 .builder()
-                .id(id)
-                .sn(sn)
+
                 .receiveDate(date)
                 .receiveTime(time)
                 .batchId(batchId)
@@ -93,6 +90,16 @@ public class PaymentSaveService {
                 .deploymentType(user.getDeploymentType())
                 .createdBy(user.getAppName())
                 .build();
+
+
+        int sn = repository.findMaxSn(date, b.getPoCode());
+        String tempId;
+
+        if (sn < 10) tempId = date + "" + b.getPoCode() + "000" + sn;
+        else if (sn < 100) tempId = date + "" + b.getPoCode() + "00" + sn;
+        else tempId = date + "" + b.getPoCode() + "0" + sn;
+        batch.setId(new BigInteger(tempId));
+        batch.setSn(sn);
         repository.save(batch);
         List<EftBatchPaymentDetail> details = new ArrayList<>();
         int rowNo = 1;
@@ -125,12 +132,15 @@ public class PaymentSaveService {
 
                 String addenda4 = (dto.getAddenda4() == null || dto.getAddenda4().isEmpty()) ? dto.getInstructionId() : dto.getAddenda4();
                 String addenda3 = "10.100.193.76";
-                BigInteger detailsId = new BigInteger((rowNo < 10) ? id + "000" + rowNo : (rowNo < 100) ? id + "00" + rowNo : (rowNo < 1000) ? id + "0" + rowNo : id + "" + rowNo);
-
+                String tempDetailsId;
+                if (rowNo < 10) tempDetailsId = tempId + "000" + rowNo;
+                else if (rowNo < 100) tempDetailsId = tempId + "00" + rowNo;
+                else if (rowNo < 1000) tempDetailsId = tempId + "0" + rowNo;
+                else tempDetailsId = tempId + rowNo;
                 details.add(EftBatchPaymentDetail
                         .builder()
-                        .id(detailsId)
-                        .eftBatchPaymentId(id)
+                        .id(new BigInteger(tempDetailsId))
+                        .eftBatchPaymentId(batch.getId())
                         .instructionId(dto.getInstructionId())
                         .creditorAccount(creditorAccount.trim())
                         .creditorAgent(creditorAgent.trim())

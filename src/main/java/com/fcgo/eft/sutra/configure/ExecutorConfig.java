@@ -18,11 +18,11 @@ public class ExecutorConfig {
 
     @Bean(name = "realTime")
     public ThreadPoolExecutor realExecutorService() {
-        return (ThreadPoolExecutor) Executors.newFixedThreadPool(20);
+        return (ThreadPoolExecutor) Executors.newFixedThreadPool(50);
     }
 
     @Bean(name = "nonRealTime")
     public ThreadPoolExecutor nonRealTimeExecutorService() {
-        return (ThreadPoolExecutor) Executors.newFixedThreadPool(20);
+        return (ThreadPoolExecutor) Executors.newFixedThreadPool(50);
     }
 }

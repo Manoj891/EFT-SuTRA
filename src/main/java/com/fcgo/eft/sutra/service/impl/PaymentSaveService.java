@@ -4,6 +4,7 @@ import com.fcgo.eft.sutra.dto.req.BankMap;
 import com.fcgo.eft.sutra.dto.req.EftPaymentReceive;
 import com.fcgo.eft.sutra.dto.req.EftPaymentRequestDetailReq;
 import com.fcgo.eft.sutra.dto.req.PaymentRequest;
+import com.fcgo.eft.sutra.dto.res.PaymentSaved;
 import com.fcgo.eft.sutra.entity.oracle.*;
 import com.fcgo.eft.sutra.exception.CustomException;
 import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
@@ -50,13 +51,13 @@ public class PaymentSaveService {
         bankMaps.forEach(b -> bankMap.put(b.getNrbCode().trim(), b.getNchlCode().trim()));
     }
 
-    public List<EftBatchPaymentDetail> save(EftPaymentReceive receive, AuthenticatedUser user) {
+    public PaymentSaved save(EftPaymentReceive receive, AuthenticatedUser user) {
         PaymentRequest b = receive.getPaymentRequest();
         Date now = new Date();
         String debtorAgent = bankMap.get(b.getDebtorAgent());
         String debtorName = b.getDebtorName().trim();
         String debtorAccount = b.getDebtorAccount().trim();
-        int offus = 0;
+
         if (debtorAgent == null) {
             status.put(b.getPoCode(), false);
             throw new CustomException("Debtor Bank Code " + b.getDebtorAgent() + " Name: " + debtorAccount + " Not Found");
@@ -97,7 +98,7 @@ public class PaymentSaveService {
         int rowNo = 1;
         long addenda1 = now.getTime();
         String addenda2 = dateFormat.format(now);
-
+        int offus = 0, onus = 0;
         for (EftPaymentRequestDetailReq dto : receive.getEftPaymentRequestDetail()) {
             Optional<EftBatchPaymentDetail> optional = detailRepository.findByInstructionId(dto.getInstructionId());
             if (optional.isPresent()) {
@@ -116,6 +117,7 @@ public class PaymentSaveService {
                 String nchlTransactionType;
                 if (debtorAgent.equals(creditorAgent)) {
                     nchlTransactionType = "ONUS";
+                    onus++;
                 } else {
                     nchlTransactionType = "OFFUS";
                     offus++;
@@ -151,7 +153,7 @@ public class PaymentSaveService {
             batch.setOffus(offus);
             repository.save(batch);
         }
-        return detailRepository.saveAll(details);
+        return PaymentSaved.builder().details(detailRepository.saveAll(details)).onus(onus).offus(offus).build();
     }
 
 }

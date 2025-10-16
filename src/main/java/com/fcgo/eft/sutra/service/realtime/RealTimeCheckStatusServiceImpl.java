@@ -64,51 +64,6 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
 
     }
 
-
-    public void realTimeCheckByDate(String dateFrom, String dateTo) {
-        String apiUrl = url + "/api/getcipstxnlistbydate";
-        String accessToken = oauthToken.getAccessToken();
-        String payload = "{\"txnDateFrom\":\"" + dateFrom + "\",\"txnDateTo\":\"" + dateTo + "\"}";
-
-        try {
-            List<ByDatePostCipsByDateResponseWrapper> res = webClient.post()
-                    .uri(apiUrl)
-                    .header("Authorization", "Bearer " + accessToken)
-                    .header("Content-Type", "application/json")
-                    .bodyValue(payload)
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<ByDatePostCipsByDateResponseWrapper>>() {
-                    })
-                    .block();
-
-            assert res != null;
-            res.forEach(response -> {
-                String debitResponseCode = response.getCipsBatchDetail().getDebitStatus();
-                String debitResponseMessage = response.getCipsBatchDetail().getDebitReasonDesc();
-                if (debitResponseCode != null && debitResponseCode.length() > 1) {
-                    try {
-                        response.getCipsTransactionDetailList()
-                                .forEach(detail -> {
-                                    try {
-                                        if (detail.getCreditStatus() != null) {
-                                            log.info("InstructionId: {} status: {} {}", detail.getInstructionId(), detail.getCreditStatus(), detail.getReasonDesc());
-                                            repository.save(detail.getInstructionId(), debitResponseCode, debitResponseMessage, detail.getCreditStatus(), detail.getReasonDesc(), detail.getInstructionId() + "", detail.getRecDate());
-                                        }
-                                    } catch (Exception e) {
-                                    }
-                                });
-                    } catch (Exception ex) {
-                        log.error(ex.getMessage());
-                    }
-                }
-            });
-
-
-        } catch (Exception e) {
-            log.info(" {}", e.getMessage());
-        }
-    }
-
     public String getRealTimeByBatch(String instructionId) {
         String response;
         try {

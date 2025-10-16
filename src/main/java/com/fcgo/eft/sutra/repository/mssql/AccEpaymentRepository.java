@@ -21,6 +21,7 @@ public interface AccEpaymentRepository extends JpaRepository<AccEpayment, Long> 
     List<Long> updateSuccessEPayment();
 
     @Modifying
+    @Transactional
     @Query(value = "update acc_epayment set transtatus=2,pstatus=2 where eftno=?1", nativeQuery = true)
     void updateStatusProcessing(long instructionId);
 

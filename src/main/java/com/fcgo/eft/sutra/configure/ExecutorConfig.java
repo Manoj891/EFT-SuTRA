@@ -13,7 +13,7 @@ public class ExecutorConfig {
     @Primary
     @Bean
     public ThreadPoolExecutor executorService() {
-        return (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
+        return (ThreadPoolExecutor) Executors.newFixedThreadPool(200);
     }
 
     @Bean(name = "realTime")

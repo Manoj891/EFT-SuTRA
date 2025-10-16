@@ -6,7 +6,6 @@ import com.fcgo.eft.sutra.dto.req.EftPaymentRequestDetailReq;
 import com.fcgo.eft.sutra.dto.req.PaymentRequest;
 import com.fcgo.eft.sutra.dto.res.PaymentSaved;
 import com.fcgo.eft.sutra.entity.oracle.BankAccountWhitelist;
-import com.fcgo.eft.sutra.entity.oracle.EftBatchPayment;
 import com.fcgo.eft.sutra.entity.oracle.EftBatchPaymentDetail;
 import com.fcgo.eft.sutra.exception.CustomException;
 import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
@@ -72,35 +71,13 @@ public class PaymentSaveService {
         Date now = new Date();
         int date = Integer.parseInt(yyMMdd.format(now));
         long time = Long.parseLong(yyyyMMddHHmmss.format(now));
-
-
-        EftBatchPayment batch = EftBatchPayment
-                .builder()
-
-                .receiveDate(date)
-                .receiveTime(time)
-                .batchId(batchId)
-                .poCode(b.getPoCode())
-                .debtorAccount(debtorAccount)
-                .debtorName(debtorName)
-                .debtorAgent(debtorAgent)
-                .categoryPurpose(CategoryPurpose.get(b.getCategoryPurpose()))
-                .offus(0)
-                .offusPushed("N")
-                .deploymentType(user.getDeploymentType())
-                .createdBy(user.getAppName())
-                .build();
-
-
         int sn = repository.findMaxSn(date, b.getPoCode());
         String tempId;
-
         if (sn < 10) tempId = date + "" + b.getPoCode() + "000" + sn;
         else if (sn < 100) tempId = date + "" + b.getPoCode() + "00" + sn;
         else tempId = date + "" + b.getPoCode() + "0" + sn;
-        batch.setId(new BigInteger(tempId));
-        batch.setSn(sn);
-        repository.save(batch);
+        BigInteger id = new BigInteger(tempId);
+        repository.insert(id, batchId, CategoryPurpose.get(b.getCategoryPurpose()), user.getAppName(), debtorAccount, debtorAgent, debtorName, user.getDeploymentType(), 0, "N", b.getPoCode(), date, time, sn);
         List<EftBatchPaymentDetail> details = new ArrayList<>();
         int rowNo = 1;
         long addenda1 = now.getTime();
@@ -111,12 +88,9 @@ public class PaymentSaveService {
             if (optional.isPresent()) {
                 epaymentRepository.updateStatusProcessing(Long.parseLong(dto.getInstructionId()));
             } else {
-
-
                 String creditorAgent = bankMap.get(dto.getCreditorAgent().trim());
                 String creditorAccount = dto.getCreditorAccount().trim();
                 String creditorName = dto.getCreditorName().trim();
-
                 if (creditorAgent == null) {
                     status.put(b.getPoCode(), false);
                     throw new CustomException("Creditor Bank Code " + dto.getCreditorAgent().trim() + " Name " + creditorName + " Not Found");
@@ -129,7 +103,6 @@ public class PaymentSaveService {
                     nchlTransactionType = "OFFUS";
                     offus++;
                 }
-
                 String addenda4 = (dto.getAddenda4() == null || dto.getAddenda4().isEmpty()) ? dto.getInstructionId() : dto.getAddenda4();
                 String addenda3 = "10.100.193.76";
                 String tempDetailsId;
@@ -137,33 +110,16 @@ public class PaymentSaveService {
                 else if (rowNo < 100) tempDetailsId = tempId + "00" + rowNo;
                 else if (rowNo < 1000) tempDetailsId = tempId + "0" + rowNo;
                 else tempDetailsId = tempId + rowNo;
-                details.add(EftBatchPaymentDetail
-                        .builder()
-                        .id(new BigInteger(tempDetailsId))
-                        .eftBatchPaymentId(batch.getId())
-                        .instructionId(dto.getInstructionId())
-                        .creditorAccount(creditorAccount.trim())
-                        .creditorAgent(creditorAgent.trim())
-                        .creditorName(creditorName.trim())
-                        .endToEndId(dto.getEndToEndId())
-                        .amount(dto.getAmount())
-                        .addenda1(addenda1)
-                        .addenda2(addenda2)
-                        .addenda3(addenda3)
-                        .addenda4(addenda4)
-                        .refId(dto.getRefId() == null ? dto.getInstructionId() : dto.getRefId())
-                        .remarks(dto.getRemarks() == null ? dto.getInstructionId() : dto.getRemarks())
-                        .nchlTransactionType(nchlTransactionType)
-                        .build());
+                details.add(EftBatchPaymentDetail.builder().id(new BigInteger(tempDetailsId)).eftBatchPaymentId(id).instructionId(dto.getInstructionId()).creditorAccount(creditorAccount.trim()).creditorAgent(creditorAgent.trim()).creditorName(creditorName.trim()).endToEndId(dto.getEndToEndId()).amount(dto.getAmount()).addenda1(addenda1).addenda2(addenda2).addenda3(addenda3).addenda4(addenda4).refId(dto.getRefId() == null ? dto.getInstructionId() : dto.getRefId()).remarks(dto.getRemarks() == null ? dto.getInstructionId() : dto.getRemarks()).nchlTransactionType(nchlTransactionType).build());
                 rowNo++;
             }
 
         }
+        PaymentSaved saved = PaymentSaved.builder().details(detailRepository.saveAll(details)).onus(onus).offus(offus).build();
         if (offus > 0) {
-            batch.setOffus(offus);
-            repository.save(batch);
+            repository.update(offus, id);
         }
-        return PaymentSaved.builder().details(detailRepository.saveAll(details)).onus(onus).offus(offus).build();
+        return saved;
     }
 
 }

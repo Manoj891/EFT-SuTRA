@@ -52,8 +52,12 @@ public class RealTimeTransactionStart {
                 try {
                     log.info("Realtime waiting for clearing pool. Active threads: {}", activeThread);
                     int sleep;
-                    if (activeThread > 15) {
-                        sleep = 5000;
+                    if (activeThread > 35) {
+                        sleep = 15000;
+                    } else  if (activeThread > 25) {
+                        sleep = 10000;
+                    } else  if (activeThread > 15) {
+                        sleep = 7000;
                     } else if (activeThread > 12) {
                         sleep = 4000;
                     } else if (activeThread > 10) {

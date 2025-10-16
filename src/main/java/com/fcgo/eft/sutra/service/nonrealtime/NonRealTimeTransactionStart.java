@@ -87,15 +87,19 @@ public class NonRealTimeTransactionStart {
 
 
             int activeThread = executor.getActiveCount();
-            while (activeThread > 10) {
+            while (activeThread > 5) {
                 try {
                     log.info("Non Realtime waiting for clearing pool. Active threads: {}", activeThread);
                     int sleep;
-                    if (activeThread > 40) {
+                    if (activeThread > 35) {
+                        sleep = 15000;
+                    } else if (activeThread > 25) {
                         sleep = 10000;
-                    } else if (activeThread > 30) {
-                        sleep = 5000;
-                    } else if (activeThread > 20) {
+                    } else if (activeThread > 15) {
+                        sleep = 7000;
+                    } else if (activeThread > 12) {
+                        sleep = 4000;
+                    } else if (activeThread > 10) {
                         sleep = 3000;
                     } else {
                         sleep = 2000;

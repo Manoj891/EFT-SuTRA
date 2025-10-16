@@ -17,7 +17,6 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(rollbackFor = CustomException.class)
 public class SuTRAProcessingStatus {
     private final NchlReconciledRepository reconciledRepository;
     private final TransactionStatusUpdate statusUpdate;

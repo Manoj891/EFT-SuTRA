@@ -17,7 +17,7 @@ import java.util.Optional;
 public interface EftBatchPaymentDetailRepository extends JpaRepository<EftBatchPaymentDetail, String> {
     Optional<EftBatchPaymentDetail> findByInstructionId(String instructionId);
 
-    @Query(value = "SELECT M.DEBTOR_AGENT AS agent, M.DEBTOR_ACCOUNT AS account, W.BRANCH_ID AS branch, M.DEBTOR_NAME AS name, M.CATEGORY_PURPOSE AS purpose, M.BATCH_ID AS batchId, M.ID AS id,OFFUS AS offus,M.PO_CODE poCode FROM EFT_PAYMENT_BATCH M JOIN BANK_ACCOUNT_WHITELIST W on M.DEBTOR_ACCOUNT = W.ACCOUNT_ID and M.DEBTOR_AGENT = W.BANK_ID where OFFUS > 0 AND OFFUS_PUSHED = 'N' AND M.RECEIVE_DATE>='251015' ORDER BY RECEIVE_TIME FETCH FIRST 20 ROWS ONLY", nativeQuery = true)
+    @Query(value = "SELECT M.DEBTOR_AGENT AS agent, M.DEBTOR_ACCOUNT AS account, W.BRANCH_ID AS branch, M.DEBTOR_NAME AS name, M.CATEGORY_PURPOSE AS purpose, M.BATCH_ID AS batchId, M.ID AS id,OFFUS AS offus,M.PO_CODE poCode FROM EFT_PAYMENT_BATCH M JOIN BANK_ACCOUNT_WHITELIST W on M.DEBTOR_ACCOUNT = W.ACCOUNT_ID and M.DEBTOR_AGENT = W.BANK_ID where OFFUS > 0 AND OFFUS_PUSHED = 'N' AND M.RECEIVE_DATE>='251015' ORDER BY RECEIVE_TIME FETCH FIRST 50 ROWS ONLY", nativeQuery = true)
     List<PaymentBatchPendingRes> findPaymentNonRealPendingRes();
 
     List<EftBatchPaymentDetail> findByEftBatchPaymentIdAndNchlTransactionTypeAndNchlCreditStatusNullAndNchlPushedDateTimeNull(BigInteger eftBatchPaymentId, String nchlTransactionType);

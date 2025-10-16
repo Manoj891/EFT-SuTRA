@@ -26,18 +26,22 @@ public interface AccEpaymentRepository extends JpaRepository<AccEpayment, Long> 
     void updateStatusProcessing(long instructionId);
 
     @Modifying
+    @Transactional
     @Query(value = "update acc_epayment set transtatus=1,pstatus=0 where eftno=?1", nativeQuery = true)
     void updateRevertInSuTra(long instructionId);
 
     @Modifying
+    @Transactional
     @Query(value = "update acc_epayment set transtatus=2,pstatus=1,StatusMessage=?1, paymentdate=?2 where eftno=?3", nativeQuery = true)
     void updateSuccessEPayment(String message, Date settelmentDate, long instructionId);
 
     @Modifying
+    @Transactional
     @Query(value = "update acc_epayment set pstatus=-1, StatusMessage=?1 where eftno=?2", nativeQuery = true)
     void updateFailureEPayment(String message, long instructionId);
 
     @Modifying
+    @Transactional
     @Query(value = "update acc_epayment set StatusMessage=?1 where eftno=?2", nativeQuery = true)
     void updateMessage(String message, long instructionId);
 }

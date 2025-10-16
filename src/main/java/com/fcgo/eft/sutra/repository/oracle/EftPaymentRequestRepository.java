@@ -1,6 +1,7 @@
 package com.fcgo.eft.sutra.repository.oracle;
 
 import com.fcgo.eft.sutra.entity.oracle.EftBatchPayment;
+import jakarta.persistence.Column;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,8 +18,9 @@ public interface EftPaymentRequestRepository extends JpaRepository<EftBatchPayme
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE EFT_PAYMENT_BATCH SET OFFUS=?1 WHERE ID=?2", nativeQuery = true)
-    void insert(BigInteger id, String batchId, String categoryPurpose, String createdBy, String debtorAccount, String debtorAgent, String debtorName, String deploymentType, int offus, String offusPushed, long poCode, int receiveDate, long receiveTime, int sn );
+    @Query(value = "INSERT INTO EFT_PAYMENT_BATCH ( ID, BATCH_ID, CATEGORY_PURPOSE, CREATED_BY, DEBTOR_ACCOUNT, DEBTOR_AGENT, DEBTOR_NAME, DEPLOYMENT_TYPE, OFFUS, OFFUS_PUSHED, PO_CODE, RECEIVE_DATE, RECEIVE_TIME, SN ) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14)", nativeQuery = true)
+    void insert(BigInteger id, String batchId, String categoryPurpose, String createdBy, String debtorAccount, String debtorAgent, String debtorName, String deploymentType, int offus, String offusPushed, long poCode, int receiveDate, long receiveTime, int sn);
+
     @Modifying
     @Transactional
     @Query(value = "UPDATE EFT_PAYMENT_BATCH SET OFFUS=?1 WHERE ID=?2", nativeQuery = true)

@@ -27,9 +27,6 @@ public class NchlReconciledService {
                 .build());
     }
 
-    public void updateForResend(String instructionId) {
-        repository.updateForResend(instructionId);
-    }
 
     public void updateStatus(String instructionId) {
         repository.updateStatus(instructionId);

@@ -41,8 +41,9 @@ public class TransactionStatusUpdate {
 
                 updateFailureStatus(reconciled.getCreditMessage() + " " + reconciled.getDebitMessage(), instructionId);
             } else {
-                log.info("Message updated {} {} ", reconciled.getCreditMessage(), instructionId);
-                String message = reconciled.getCreditMessage() + " " + reconciled.getDebitMessage();
+                String message = (reconciled.getCreditMessage() == null ? status : reconciled.getCreditMessage()) + " DEBIT:" + reconciled.getDebitMessage();
+                log.info("Message updated {} {} ", message, instructionId);
+
                 if (message.length() > 500) message = message.substring(0, 495);
                 if (message.equalsIgnoreCase("SUCCESS")) {
                     updateSuccessStatus(reconciled.getCreditMessage(), reconciled.getRecDate(), instructionId);

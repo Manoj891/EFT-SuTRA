@@ -63,11 +63,4 @@ public class ReconciledTransactionDetail {
 
     @Column(name = "RECONCILED_TRANSACTION_Id",length = 50, nullable = false)
     private String reconciledTransactionId;
-
-    @Setter(AccessLevel.NONE)
-    @Getter(AccessLevel.NONE)
-    @JoinColumn(name = "RECONCILED_TRANSACTION_Id", referencedColumnName = "ENTITY_ID", insertable = false, updatable = false)
-    @ManyToOne(fetch = FetchType.LAZY)
-    private ReconciledTransaction realTimeTransaction;
-
 }

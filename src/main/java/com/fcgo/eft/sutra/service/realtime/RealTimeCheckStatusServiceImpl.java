@@ -33,7 +33,6 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
     private final WebClient webClient;
     private final ReconciledTransactionService reconciledTransactionService;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
     private final StringToJsonNode jsonNode;
 
     @Override
@@ -75,7 +74,6 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
         long time = new Date().getTime();
         try {
             String res = getRealTimeByBatch(instructionId);
-
             if (res != null && res.length() > 50) {
                 JsonNode node = jsonNode.toJsonNode(res);
                 if (node != null) {

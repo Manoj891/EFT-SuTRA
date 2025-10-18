@@ -43,10 +43,6 @@ public class TransactionCheckStatus {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
         isProdService.init();
-        new Thread(() -> {
-            executeStatus();
-        }).start();
-//        repository.findByPushed("N").forEach(statusUpdate::update);
         if (isProdService.isProdService()) {
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(0).build()));
         }

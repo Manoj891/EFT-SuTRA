@@ -3,11 +3,13 @@ package com.fcgo.eft.sutra.service.realtime;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.res.EftPaymentRequestDetailProjection;
 import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
 import com.fcgo.eft.sutra.exception.CustomException;
 import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
+import com.fcgo.eft.sutra.service.RealTimeCheckStatusService;
 import com.fcgo.eft.sutra.service.impl.NchlReconciledService;
 import com.fcgo.eft.sutra.service.realtime.response.CipsBatchResponse;
 import com.fcgo.eft.sutra.service.realtime.response.CipsTxnResponse;
@@ -37,9 +39,11 @@ public class RealTimeTransactionService {
     private final EftBatchPaymentDetailRepository repository;
     private final NchlReconciledService reconciledRepository;
     private final AccEpaymentRepository epaymentRepository;
+    private final RealTimeCheckStatusService realTime;
+    private final StringToJsonNode jsonNode;
     private final DecimalFormat df = new DecimalFormat("#.00");
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-    private final ObjectMapper mapper = new ObjectMapper();
+
 
     public void ipsDctTransaction(EftPaymentRequestDetailProjection m, String creditorBranch) {
 
@@ -87,22 +91,14 @@ public class RealTimeTransactionService {
                     log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} Success", instructionId);
                 } else {
                     log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} Not Success", instructionId);
+                    realTime.checkStatusByInstructionId(instructionId);
                 }
             }
 
         } catch (Exception e) {
             repository.updateNchlStatusByInstructionId("SENT", dateTime, instructionId);
+            realTime.checkStatusByInstructionId(instructionId);
             log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} {}", instructionId, e.getMessage());
-            try {
-                long eftNo = Long.parseLong(instructionId);
-                JsonNode jsonNode = mapper.readTree(e.getMessage());
-                String responseCode = jsonNode.get("responseCode").asText();
-                String responseDescription = jsonNode.get("responseDescription").asText();
-                if (responseCode.equals("E007")) {
-                    failure("Please Conform with bank: " + responseDescription, instructionId, eftNo);
-                }
-            } catch (Exception ignored) {
-            }
         }
     }
 

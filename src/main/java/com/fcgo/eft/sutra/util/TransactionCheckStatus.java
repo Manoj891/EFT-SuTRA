@@ -48,7 +48,7 @@ public class TransactionCheckStatus {
         }
     }
 
-    //    @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
+    @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
     public void executeStatus() {
         repository.findRealTimePendingInstructionId().forEach(instructionId -> {
             realTime.checkStatusByInstructionId(instructionId);
@@ -61,7 +61,7 @@ public class TransactionCheckStatus {
 
     }
 
-    //    @Scheduled(cron = "0 15 23 * * *")
+    @Scheduled(cron = "0 15 23 * * *")
     public void executeCheckTransactionStatus() {
         if (!isProdService.isProdService()) {
             return;
@@ -89,10 +89,10 @@ public class TransactionCheckStatus {
 
             }
         });
-//        executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
+        executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
     }
 
-    //    @Scheduled(cron = "0 50 21 * * *")
+    @Scheduled(cron = "0 50 21 * * *")
     public void fetchBankAccountDetails() {
         if (!isProdService.isProdService()) {
             return;

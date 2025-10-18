@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -50,52 +51,59 @@ public class TransactionCheckStatus {
 
     @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
     public void executeStatus() {
-        executor.submit(() -> repository.findRealTimePendingInstructionId().forEach(instructionId -> {
-            realTime.checkStatusByInstructionId(instructionId);
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ignored) {
-            }
-        }));
-        executor.submit(() -> repository.findNonRealTimePendingBatchId().forEach(batchId -> {
-            nonRealTime.checkStatusByBatchId(batchId);
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ignored) {
-            }
-        }));
+        executor.submit(() -> {
+            repository.findRealTimePendingInstructionId().forEach(instructionId -> {
+                realTime.checkStatusByInstructionId(instructionId);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ignored) {
+                }
+            });
 
-
+            repository.findNonRealTimePendingBatchId().forEach(batchId -> {
+                nonRealTime.checkStatusByBatchId(batchId);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ignored) {
+                }
+            });
+            repository.updateMissingStatusSent();
+            repository.findByPushed("N").forEach(statusUpdate::update);
+        });
     }
 
-    @Scheduled(cron = "0 15 23 * * *")
+    @Scheduled(cron = "0 05 00 * * *")
     public void executeCheckTransactionStatus() {
         if (!isProdService.isProdService()) {
             return;
         }
         long startTime = 20251016000000L;
-        long dateTime = Long.parseLong(dateFormat.format(new Date())) - (50000 * 4);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
 
-        repository.findByPendingDate().forEach(yyyyMMdd -> {
-            String year = yyyyMMdd.substring(0, 4);
-            String month = yyyyMMdd.substring(4, 6);
-            String day = yyyyMMdd.substring(6, 8);
-            String date = year + "-" + month + "-" + day;
-            log.info("{} Non Real Time Status", date);
-            nonRealTime.checkStatusByDate(date);
-            log.info("Non Real Time Status Completed {} Real Time Status", date);
-            realTime.checkStatusByDate(date);
-            log.info("Non Real Time Status Completed {}", date);
-            repository.updateMissingStatusSent();
-            repository.findByPushed("N").forEach(statusUpdate::update);
-            epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
-            if (dateTime > startTime) {
-                headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
-                headOfficeRepository.updatePaymentPendingStatusDetail();
-                headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
+        long dateTime = Long.parseLong(dateFormat.format(calendar.getTime())) - (50000 * 4);
+        calendar.add(Calendar.DATE, -1);
+        String yyyyMMdd = dateFormat.format(calendar.getTime());
 
-            }
-        });
+        String year = yyyyMMdd.substring(0, 4);
+        String month = yyyyMMdd.substring(4, 6);
+        String day = yyyyMMdd.substring(6, 8);
+        String date = year + "-" + month + "-" + day;
+        log.info("{} Non Real Time Status", date);
+        nonRealTime.checkStatusByDate(date);
+        log.info("Non Real Time Status Completed {} Real Time Status", date);
+        realTime.checkStatusByDate(date);
+        log.info("Non Real Time Status Completed {}", date);
+        repository.updateMissingStatusSent();
+        repository.findByPushed("N").forEach(statusUpdate::update);
+        epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
+        if (dateTime > startTime) {
+            headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
+            headOfficeRepository.updatePaymentPendingStatusDetail();
+            headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
+
+        }
+
         executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
     }
 

@@ -48,6 +48,7 @@ public interface EftPaymentRequestDetailProjection {
     String getDebtorBranch();
 
     Long getPoCode();
+    Integer getTryCount();
 }
 
 

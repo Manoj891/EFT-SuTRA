@@ -2,7 +2,6 @@ package com.fcgo.eft.sutra.service.realtime;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.res.EftPaymentRequestDetailProjection;
 import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
@@ -45,7 +44,7 @@ public class RealTimeTransactionService {
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 
 
-    public void ipsDctTransaction(EftPaymentRequestDetailProjection m, String creditorBranch) {
+    public void ipsDctTransaction(EftPaymentRequestDetailProjection m, String creditorBranch, Integer tryCount) {
 
         String amount = df.format(m.getAmount());
         String debtorBranch = m.getDebtorBranch();
@@ -78,7 +77,7 @@ public class RealTimeTransactionService {
 
             assert response != null;
             CipsBatchResponse nchl = response.getCipsBatchResponse();
-            repository.updateNchlStatusByInstructionId("SENT", dateTime, instructionId);
+            repository.updateNchlSentByInstructionId("SENT", dateTime, instructionId);
             if (!response.getCipsTxnResponseList().isEmpty()) {
                 CipsTxnResponse txn = response.getCipsTxnResponseList().get(0);
                 if (nchl.getDebitStatus().equals("000") && txn.getCreditStatus().equals("000")) {
@@ -93,22 +92,35 @@ public class RealTimeTransactionService {
                     log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} Not Success", instructionId);
                     realTime.checkStatusByInstructionId(instructionId);
                 }
-            }else {
+            } else {
                 log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} Not Success", instructionId);
                 realTime.checkStatusByInstructionId(instructionId);
             }
 
         } catch (Exception e) {
-            repository.updateNchlStatusByInstructionId("SENT", dateTime, instructionId);
-            realTime.checkStatusByInstructionId(instructionId);
+            if (tryCount == null) tryCount = 1;
+            JsonNode node = jsonNode.toJsonNode(e.getMessage());
+            if (node != null) {
+                String code = node.get("responseCode").asText();
+                String description = node.get("responseDescription").asText();
+                if (code.equalsIgnoreCase("E012") && description.contains("Unable to validate bank account details.")) {
+                    if (tryCount > 10) {
+                        repository.updateNchlSentByInstructionId("SENT", dateTime, instructionId);
+                        failure(code, description, instructionId);
+                    } else {
+                        repository.updateNextTryInstructionId((tryCount + 1), dateTime, instructionId);
+                    }
+                }
+            }
             log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} {}", instructionId, e.getMessage());
         }
     }
 
-    private void failure(String responseDescription, String instructionId, long eftNo) {
-        if (responseDescription.length() > 500) responseDescription = responseDescription.substring(0, 490);
-//        epaymentRepository.updateEPaymentLog(responseDescription, eftNo);
-        epaymentRepository.updateFailureEPayment(responseDescription, eftNo);
+    private void failure(String code, String description, String instructionId) {
+        long eftNo = Long.parseLong(instructionId);
+        reconciledRepository.save(eftNo, code, description, "1000", description, instructionId, new Date());
+        if (description.length() > 500) description = description.substring(0, 490);
+        epaymentRepository.updateFailureEPayment(description, eftNo);
         reconciledRepository.updateStatus(instructionId);
     }
 

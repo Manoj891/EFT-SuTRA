@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -19,6 +21,7 @@ public class RealTimeTransactionStart {
     private final RealTimeTransactionService service;
     private final BankHeadOfficeService ho;
     private final ThreadPoolExecutor executor;
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
     @Getter
     private boolean started = false;
 
@@ -40,10 +43,11 @@ public class RealTimeTransactionStart {
             }
             started = true;
 
-            list.forEach(eftPaymentRequestDetailProjection -> {
+            list.forEach(d -> {
                 try {
-                    repository.updateNchlStatusByInstructionId("BUILD", eftPaymentRequestDetailProjection.getInstructionId());
-                    executor.submit(() -> service.ipsDctTransaction(eftPaymentRequestDetailProjection, ho.getHeadOfficeId(eftPaymentRequestDetailProjection.getCreditorAgent())));
+                    long time = Long.parseLong(sdf.format(new Date()));
+                    repository.updateNchlBuildByInstructionId("BUILD", time, d.getInstructionId());
+                    executor.submit(() -> service.ipsDctTransaction(d, ho.getHeadOfficeId(d.getCreditorAgent()), d.getTryCount()));
                 } catch (Exception e) {
                     log.error("Real Time Transaction Start ERROR:{}", e.getMessage());
                 }

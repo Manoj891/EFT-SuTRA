@@ -22,13 +22,14 @@ public interface EftBatchPaymentDetailRepository extends JpaRepository<EftBatchP
 
     List<EftBatchPaymentDetail> findByEftBatchPaymentIdAndNchlTransactionTypeAndNchlCreditStatusNullAndNchlPushedDateTimeNull(BigInteger eftBatchPaymentId, String nchlTransactionType);
 
-    @Query(value = "SELECT D.ID AS id, D.ADDENDA1 AS addenda1, D.ADDENDA2 AS addenda2, D.ADDENDA3 AS addenda3, D.ADDENDA4 AS addenda4, D.AMOUNT AS amount, D.CREDITOR_ACCOUNT AS creditorAccount, D.CREDITOR_AGENT AS creditorAgent, D.CREDITOR_NAME AS creditorName, D.END_TO_END_ID AS endToEndId, D.INSTRUCTION_ID AS instructionId, D.NCHL_CREDIT_STATUS AS nchlCreditStatus,  D.NCHL_TRANSACTION_TYPE AS nchlTransactionType, D.REF_ID AS refId, D.REMARKS AS remarks, M.DEBTOR_AGENT AS debtorAgent, M.DEBTOR_ACCOUNT AS debtorAccount, M.DEBTOR_NAME AS debtorName, M.CATEGORY_PURPOSE AS categoryPurpose, W.BRANCH_ID AS debtorBranch,M.PO_CODE poCode FROM EFT_PAYMENT_BATCH_DETAIL D JOIN EFT_PAYMENT_BATCH M ON D.EFT_BATCH_PAYMENT_ID = M.ID JOIN BANK_ACCOUNT_WHITELIST W ON M.DEBTOR_ACCOUNT = W.ACCOUNT_ID and M.DEBTOR_AGENT = W.BANK_ID WHERE D.NCHL_CREDIT_STATUS IS NULL AND D.NCHL_PUSHED_DATE_TIME IS NULL AND D.NCHL_TRANSACTION_TYPE = 'ONUS' AND M.RECEIVE_DATE>=251017 ORDER BY M.RECEIVE_TIME FETCH FIRST 50 ROWS ONLY", nativeQuery = true)
+    @Query(value = "SELECT D.ID AS id, D.ADDENDA1 AS addenda1, D.ADDENDA2 AS addenda2, D.ADDENDA3 AS addenda3, D.ADDENDA4 AS addenda4, D.AMOUNT AS amount, D.CREDITOR_ACCOUNT AS creditorAccount, D.CREDITOR_AGENT AS creditorAgent, D.CREDITOR_NAME AS creditorName, D.END_TO_END_ID AS endToEndId, D.INSTRUCTION_ID AS instructionId, D.NCHL_CREDIT_STATUS AS nchlCreditStatus,  D.NCHL_TRANSACTION_TYPE AS nchlTransactionType, D.REF_ID AS refId, D.REMARKS AS remarks, M.DEBTOR_AGENT AS debtorAgent, M.DEBTOR_ACCOUNT AS debtorAccount, M.DEBTOR_NAME AS debtorName, M.CATEGORY_PURPOSE AS categoryPurpose, W.BRANCH_ID AS debtorBranch,M.PO_CODE poCode,TRY_COUNT tryCount FROM EFT_PAYMENT_BATCH_DETAIL D JOIN EFT_PAYMENT_BATCH M ON D.EFT_BATCH_PAYMENT_ID = M.ID JOIN BANK_ACCOUNT_WHITELIST W ON M.DEBTOR_ACCOUNT = W.ACCOUNT_ID and M.DEBTOR_AGENT = W.BANK_ID WHERE D.NCHL_CREDIT_STATUS IS NULL AND D.NCHL_PUSHED_DATE_TIME IS NULL AND D.NCHL_TRANSACTION_TYPE = 'ONUS' AND M.RECEIVE_DATE>=251017 ORDER BY M.RECEIVE_TIME FETCH FIRST 50 ROWS ONLY", nativeQuery = true)
     List<EftPaymentRequestDetailProjection> findRealTimePending();
 
     @Modifying
     @Transactional
     @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = ?1,NCHL_PUSHED_DATE_TIME=?2 WHERE EFT_BATCH_PAYMENT_ID = ?3 AND NCHL_TRANSACTION_TYPE='OFFUS'", nativeQuery = true)
     void updateBatchBuild(String status, long dateTime, BigInteger masterId);
+
     @Modifying
     @Transactional
     @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = ?1 WHERE EFT_BATCH_PAYMENT_ID = ?2 AND NCHL_TRANSACTION_TYPE='OFFUS'", nativeQuery = true)
@@ -41,13 +42,18 @@ public interface EftBatchPaymentDetailRepository extends JpaRepository<EftBatchP
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = ?1 WHERE  INSTRUCTION_ID = ?2", nativeQuery = true)
-    void updateNchlStatusByInstructionId(String status, String instructionId);
+    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = ?1,TRY_TIME=?2 WHERE  INSTRUCTION_ID = ?3", nativeQuery = true)
+    void updateNchlBuildByInstructionId(String status, long time, String instructionId);
 
     @Modifying
     @Transactional
     @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = ?1,NCHL_PUSHED_DATE_TIME=?2 WHERE  INSTRUCTION_ID = ?3", nativeQuery = true)
-    void updateNchlStatusByInstructionId(String status,long dateTime, String instructionId);
+    void updateNchlSentByInstructionId(String status, long dateTime, String instructionId);
 
 
-   }
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS=null,NCHL_PUSHED_DATE_TIME=null,TRY_COUNT = ?1,TRY_TIME=?2 WHERE  INSTRUCTION_ID = ?3", nativeQuery = true)
+    void updateNextTryInstructionId(int count, long dateTime, String instructionId);
+
+}

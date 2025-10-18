@@ -50,13 +50,20 @@ public class TransactionCheckStatus {
 
     @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
     public void executeStatus() {
-        repository.findRealTimePendingInstructionId().forEach(instructionId -> {
+        executor.submit(() -> repository.findRealTimePendingInstructionId().forEach(instructionId -> {
             realTime.checkStatusByInstructionId(instructionId);
             try {
                 Thread.sleep(100);
             } catch (InterruptedException ignored) {
             }
-        });
+        }));
+        executor.submit(() -> repository.findNonRealTimePendingBatchId().forEach(batchId -> {
+            nonRealTime.checkStatusByBatchId(batchId);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignored) {
+            }
+        }));
 
 
     }

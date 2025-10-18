@@ -10,6 +10,7 @@ import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeCheckStatusService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -42,14 +43,19 @@ public class TransactionCheckStatus {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
         isProdService.init();
+        executeCheckTransactionStatus();
 //        repository.findByPushed("N").forEach(statusUpdate::update);
-        if (isProdService.isProdService()) {
-            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(0).build()));
-        }
+//        if (isProdService.isProdService()) {
+//            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(0).build()));
+//        }
     }
 
+    @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
+    public void executeStatus() {
+        repository.findRealTimePendingInstructionId().forEach(realTime::checkStatusByInstructionId);
+    }
 
-    //    @Scheduled(cron = "0 15 08,12,16,20,23 * * *")
+    @Scheduled(cron = "0 15 23 * * *")
     public void executeCheckTransactionStatus() {
         if (!isProdService.isProdService()) {
             return;
@@ -72,8 +78,9 @@ public class TransactionCheckStatus {
             epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
             if (dateTime > startTime) {
                 headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
-                headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
                 headOfficeRepository.updatePaymentPendingStatusDetail();
+                headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
+
             }
         });
 //        executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));

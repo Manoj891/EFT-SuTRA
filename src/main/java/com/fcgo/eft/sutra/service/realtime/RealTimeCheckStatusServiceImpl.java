@@ -2,7 +2,6 @@ package com.fcgo.eft.sutra.service.realtime;
 
 import com.fcgo.eft.sutra.service.RealTimeCheckStatusService;
 import com.fcgo.eft.sutra.service.ReconciledTransactionService;
-import com.fcgo.eft.sutra.service.impl.NchlReconciledService;
 import com.fcgo.eft.sutra.service.realtime.response.ByDatePostCipsByDateResponseWrapper;
 import com.fcgo.eft.sutra.service.realtime.response.RealTimeTransaction;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
@@ -27,7 +26,6 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
     private String url;
     private final NchlOauthToken oauthToken;
     private final WebClient webClient;
-    private final NchlReconciledService repository;
     private final ReconciledTransactionService reconciledTransactionService;
 
     @Override
@@ -62,6 +60,11 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
                 });
 
 
+    }
+
+    @Override
+    public void checkStatusByInstructionId(String instructionId) {
+        String res = getRealTimeByBatch(instructionId);
     }
 
     public String getRealTimeByBatch(String instructionId) {

@@ -35,13 +35,13 @@ public class NonRealTimeTransactionStart {
     }
 
     public void start() {
-//        while (true) {
+        while (true) {
             List<PaymentBatchPendingRes> list = repository.findPaymentNonRealPendingRes();
-//            if (list.isEmpty()) {
-//                log.info("Non Real Time new record not found");
-//                started = false;
-//                break;
-//            }
+            if (list.isEmpty()) {
+                log.info("Non Real Time new record not found");
+                started = false;
+                break;
+            }
             started = true;
             list.forEach(batch -> {
                 try {
@@ -85,7 +85,7 @@ public class NonRealTimeTransactionStart {
                 }
             });
 
-/*
+
             int activeThread = executor.getActiveCount();
             while (activeThread > 5) {
                 int sleep;
@@ -109,6 +109,6 @@ public class NonRealTimeTransactionStart {
                 }
                 activeThread = executor.getActiveCount();
             }
-        }*/
+        }
     }
 }

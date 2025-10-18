@@ -169,16 +169,15 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
     }
 
     public String getRealTimeByBatch(String instructionId) {
-        String response;
+
         try {
-            response = webClient.post()
+            return Objects.requireNonNull(webClient.post()
                     .uri(url + "/api/getcipstxnlistbybatchid")
                     .header("Authorization", "Bearer " + oauthToken.getAccessToken())
                     .header("Content-Type", "application/json")
                     .bodyValue("{\"batchId\":\"" + instructionId + "\"}")
                     .retrieve().bodyToMono(String.class)
-                    .block();
-            return response;
+                    .block());
         } catch (Exception e) {
             return e.getMessage();
         }

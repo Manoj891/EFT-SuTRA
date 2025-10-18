@@ -43,23 +43,29 @@ public class TransactionCheckStatus {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
         isProdService.init();
-
-        realTime.checkStatusByInstructionId("83261382830000119");
-        realTime.checkStatusByInstructionId("83261382830000131");
-        realTime.checkStatusByInstructionId("83261282830000067");
-        realTime.checkStatusByInstructionId("83261382830000163");
+        new Thread(() -> {
+            executeStatus();
+        }).start();
 //        repository.findByPushed("N").forEach(statusUpdate::update);
-//        if (isProdService.isProdService()) {
-//            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(0).build()));
-//        }
+        if (isProdService.isProdService()) {
+            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(0).build()));
+        }
     }
 
-//    @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
+    //    @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
     public void executeStatus() {
-        repository.findRealTimePendingInstructionId().forEach(realTime::checkStatusByInstructionId);
+        repository.findRealTimePendingInstructionId().forEach(instructionId -> {
+            realTime.checkStatusByInstructionId(instructionId);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignored) {
+            }
+        });
+
+
     }
 
-//    @Scheduled(cron = "0 15 23 * * *")
+    //    @Scheduled(cron = "0 15 23 * * *")
     public void executeCheckTransactionStatus() {
         if (!isProdService.isProdService()) {
             return;

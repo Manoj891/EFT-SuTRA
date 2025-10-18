@@ -6,6 +6,7 @@ import com.fcgo.eft.sutra.service.BankHeadOfficeService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,7 +18,6 @@ public class RealTimeTransactionStart {
     private final EftBatchPaymentDetailRepository repository;
     private final RealTimeTransactionService service;
     private final BankHeadOfficeService ho;
-
     private final ThreadPoolExecutor executor;
     @Getter
     private boolean started = false;
@@ -30,6 +30,7 @@ public class RealTimeTransactionStart {
     }
 
     public void start() {
+
         while (true) {
             List<EftPaymentRequestDetailProjection> list = repository.findRealTimePending();
             if (list.isEmpty()) {

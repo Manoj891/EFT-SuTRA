@@ -63,8 +63,8 @@ public class BatchPaymentServiceImpl implements BatchPaymentService {
                     .block();
             assert res != null;
             repository.updateBatchBuild("SENT", dateTime, masterId);
-            executor.submit(() -> statusService.checkStatusByBatchId(batchId));
             log.info("PUSHED INTO NCHL POST BATCH ID: {} | Batch size: {}", batchId, cipsFundTransfer.getNchlIpsTransactionDetailList().size());
+            executor.submit(() -> statusService.checkStatusByBatchId(batchId));
         } catch (Exception e) {
             log.info(e.getMessage());
         }

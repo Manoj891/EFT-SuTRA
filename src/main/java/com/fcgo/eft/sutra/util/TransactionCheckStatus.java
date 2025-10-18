@@ -6,10 +6,10 @@ import com.fcgo.eft.sutra.repository.oracle.BankHeadOfficeRepository;
 import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
 import com.fcgo.eft.sutra.service.*;
 import com.fcgo.eft.sutra.service.impl.SuTRAProcessingStatus;
+import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeCheckStatusService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -34,6 +34,7 @@ public class TransactionCheckStatus {
     private final AccEpaymentRepository epaymentRepository;
     private final IsProdService isProdService;
     private final ThreadPoolExecutor executor;
+    private final TransactionFaield transactionFaield;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 
 
@@ -42,13 +43,14 @@ public class TransactionCheckStatus {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(headOfficeRepository.findBankMap());
         isProdService.init();
+//        repository.findByPushed("N").forEach(statusUpdate::update);
         if (isProdService.isProdService()) {
-            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
+            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(0).build()));
         }
     }
 
 
-    @Scheduled(cron = "0 15 08,12,16,20,23 * * *")
+//    @Scheduled(cron = "0 15 08,12,16,20,23 * * *")
     public void executeCheckTransactionStatus() {
         if (!isProdService.isProdService()) {
             return;
@@ -75,10 +77,10 @@ public class TransactionCheckStatus {
                 headOfficeRepository.updatePaymentPendingStatusDetail();
             }
         });
-        executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
+//        executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
     }
 
-    @Scheduled(cron = "0 50 21 * * *")
+//    @Scheduled(cron = "0 50 21 * * *")
     public void fetchBankAccountDetails() {
         if (!isProdService.isProdService()) {
             return;

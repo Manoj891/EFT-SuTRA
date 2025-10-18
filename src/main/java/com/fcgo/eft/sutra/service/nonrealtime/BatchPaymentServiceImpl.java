@@ -16,12 +16,13 @@ import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
+import java.util.concurrent.ThreadPoolExecutor;
 
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class BatchPaymentServiceServiceImpl implements BatchPaymentService {
+public class BatchPaymentServiceImpl implements BatchPaymentService {
     @Value("${nchl.npi.url}")
     private String url;
     private final NchlOauthToken oauthToken;
@@ -29,6 +30,8 @@ public class BatchPaymentServiceServiceImpl implements BatchPaymentService {
     private final WebClient webClient;
     private final EftBatchPaymentDetailRepository repository;
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+    private final NonRealTimeCheckStatusService statusService;
+    private final ThreadPoolExecutor executor;
 
 
     @Override
@@ -50,12 +53,14 @@ public class BatchPaymentServiceServiceImpl implements BatchPaymentService {
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, clientResponse ->
                             clientResponse.bodyToMono(String.class)
-                                    .doOnNext(errorBody -> log.error("Error Code {} received from NCHL: {}", clientResponse.statusCode(), errorBody))
-                                    .then(Mono.empty())
+                                    .flatMap(errorBody -> {
+                                        log.info(errorBody);
+                                        executor.submit(() -> statusService.checkStatusByBatchId(batchId));
+                                        return Mono.empty();
+                                    })
                     )
                     .bodyToMono(String.class)
                     .block();
-
             assert res != null;
             repository.updateBatchBuild("SENT", dateTime, masterId);
 

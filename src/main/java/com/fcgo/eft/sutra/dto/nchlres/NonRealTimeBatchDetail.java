@@ -27,8 +27,19 @@ public class NonRealTimeBatchDetail {
     private String reasonDesc;
     private String txnResponse;
     private String ipsBatchId;
+    private String addenda1;
+    private String addenda2;
+    private String addenda3;
+    private String addenda4;
+    private String refId;
+    private String remarks;
 
-   ;private String addenda1   ;private String addenda2   ;private String addenda3   ;private String addenda4   ;
+
+    private String chargeLiability;
+
+    private String purpose;
+
+    private String rcreTime;
 
 
     /*

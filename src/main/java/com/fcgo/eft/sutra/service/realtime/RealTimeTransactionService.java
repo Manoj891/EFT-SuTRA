@@ -74,12 +74,12 @@ public class RealTimeTransactionService {
                     .onStatus(HttpStatusCode::isError, clientResponse -> clientResponse.bodyToMono(String.class)
                             .map(CustomException::new))
                     .bodyToMono(RealTimeResponse.class).block();
-            repository.updateNchlStatusByInstructionId("SENT", dateTime, instructionId);
+
 
             assert response != null;
             CipsBatchResponse nchl = response.getCipsBatchResponse();
+            repository.updateNchlStatusByInstructionId("SENT", dateTime, instructionId);
             if (!response.getCipsTxnResponseList().isEmpty()) {
-
                 CipsTxnResponse txn = response.getCipsTxnResponseList().get(0);
                 if (nchl.getDebitStatus().equals("000") && txn.getCreditStatus().equals("000")) {
                     long eftNo = Long.parseLong(instructionId);
@@ -93,6 +93,9 @@ public class RealTimeTransactionService {
                     log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} Not Success", instructionId);
                     realTime.checkStatusByInstructionId(instructionId);
                 }
+            }else {
+                log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} Not Success", instructionId);
+                realTime.checkStatusByInstructionId(instructionId);
             }
 
         } catch (Exception e) {

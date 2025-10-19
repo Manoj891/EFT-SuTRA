@@ -1,6 +1,5 @@
 package com.fcgo.eft.sutra.repository.mssql;
 
-import com.fcgo.eft.sutra.dto.EftStatus;
 import com.fcgo.eft.sutra.entity.mssql.AccEpayment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -20,9 +19,6 @@ public interface AccEpaymentRepository extends JpaRepository<AccEpayment, Long> 
 
     @Query(value = "select eftno from acc_epayment where transtatus =2 and pstatus=2  and paymentdate < dateadd(minute, -30, getdate())", nativeQuery = true)
     List<Long> updateSuccessEPayment();
-
-    @Query(value = "select transtatus tstatus,pstatus as pstatus from acc_epayment where eftno=?1", nativeQuery = true)
-    Optional<EftStatus> findEftStatus(long eftNo);
 
     @Modifying
     @Transactional

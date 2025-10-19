@@ -20,7 +20,7 @@ public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, 
 
     Optional<NchlReconciled> findByInstructionId(long instructionId);
 
-    @Query(value = "SELECT * FROM NCHL_RECONCILED WHERE PUSHED='N' AND CREDIT_STATUS NOT IN('ACTC','SENT','ACSP','ENTR')", nativeQuery = true)
+    @Query(value = "SELECT * FROM NCHL_RECONCILED WHERE PUSHED='N'", nativeQuery = true)
     List<NchlReconciled> findByPushed(String pushed);
 
     @Modifying

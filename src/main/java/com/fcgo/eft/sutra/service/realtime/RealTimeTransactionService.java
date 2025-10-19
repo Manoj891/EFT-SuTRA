@@ -109,6 +109,7 @@ public class RealTimeTransactionService {
                         failure(code, description, instructionId);
                     } else {
                         repository.updateNextTryInstructionId((tryCount + 1), dateTime, instructionId);
+                        reconciledRepository.save(Long.parseLong(instructionId), "000", description + ". We will try again " + (10 - tryCount) + " Time", "SENT", description + ". We will try again " + (10 - tryCount) + " Time", instructionId, new Date());
                     }
                 }
             }

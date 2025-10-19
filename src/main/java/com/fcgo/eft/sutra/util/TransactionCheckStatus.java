@@ -61,8 +61,10 @@ public class TransactionCheckStatus {
         headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
 
         epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
-
+        repository.updateMissingStatusSent();
         executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
+        executor.submit(() -> repository.findByPushed("N").forEach(statusUpdate::update));
+
     }
 
     @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
@@ -107,7 +109,6 @@ public class TransactionCheckStatus {
         realTime.checkStatusByDate(date);
         log.info("Non Real Time Status Completed {}", date);
         repository.updateMissingStatusSent();
-        repository.findByPushed("N").forEach(statusUpdate::update);
     }
 
     @Scheduled(cron = "0 50 21 * * *")

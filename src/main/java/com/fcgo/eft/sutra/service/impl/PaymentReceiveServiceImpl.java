@@ -2,6 +2,7 @@ package com.fcgo.eft.sutra.service.impl;
 
 import com.fcgo.eft.sutra.dto.req.BankMap;
 import com.fcgo.eft.sutra.dto.req.EftPaymentReceive;
+import com.fcgo.eft.sutra.dto.req.PaymentRequestNew;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
 import com.fcgo.eft.sutra.dto.res.PaymentSaved;
 import com.fcgo.eft.sutra.entity.oracle.EftBatchPaymentDetail;
@@ -10,6 +11,7 @@ import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.security.AuthenticatedUser;
 import com.fcgo.eft.sutra.security.AuthenticationFacade;
 import com.fcgo.eft.sutra.service.PaymentReceiveService;
+import com.fcgo.eft.sutra.service.PaymentSaveService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -55,6 +57,28 @@ public class PaymentReceiveServiceImpl implements PaymentReceiveService {
         });
 
         return PaymentReceiveStatus.builder().offus(saved.getOffus()).onus(saved.getOnus()).build();
+    }
+
+    @Override
+    public PaymentReceiveStatus paymentReceive(PaymentRequestNew receive) {
+
+        AuthenticatedUser user = facade.getAuthentication();
+        if (!(user.getPaymentUser().equals("Y") && user.getAppName().equals("SuTRA")))
+            throw new PermissionDeniedException();
+        long poCode = receive.getPoCode();
+        waitResourcesBusy(poCode);
+        PaymentSaved saved = service.save(receive, user);
+        service.busy(poCode, false);
+        log.info("Commited. BATCH ID:{} {} ITEM RECEIVED", receive.getBatchId(), saved.getDetails().size());
+
+        executor.submit(() -> {
+            for (EftBatchPaymentDetail detail : saved.getDetails()) {
+                epaymentRepository.updateStatusProcessing(Long.parseLong(detail.getInstructionId()));
+            }
+        });
+
+        return PaymentReceiveStatus.builder().offus(saved.getOffus()).onus(saved.getOnus()).build();
+
     }
 
     private void waitResourcesBusy(long poCode) {

@@ -1,6 +1,7 @@
 package com.fcgo.eft.sutra.service.impl;
 
 import com.fcgo.eft.sutra.dto.req.EftPaymentReceive;
+import com.fcgo.eft.sutra.dto.req.PaymentRequestNew;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
 import com.fcgo.eft.sutra.exception.CustomException;
 import com.fcgo.eft.sutra.service.EftPaymentReceiveService;
@@ -26,6 +27,15 @@ public class EftPaymentReceiveServiceImpl implements EftPaymentReceiveService {
 
     @Override
     public void paymentReceive(EftPaymentReceive receive) {
+        if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
+            startTransactionThread(service.paymentReceive(receive));
+        } else {
+            throw new CustomException("Prod service not supported");
+        }
+    }
+
+    @Override
+    public void paymentReceive(PaymentRequestNew receive) {
         if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
             startTransactionThread(service.paymentReceive(receive));
         } else {

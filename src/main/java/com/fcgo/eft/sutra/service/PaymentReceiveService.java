@@ -2,6 +2,7 @@ package com.fcgo.eft.sutra.service;
 
 import com.fcgo.eft.sutra.dto.req.BankMap;
 import com.fcgo.eft.sutra.dto.req.EftPaymentReceive;
+import com.fcgo.eft.sutra.dto.req.PaymentRequestNew;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
 
 import java.util.List;
@@ -13,4 +14,7 @@ public interface PaymentReceiveService {
     Map<String, String> getBankMap();
 
     PaymentReceiveStatus paymentReceive(EftPaymentReceive receive);
+
+    PaymentReceiveStatus paymentReceive(PaymentRequestNew receive);
+
 }

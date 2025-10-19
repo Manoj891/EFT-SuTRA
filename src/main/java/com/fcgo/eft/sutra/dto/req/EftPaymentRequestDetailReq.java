@@ -17,13 +17,10 @@ public class EftPaymentRequestDetailReq {
     private String creditorBranch;
     private String creditorName;
     private String creditorAccount;
-
-    // conditionals
     private String addenda1;
     private String addenda2;
     private String addenda3;
     private String addenda4;
-    //Only Applicable For Tax distribution
     private String refId;
     private String remarks;
     private String particulars;

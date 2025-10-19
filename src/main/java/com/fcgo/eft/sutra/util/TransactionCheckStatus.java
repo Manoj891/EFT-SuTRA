@@ -52,8 +52,17 @@ public class TransactionCheckStatus {
     }
 
     @Scheduled(cron = "0 */30 * * * *")
-    public void executeEvery15Min() {
+    public void executeEvery30Min() {
+        long startTime = 20251018000000L;
+        long dateTime = Long.parseLong(dateFormat.format(new Date())) - (3000);
+
+        headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
+        headOfficeRepository.updatePaymentPendingStatusDetail();
+        headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
+
         epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
+
+        executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
     }
 
     @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
@@ -84,14 +93,11 @@ public class TransactionCheckStatus {
         if (!isProdService.isProdService()) {
             return;
         }
-        long startTime = 20251016000000L;
+
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
-
-        long dateTime = Long.parseLong(dateFormat.format(calendar.getTime())) - (50000 * 4);
         calendar.add(Calendar.DATE, -1);
         String yyyyMMdd = dateFormat.format(calendar.getTime());
-
         String year = yyyyMMdd.substring(0, 4);
         String month = yyyyMMdd.substring(4, 6);
         String day = yyyyMMdd.substring(6, 8);
@@ -103,15 +109,6 @@ public class TransactionCheckStatus {
         log.info("Non Real Time Status Completed {}", date);
         repository.updateMissingStatusSent();
         repository.findByPushed("N").forEach(statusUpdate::update);
-        epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
-        if (dateTime > startTime) {
-            headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
-            headOfficeRepository.updatePaymentPendingStatusDetail();
-            headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
-
-        }
-
-        executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
     }
 
     @Scheduled(cron = "0 50 21 * * *")

@@ -48,10 +48,7 @@ public class EftPaymentReceiveServiceImpl implements EftPaymentReceiveService {
             try {
                 if (status.getOffus() > 0) {
                     if (!nonRealTimeThread.isStarted()) {
-                        log.info("Non Real Time Thread is started...................");
                         nonRealTimeThread.start();
-                    } else {
-                        log.info("Non Real Time Thread is already started...................");
                     }
                 }
             } catch (Exception e) {
@@ -60,10 +57,7 @@ public class EftPaymentReceiveServiceImpl implements EftPaymentReceiveService {
             try {
                 if (status.getOnus() > 0) {
                     if (!realTimeThread.isStarted()) {
-                        log.info("Real Time Thread is started...................");
                         realTimeThread.start();
-                    } else {
-                        log.info("Real Time Thread is already started...................");
                     }
                 }
             } catch (Exception e) {

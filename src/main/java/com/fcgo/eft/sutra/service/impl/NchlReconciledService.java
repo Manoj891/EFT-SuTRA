@@ -15,6 +15,15 @@ public class NchlReconciledService {
     private final NchlReconciledRepository repository;
 
     public NchlReconciled save(long instructionId, String debitResponseCode, String debitResponseMessage, String creditStatus, String reasonDesc, String transactionId, Date recDate) {
+        if (debitResponseMessage == null || debitResponseMessage.isEmpty()) {
+            debitResponseMessage = "NA";
+        }
+        if (reasonDesc == null || reasonDesc.isEmpty()) {
+            reasonDesc = "NA";
+        }
+        if (creditStatus == null || creditStatus.isEmpty()) {
+            creditStatus = "NA";
+        }
         return repository.save(NchlReconciled.builder()
                 .instructionId(instructionId)
                 .debitStatus(debitResponseCode)

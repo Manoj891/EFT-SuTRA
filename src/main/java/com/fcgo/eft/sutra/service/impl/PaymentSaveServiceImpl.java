@@ -33,7 +33,6 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
     private final SimpleDateFormat yyMMdd = new SimpleDateFormat("yyMMdd");
     private final SimpleDateFormat yyyyMMddHHmmss = new SimpleDateFormat("yyyyMMddHHmmss");
     private final Map<Long, Boolean> status = new HashMap<>();
-
     private final Map<String, String> bankMap = new HashMap<>();
 
     @Override

@@ -12,8 +12,7 @@ import java.util.List;
 
 @Repository
 public interface BankHeadOfficeRepository extends JpaRepository<BankHeadOffice, String> {
-    @Query(value = "select BANK_ID nchlCode,NRB_BANK_CODE nrbCode,BANK_NAME bankName from EFT_NCHL_RBB_BANK_MAPPING M join BANK_HEAD_OFFICE H on M.BANK_CODE=H.BANK_ID", nativeQuery = true)
-    List<BankMap> findBankMap();
+
 
 
     @Modifying

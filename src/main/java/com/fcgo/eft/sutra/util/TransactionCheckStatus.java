@@ -3,6 +3,7 @@ package com.fcgo.eft.sutra.util;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
 import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.BankHeadOfficeRepository;
+import com.fcgo.eft.sutra.repository.oracle.EftNchlRbbBankMappingRepository;
 import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
 import com.fcgo.eft.sutra.service.*;
 import com.fcgo.eft.sutra.service.impl.SuTRAProcessingStatus;
@@ -30,6 +31,7 @@ public class TransactionCheckStatus {
     private final BankAccountDetailsService bankAccountDetailsService;
     private final BankHeadOfficeService bankHeadOfficeService;
     private final BankHeadOfficeRepository headOfficeRepository;
+    private final EftNchlRbbBankMappingRepository eftNchlRbbBankMappingRepository;
     private final PaymentReceiveService bankMapService;
     private final EftPaymentReceiveService paymentReceiveService;
     private final SuTRAProcessingStatus suTRAProcessingStatus;
@@ -42,7 +44,7 @@ public class TransactionCheckStatus {
     @PostConstruct
     public void executePostConstruct() {
         bankHeadOfficeService.setHeadOfficeId();
-        bankMapService.setBankMaps(headOfficeRepository.findBankMap());
+        bankMapService.setBankMaps(eftNchlRbbBankMappingRepository.findBankMap());
         isProdService.init();
         if (isProdService.isProdService()) {
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(0).build()));

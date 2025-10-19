@@ -93,7 +93,6 @@ public class TransactionCheckStatus {
         if (!isProdService.isProdService()) {
             return;
         }
-
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         calendar.add(Calendar.DATE, -1);

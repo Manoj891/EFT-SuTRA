@@ -6,7 +6,6 @@ import com.fcgo.eft.sutra.service.BankHeadOfficeService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -47,7 +46,7 @@ public class RealTimeTransactionStart {
             list.forEach(d -> {
                 try {
                     long time = Long.parseLong(sdf.format(new Date()));
-                    repository.updateNchlBuildByInstructionId("BUILD", time, d.getInstructionId());
+                    repository.updateRealTimeTransactionStatus("BUILD", time, d.getInstructionId());
                     executor.submit(() -> service.ipsDctTransaction(d, ho.getHeadOfficeId(d.getCreditorAgent()), d.getTryCount()));
                 } catch (Exception e) {
                     log.error("Real Time Transaction Start ERROR:{}", e.getMessage());

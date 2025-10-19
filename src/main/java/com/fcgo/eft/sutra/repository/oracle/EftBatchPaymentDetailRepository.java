@@ -30,10 +30,6 @@ public interface EftBatchPaymentDetailRepository extends JpaRepository<EftBatchP
     @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = ?1,NCHL_PUSHED_DATE_TIME=?2 WHERE EFT_BATCH_PAYMENT_ID = ?3 AND NCHL_TRANSACTION_TYPE='OFFUS'", nativeQuery = true)
     void updateBatchBuild(String status, long dateTime, BigInteger masterId);
 
-    @Modifying
-    @Transactional
-    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = ?1 WHERE EFT_BATCH_PAYMENT_ID = ?2 AND NCHL_TRANSACTION_TYPE='OFFUS'", nativeQuery = true)
-    void updateBatchBuild(String status, BigInteger masterId);
 
     @Modifying
     @Transactional
@@ -42,13 +38,9 @@ public interface EftBatchPaymentDetailRepository extends JpaRepository<EftBatchP
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = ?1,TRY_TIME=?2 WHERE  INSTRUCTION_ID = ?3", nativeQuery = true)
-    void updateNchlBuildByInstructionId(String status, long time, String instructionId);
-
-    @Modifying
-    @Transactional
     @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = ?1,NCHL_PUSHED_DATE_TIME=?2 WHERE  INSTRUCTION_ID = ?3", nativeQuery = true)
-    void updateNchlSentByInstructionId(String status, long dateTime, String instructionId);
+    void updateRealTimeTransactionStatus(String status, long time, String instructionId);
+
 
 
     @Modifying

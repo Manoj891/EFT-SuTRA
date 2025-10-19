@@ -77,7 +77,7 @@ public class RealTimeTransactionService {
 
             assert response != null;
             CipsBatchResponse nchl = response.getCipsBatchResponse();
-            repository.updateNchlSentByInstructionId("SENT", dateTime, instructionId);
+            repository.updateRealTimeTransactionStatus("SENT", dateTime, instructionId);
             if (!response.getCipsTxnResponseList().isEmpty()) {
                 CipsTxnResponse txn = response.getCipsTxnResponseList().get(0);
                 if (nchl.getDebitStatus().equals("000") && txn.getCreditStatus().equals("000")) {
@@ -105,7 +105,7 @@ public class RealTimeTransactionService {
                 String description = node.get("responseDescription").asText();
                 if (code.equalsIgnoreCase("E012") && description.contains("Unable to validate bank account details.")) {
                     if (tryCount > 10) {
-                        repository.updateNchlSentByInstructionId("SENT", dateTime, instructionId);
+                        repository.updateRealTimeTransactionStatus("SENT", dateTime, instructionId);
                         failure(code, description, instructionId);
                     } else {
                         repository.updateNextTryInstructionId((tryCount + 1), dateTime, instructionId);

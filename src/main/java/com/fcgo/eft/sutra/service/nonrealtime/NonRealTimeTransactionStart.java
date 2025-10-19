@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -26,7 +28,7 @@ public class NonRealTimeTransactionStart {
     private final EftBatchPaymentDetailRepository repository;
     private final BatchPaymentService service;
     private final BankHeadOfficeService ho;
-
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
     public NonRealTimeTransactionStart(@Qualifier("nonRealTime") ThreadPoolExecutor executor, EftBatchPaymentDetailRepository repository, BatchPaymentService batch, BankHeadOfficeService ho) {
         this.executor = executor;
         this.repository = repository;
@@ -43,6 +45,7 @@ public class NonRealTimeTransactionStart {
                 break;
             }
             started = true;
+            long dateTime = Long.parseLong(sdf.format(new Date()));
             list.forEach(batch -> {
                 try {
                     BigInteger id = batch.getId();
@@ -77,7 +80,7 @@ public class NonRealTimeTransactionStart {
                     batchDetail.setBatchAmount(data.stream().map(NchlIpsTransactionDetailList::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add));
                     batchDetail.setBatchCount(data.size());
                     CipsFundTransfer transfer = CipsFundTransfer.builder().nchlIpsBatchDetail(batchDetail).nchlIpsTransactionDetailList(data).build();
-                    repository.updateBatchBuild("BUILD", id);
+                    repository.updateBatchBuild("BUILD",dateTime, id);
                     repository.updateBatchBuild(id);
                     executor.execute(() -> service.start(transfer, id));
                 } catch (Exception ex) {

@@ -49,6 +49,11 @@ public class TransactionCheckStatus {
         }
     }
 
+    @Scheduled(cron = "0 05 * * * *")
+    public void executeEvery15Min() {
+        epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
+    }
+
     @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
     public void executeStatus() {
         executor.submit(() -> {

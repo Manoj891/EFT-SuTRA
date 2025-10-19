@@ -27,7 +27,7 @@ public class SuTRAProcessingStatus {
         try {
             Optional<NchlReconciled> reconciled = reconciledRepository.findByInstructionId(eftNo);
             if (reconciled.isPresent()) {
-                statusUpdate.update(reconciled.get());
+//                statusUpdate.update(reconciled.get());
             } else {
                 String instructionId = String.valueOf(eftNo);
                 Optional<EftBatchPaymentDetail> batchPaymentDetail = detailRepository.findByInstructionId(instructionId);

@@ -4,6 +4,7 @@ import com.fcgo.eft.sutra.dto.req.CipsFundTransfer;
 import com.fcgo.eft.sutra.dto.req.NchlIpsBatchDetail;
 import com.fcgo.eft.sutra.dto.req.NchlIpsTransactionDetailList;
 import com.fcgo.eft.sutra.dto.res.PaymentBatchPendingRes;
+import com.fcgo.eft.sutra.entity.oracle.EftBatchPaymentDetail;
 import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.service.BankHeadOfficeService;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class NonRealTimeTransactionStart {
     private final BatchPaymentService service;
     private final BankHeadOfficeService ho;
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+
     public NonRealTimeTransactionStart(@Qualifier("nonRealTime") ThreadPoolExecutor executor, EftBatchPaymentDetailRepository repository, BatchPaymentService batch, BankHeadOfficeService ho) {
         this.executor = executor;
         this.repository = repository;
@@ -55,34 +57,39 @@ public class NonRealTimeTransactionStart {
                     String name = batch.getName();
                     String purpose = batch.getPurpose();
                     String batchId = batch.getBatchId();
+                    int batchCount = batch.getOffus();
 
                     NchlIpsBatchDetail batchDetail = NchlIpsBatchDetail.builder().categoryPurpose(purpose).debtorAgent(agent).debtorBranch(branch).debtorName(name).debtorAccount(account).batchId(batchId).batchCount(batch.getOffus()).batchCrncy("NPR").build();
                     List<NchlIpsTransactionDetailList> data = new ArrayList<>();
 
-                    repository.findByEftBatchPaymentIdAndNchlTransactionTypeAndNchlCreditStatusNullAndNchlPushedDateTimeNull(id, "OFFUS")
-                            .forEach(d ->
-                                    data.add(NchlIpsTransactionDetailList.builder()
-                                            .instructionId(d.getInstructionId())
-                                            .endToEndId(d.getEndToEndId())
-                                            .amount(d.getAmount())
-                                            .purpose(purpose)
-                                            .creditorAgent(d.getCreditorAgent())
-                                            .creditorBranch(ho.getHeadOfficeId(d.getCreditorAgent()))
-                                            .creditorName(d.getCreditorName())
-                                            .creditorAccount(d.getCreditorAccount())
-                                            .addenda1(d.getAddenda1())
-                                            .addenda2(d.getAddenda2())
-                                            .addenda3(d.getAddenda3())
-                                            .addenda4(d.getAddenda4())
-                                            .refId(d.getRefId())
-                                            .remarks(d.getRemarks())
-                                            .build()));
-                    batchDetail.setBatchAmount(data.stream().map(NchlIpsTransactionDetailList::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add));
-                    batchDetail.setBatchCount(data.size());
-                    CipsFundTransfer transfer = CipsFundTransfer.builder().nchlIpsBatchDetail(batchDetail).nchlIpsTransactionDetailList(data).build();
-                    repository.updateBatchBuild("BUILD",dateTime, id);
-                    repository.updateBatchBuild(id);
-                    executor.execute(() -> service.start(transfer, id));
+                    List<EftBatchPaymentDetail> details = repository.findByEftBatchPaymentIdAndNchlTransactionTypeAndNchlCreditStatusNullAndNchlPushedDateTimeNull(id, "OFFUS");
+                    if (details.size() == batchCount) {
+                        details.forEach(d ->
+                                data.add(NchlIpsTransactionDetailList.builder()
+                                        .instructionId(d.getInstructionId())
+                                        .endToEndId(d.getEndToEndId())
+                                        .amount(d.getAmount())
+                                        .purpose(purpose)
+                                        .creditorAgent(d.getCreditorAgent())
+                                        .creditorBranch(ho.getHeadOfficeId(d.getCreditorAgent()))
+                                        .creditorName(d.getCreditorName())
+                                        .creditorAccount(d.getCreditorAccount())
+                                        .addenda1(d.getAddenda1())
+                                        .addenda2(d.getAddenda2())
+                                        .addenda3(d.getAddenda3())
+                                        .addenda4(d.getAddenda4())
+                                        .refId(d.getRefId())
+                                        .remarks(d.getRemarks())
+                                        .build()));
+                        batchDetail.setBatchAmount(data.stream().map(NchlIpsTransactionDetailList::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add));
+                        batchDetail.setBatchCount(batchCount);
+                        CipsFundTransfer transfer = CipsFundTransfer.builder().nchlIpsBatchDetail(batchDetail).nchlIpsTransactionDetailList(data).build();
+                        repository.updateBatchBuild("BUILD", dateTime, id);
+                        repository.updateBatchBuild(id);
+                        executor.execute(() -> service.start(transfer, id));
+                    } else {
+                        log.info("Invalid Batch count {} but actual size is {}", batchCount, details.size());
+                    }
                 } catch (Exception ex) {
                     log.error(ex.getMessage());
                 }

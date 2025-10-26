@@ -57,8 +57,9 @@ public class TransactionCheckStatus {
         long dateTime = Long.parseLong(dateFormat.format(new Date())) - (3000);
 
         headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
-        headOfficeRepository.updatePaymentPendingStatusDetail();
         headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
+        headOfficeRepository.updatePaymentPendingStatusDetail();
+
 
         epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
         repository.updateMissingStatusSent();

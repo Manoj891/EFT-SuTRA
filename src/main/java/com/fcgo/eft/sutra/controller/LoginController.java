@@ -6,6 +6,7 @@ import com.fcgo.eft.sutra.dto.res.LoginRes;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
 import com.fcgo.eft.sutra.service.EftPaymentReceiveService;
 import com.fcgo.eft.sutra.service.LoginService;
+import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeStatusFromNchl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class LoginController {
     private final LoginService service;
     private final EftPaymentReceiveService paymentReceiveService;
+    private final NonRealTimeStatusFromNchl statusFromNchl;
 
     @PostMapping("/login")
     public ResponseEntity<LoginRes> login(@RequestBody LoginReq req, HttpServletRequest request) {
@@ -28,5 +30,10 @@ public class LoginController {
     public ResponseEntity<Void> paymentSTart() {
         paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build());
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/nonrealtime/{batchId}")
+    public ResponseEntity<Object> paymentSTart(@PathVariable String batchId) {
+        return ResponseEntity.status(HttpStatus.OK).body(statusFromNchl.checkByBatchId(batchId));
     }
 }

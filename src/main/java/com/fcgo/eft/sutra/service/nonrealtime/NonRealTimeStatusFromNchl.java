@@ -68,4 +68,26 @@ public class NonRealTimeStatusFromNchl {
                 .block());
 
     }
+
+
+    public Object checkByBatchId(String batchId) {
+        String apiUrl = url + "/api/getnchlipstxnlistbybatchid";
+        String accessToken = oauthToken.getAccessToken();
+        String payload = "{\"batchId\":\"" + batchId + "\"}";
+        return Objects.requireNonNull(webClient.post()
+                .uri(apiUrl).header("Authorization", "Bearer " + accessToken)
+                .header("Content-Type", "application/json")
+                .bodyValue(payload)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, clientResponse ->
+                        clientResponse.bodyToMono(String.class)
+                                .flatMap(errorBody -> {
+                                    log.error(errorBody);
+                                    return Mono.empty();
+                                })
+                )
+                .bodyToMono(Object.class)
+                .block());
+
+    }
 }

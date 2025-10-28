@@ -3,6 +3,7 @@ package com.fcgo.eft.sutra.service.nonrealtime;
 
 import com.fcgo.eft.sutra.dto.PostCipsByDateResponseWrapper;
 import com.fcgo.eft.sutra.dto.nchlres.NonRealTimeBatch;
+import com.fcgo.eft.sutra.service.ReconciledTransactionService;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,6 +25,7 @@ public class NonRealTimeStatusFromNchl {
     @Value("${nchl.npi.url}")
     private String url;
     private final NchlOauthToken oauthToken;
+    private final ReconciledTransactionService reconciledTransactionService;
     private final WebClient webClient;
 
     public List<PostCipsByDateResponseWrapper> checkStatusByDate(String date) {
@@ -72,10 +75,31 @@ public class NonRealTimeStatusFromNchl {
 
     public Object checkByBatchId(String batchId) {
         String apiUrl = url + "/api/getnchlipstxnlistbybatchid";
-        String accessToken = oauthToken.getAccessToken();
         String payload = "{\"batchId\":\"" + batchId + "\"}";
+        try {
+
+            NonRealTimeBatch batch = webClient.post()
+                    .uri(apiUrl).header("Authorization", "Bearer " + oauthToken.getAccessToken())
+                    .header("Content-Type", "application/json")
+                    .bodyValue(payload)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, clientResponse ->
+                            clientResponse.bodyToMono(String.class)
+                                    .flatMap(errorBody -> {
+                                        log.error(errorBody);
+                                        return Mono.empty();
+                                    })
+                    )
+                    .bodyToMono(NonRealTimeBatch.class)
+                    .block();
+            if (batch != null && !batch.getNchlIpsTransactionDetailList().isEmpty()) {
+                reconciledTransactionService.save(batch, new Date().getTime());
+                return batch;
+            }
+        } catch (Exception ignored) {
+        }
         return Objects.requireNonNull(webClient.post()
-                .uri(apiUrl).header("Authorization", "Bearer " + accessToken)
+                .uri(apiUrl).header("Authorization", "Bearer " + oauthToken.getAccessToken())
                 .header("Content-Type", "application/json")
                 .bodyValue(payload)
                 .retrieve()

@@ -1,5 +1,6 @@
 package com.fcgo.eft.sutra.service.impl;
 
+import com.fcgo.eft.sutra.dto.nchlres.NonRealTimeBatch;
 import com.fcgo.eft.sutra.dto.res.NchlIpsBatchDetailRes;
 import com.fcgo.eft.sutra.dto.res.NchlIpsTransactionDetail;
 import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
@@ -22,6 +23,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(rollbackFor = RuntimeException.class)
 public class ReconciledTransactionServiceImpl implements ReconciledTransactionService {
     private final ReconciledTransactionRepository transactionRepository;
     private final ReconciledTransactionDetailRepository detailRepository;
@@ -39,7 +41,6 @@ public class ReconciledTransactionServiceImpl implements ReconciledTransactionSe
     }
 
     @Override
-    @Transactional(rollbackFor = RuntimeException.class)
     public void save(NchlIpsBatchDetailRes batch, List<NchlIpsTransactionDetail> details, long time) {
         if (batch != null && batch.getDebitStatus() != null && batch.getDebitStatus().length() > 1) {
             String id = batch.getBatchId() + "-" + batch.getId();
@@ -65,5 +66,26 @@ public class ReconciledTransactionServiceImpl implements ReconciledTransactionSe
 
             });
         }
+    }
+
+    @Override
+    public void save(NonRealTimeBatch batch, long time) {
+        save(NchlIpsBatchDetailRes.builder()
+                .id(batch.getId())
+                .batchId(batch.getBatchId())
+                .recDate(batch.getRecDate())
+                .isoTxnId(batch.getIsoTxnId())
+                .batchAmount(batch.getBatchAmount())
+                .batchCount(batch.getBatchCount())
+                .batchCrncy(batch.getBatchCrncy())
+                .categoryPurpose(batch.getCategoryPurpose())
+                .debtorAgent(batch.getDebtorAgent())
+                .debtorBranch(batch.getDebtorBranch())
+                .debtorName(batch.getDebtorName())
+                .debtorAccount(batch.getDebtorAccount())
+                .debitStatus(batch.getDebitStatus())
+                .rcreTime(batch.getRcreTime())
+                .debitReasonDesc(batch.getDebitReasonDesc())
+                .build(), batch.getNchlIpsTransactionDetailList(), time);
     }
 }

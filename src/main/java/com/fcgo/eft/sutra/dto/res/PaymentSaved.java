@@ -14,6 +14,6 @@ import java.util.List;
 @Builder
 public class PaymentSaved {
     private List<EftBatchPaymentDetail> details;
-    private int offus = 0;
-    private int onus = 0;
+    private int offus;
+    private int onus;
 }

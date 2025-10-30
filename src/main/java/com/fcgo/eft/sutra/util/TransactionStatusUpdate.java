@@ -22,7 +22,9 @@ public class TransactionStatusUpdate {
         try {
             long instructionId = reconciled.getInstructionId();
             String status = reconciled.getCreditStatus();
+            status = (status == null ? "" : status);
             String debitStatus = reconciled.getDebitStatus();
+            debitStatus = (debitStatus == null ? "000" : debitStatus);
 
             if (!debitStatus.equals("000")) {
                 updateFailureStatus(reconciled.getCreditMessage() + " " + reconciled.getDebitMessage(), instructionId);

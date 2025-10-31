@@ -51,6 +51,11 @@ public class TransactionCheckStatus {
         }
     }
 
+    @Scheduled(cron = "0 */05 * * * *")
+    public void executeEvery05Min() {
+        executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
+    }
+
     @Scheduled(cron = "0 */30 * * * *")
     public void executeEvery30Min() {
         long startTime = 20251018000000L;
@@ -60,10 +65,8 @@ public class TransactionCheckStatus {
         headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
         headOfficeRepository.updatePaymentPendingStatusDetail();
 
-
         epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
         repository.updateMissingStatusSent();
-        executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
         executor.submit(() -> repository.findByPushed("N").forEach(statusUpdate::update));
 
     }

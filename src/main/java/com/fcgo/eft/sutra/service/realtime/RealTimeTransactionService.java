@@ -103,7 +103,7 @@ public class RealTimeTransactionService {
             if (node != null) {
                 String code = node.get("responseCode").asText();
                 String description = node.get("responseDescription").asText();
-                if (code.equalsIgnoreCase("E012") && description.contains("Unable to validate bank account details.")) {
+                if (getStatus(code)) {
                     if (tryCount > 10) {
                         repository.updateRealTimeTransactionStatus("SENT", dateTime, instructionId);
                         failure(code, description, instructionId);
@@ -115,6 +115,10 @@ public class RealTimeTransactionService {
             }
             log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} {}", instructionId, e.getMessage());
         }
+    }
+
+    private boolean getStatus(String code) {
+        return (code.equalsIgnoreCase("E012") || code.equalsIgnoreCase("E004"));
     }
 
     private void failure(String code, String description, String instructionId) {

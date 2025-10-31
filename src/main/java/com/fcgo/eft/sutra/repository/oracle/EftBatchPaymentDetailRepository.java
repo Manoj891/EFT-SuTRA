@@ -38,8 +38,8 @@ public interface EftBatchPaymentDetailRepository extends JpaRepository<EftBatchP
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = ?1,NCHL_PUSHED_DATE_TIME=?2 WHERE  INSTRUCTION_ID = ?3", nativeQuery = true)
-    void updateRealTimeTransactionStatus(String status, long time, String instructionId);
+    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = ?1,NCHL_PUSHED_DATE_TIME=?2,TRY_TIME=?2,TRY_COUNT = ?3 WHERE  INSTRUCTION_ID = ?4", nativeQuery = true)
+    void updateRealTimeTransactionStatus(String status, long time,int tryCount, String instructionId);
 
 
 

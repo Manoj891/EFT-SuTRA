@@ -77,7 +77,7 @@ public class RealTimeTransactionService {
 
             assert response != null;
             CipsBatchResponse nchl = response.getCipsBatchResponse();
-            repository.updateRealTimeTransactionStatus("SENT", dateTime,(tryCount+1), instructionId);
+            repository.updateRealTimeTransactionStatus("SENT", dateTime, (tryCount + 1), instructionId);
             if (!response.getCipsTxnResponseList().isEmpty()) {
                 CipsTxnResponse txn = response.getCipsTxnResponseList().get(0);
                 if (nchl.getDebitStatus().equals("000") && txn.getCreditStatus().equals("000")) {
@@ -105,7 +105,7 @@ public class RealTimeTransactionService {
                 String description = node.get("responseDescription").asText();
                 if (getStatus(code)) {
                     if (tryCount > 10) {
-                        repository.updateRealTimeTransactionStatus("SENT", dateTime,(tryCount+1), instructionId);
+                        repository.updateRealTimeTransactionStatus("SENT", dateTime, (tryCount + 1), instructionId);
                         failure(code, description, instructionId);
                     } else {
                         repository.updateNextTryInstructionId((tryCount + 1), dateTime, instructionId);
@@ -118,7 +118,18 @@ public class RealTimeTransactionService {
     }
 
     private boolean getStatus(String code) {
-        return (code.equalsIgnoreCase("E012") || code.equalsIgnoreCase("E004"));
+        return    (code.equalsIgnoreCase("E001")
+                || code.equalsIgnoreCase("E002")
+                || code.equalsIgnoreCase("E003")
+                || code.equalsIgnoreCase("E004")
+                || code.equalsIgnoreCase("E005")
+                || code.equalsIgnoreCase("E006")
+                || code.equalsIgnoreCase("E007")
+                || code.equalsIgnoreCase("E008")
+                || code.equalsIgnoreCase("E009")
+                || code.equalsIgnoreCase("E010")
+                || code.equalsIgnoreCase("E011")
+                || code.equalsIgnoreCase("E012"));
     }
 
     private void failure(String code, String description, String instructionId) {

@@ -45,7 +45,7 @@ public class EftPaymentReceiveServiceImpl implements EftPaymentReceiveService {
 
     @Override
     public void startTransactionThread(PaymentReceiveStatus status) {
-        if (port.equalsIgnoreCase("7891")) {
+        if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
             try {
                 if (status.getOffus() > 0) {
                     if (!nonRealTimeThread.isStarted()) {
@@ -64,6 +64,8 @@ public class EftPaymentReceiveServiceImpl implements EftPaymentReceiveService {
             } catch (Exception e) {
                 log.info(e.getMessage());
             }
+        } else {
+            throw new CustomException("Prod service not supported");
         }
     }
 }

@@ -32,12 +32,10 @@ public class RealTimeTransactionStart {
     }
 
     public void start() {
-
         while (true) {
             long start = Long.parseLong(sdf.format(new Date())) - 1500;
             List<EftPaymentRequestDetailProjection> list = repository.findRealTimePending(start);
             if (list.isEmpty()) {
-                log.info("Real Time new record not found");
                 started = false;
                 break;
             }

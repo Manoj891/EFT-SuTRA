@@ -42,7 +42,6 @@ public class NonRealTimeTransactionStart {
         while (true) {
             List<PaymentBatchPendingRes> list = repository.findPaymentNonRealPendingRes();
             if (list.isEmpty()) {
-                log.info("Non Real Time new record not found");
                 started = false;
                 break;
             }

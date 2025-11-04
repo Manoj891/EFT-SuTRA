@@ -34,7 +34,8 @@ public class RealTimeTransactionStart {
     public void start() {
         while (true) {
             long start = Long.parseLong(sdf.format(new Date())) - 500;
-            List<EftPaymentRequestDetailProjection> list = repository.findRealTimePending(start);
+            List<EftPaymentRequestDetailProjection> list = repository.findRealTimePending();
+            list.addAll(repository.findRealTimePending(start));
             if (list.isEmpty()) {
                 started = false;
                 break;
@@ -45,15 +46,13 @@ public class RealTimeTransactionStart {
                 try {
                     long time = Long.parseLong(sdf.format(new Date()));
                     repository.updateRealTimeTransactionStatus("BUILD", time, (d.getTryCount() + 1), d.getInstructionId());
-                    executor.submit(() -> service.ipsDctTransaction(d, ho.getHeadOfficeId(d.getCreditorAgent()), d.getTryCount()));
+                    executor.submit(() -> service.ipsDctTransaction(d, ho.getHeadOfficeId(d.getCreditorAgent())));
                 } catch (Exception e) {
                     log.error("Real Time Transaction Start ERROR:{}", e.getMessage());
                 }
             });
             int activeThread = executor.getActiveCount();
             while (activeThread > 5) {
-
-
                 int sleep;
                 if (activeThread > 35) {
                     sleep = 30000;

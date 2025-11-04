@@ -44,8 +44,7 @@ public class RealTimeTransactionService {
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 
 
-    public void ipsDctTransaction(EftPaymentRequestDetailProjection m, String creditorBranch, Integer tryCount) {
-
+    public void ipsDctTransaction(EftPaymentRequestDetailProjection m, String creditorBranch) {
         String amount = df.format(m.getAmount());
         String debtorBranch = m.getDebtorBranch();
         String debtorAgent = m.getDebtorAgent();
@@ -54,7 +53,7 @@ public class RealTimeTransactionService {
         String creditorName = m.getCreditorName();
         String creditorAccount = m.getCreditorAccount();
         String creditorAgent = m.getCreditorAgent();
-
+        Integer tryCount=   m.getTryCount();
         String token = tokenGenerate.geterateHashCipsBatch(m.getInstructionId(), debtorBranch, debtorAgent, debtorAccount, creditorAccount, creditorAgent, creditorBranch, amount);
         String payload = "{\"cipsBatchDetail\":{\"batchId\":\"" + m.getInstructionId() + "\",\"batchAmount\":\"" + amount + "\",\"batchCount\":\"1\",\"batchCrncy\":\"NPR\",\"categoryPurpose\":\"" + m.getCategoryPurpose() + "\",\"debtorAgent\":\"" + debtorAgent + "\",\"debtorBranch\":\"" + debtorBranch + "\",\"debtorName\":\"" + debtorName + "\",\"debtorAccount\":\"" + debtorAccount + "\"}," +
                 "\"cipsTransactionDetailList\":[{\"instructionId\":\"" + m.getInstructionId() + "\",\"endToEndId\":\"" + m.getEndToEndId() + "\",\"amount\":\"" + amount + "\",\"purpose\":\"" + m.getCategoryPurpose() + "\",\"creditorAgent\":\"" + creditorAgent + "\",\"creditorBranch\":\"" + creditorBranch + "\",\"creditorName\":\"" + creditorName + "\",\"creditorAccount\":\"" + creditorAccount + "\",\"addenda1\":\"" + m.getAddenda1() + "\",\"addenda2\":\"" + m.getAddenda2() + "\",\"addenda3\":\"" + m.getAddenda3() + "\",\"addenda4\":\"" + m.getAddenda4() + "\",\"channelId\":\"IPS\",\"refId\":\"" + m.getRefId() + "\",\"remarks\":\"" + m.getRemarks() + "\"}]," +

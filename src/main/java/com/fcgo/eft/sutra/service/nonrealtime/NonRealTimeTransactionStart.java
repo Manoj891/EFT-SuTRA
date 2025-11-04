@@ -87,6 +87,7 @@ public class NonRealTimeTransactionStart {
                         repository.updateBatchBuild(id);
                         executor.execute(() -> service.start(transfer, id));
                     } else {
+                        repository.updateBatchBuild(id);
                         log.info("Invalid Batch count {} but actual size is {}", batchCount, details.size());
                     }
                 } catch (Exception ex) {

@@ -46,7 +46,7 @@ public class RealTimeTransactionStart {
                 try {
                     long time = Long.parseLong(sdf.format(new Date()));
                     repository.updateRealTimeTransactionStatus("BUILD", time, (d.getTryCount() + 1), d.getInstructionId());
-                    executor.submit(() -> service.ipsDctTransaction(d, ho.getHeadOfficeId(d.getCreditorAgent())));
+                    executor.submit(() -> service.pushPayment(d, ho.getHeadOfficeId(d.getCreditorAgent())));
                 } catch (Exception e) {
                     log.error("Real Time Transaction Start ERROR:{}", e.getMessage());
                 }
@@ -68,7 +68,7 @@ public class RealTimeTransactionStart {
                     sleep = 5000;
                 }
                 try {
-                    log.info("Realtime waiting for clearing pool. Active threads: {} {} Second.", activeThread, (sleep / 1000));
+                    log.info("Realtime process waiting for clearing pool — active threads: {}, waiting for {} seconds.", activeThread, sleep / 1000);
                     Thread.sleep(sleep);
                 } catch (InterruptedException ignored) {
                 }

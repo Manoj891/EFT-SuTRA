@@ -53,73 +53,76 @@ public class TransactionCheckStatus {
 
     @Scheduled(cron = "0 */05 * * * *")
     public void executeEvery05Min() {
-        executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
+        if (isProdService.isProdService()) {
+            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
+        }
     }
 
-    @Scheduled(cron = "0 */30 * * * *")
-    public void executeEvery30Min() {
-        long startTime = 20251018000000L;
-        long dateTime = Long.parseLong(dateFormat.format(new Date())) - (3000);
+    @Scheduled(cron = "0 30 08,09,10,11,12,13,14,15,16,17,18,20,22 * * *")
+    public void executeEveryHour30Min() {
+        if (isProdService.isProdService()) {
+            long startTime = 20251018000000L;
+            long dateTime = Long.parseLong(dateFormat.format(new Date())) - (3000);
 
-        headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
-        headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
-        headOfficeRepository.updatePaymentPendingStatusDetail();
+            headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
+            headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
+            headOfficeRepository.updatePaymentPendingStatusDetail();
 
-        epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
-        repository.updateMissingStatusSent();
-        executor.submit(() -> repository.findByPushed("N").forEach(statusUpdate::update));
-
+            epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
+            repository.updateMissingStatusSent();
+            executor.submit(() -> repository.findByPushed("N").forEach(statusUpdate::update));
+        }
     }
 
     @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
     public void executeStatus() {
-        executor.submit(() -> {
-            repository.findRealTimePendingInstructionId().forEach(instructionId -> {
-                realTime.checkStatusByInstructionId(instructionId);
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ignored) {
-                }
-            });
+        if (isProdService.isProdService()) {
+            executor.submit(() -> {
+                repository.findRealTimePendingInstructionId().forEach(instructionId -> {
+                    realTime.checkStatusByInstructionId(instructionId);
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ignored) {
+                    }
+                });
 
-            repository.findNonRealTimePendingBatchId().forEach(batchId -> {
-                nonRealTime.checkStatusByBatchId(batchId);
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ignored) {
-                }
+                repository.findNonRealTimePendingBatchId().forEach(batchId -> {
+                    nonRealTime.checkStatusByBatchId(batchId);
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ignored) {
+                    }
+                });
+                repository.updateMissingStatusSent();
+                repository.findByPushed("N").forEach(statusUpdate::update);
             });
-            repository.updateMissingStatusSent();
-            repository.findByPushed("N").forEach(statusUpdate::update);
-        });
+        }
     }
 
     @Scheduled(cron = "0 05 00 * * *")
     public void executeCheckTransactionStatus() {
-        if (!isProdService.isProdService()) {
-            return;
+        if (isProdService.isProdService()) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date());
+            calendar.add(Calendar.DATE, -1);
+            String yyyyMMdd = dateFormat.format(calendar.getTime());
+            String year = yyyyMMdd.substring(0, 4);
+            String month = yyyyMMdd.substring(4, 6);
+            String day = yyyyMMdd.substring(6, 8);
+            String date = year + "-" + month + "-" + day;
+            log.info("{} Non Real Time Status", date);
+            nonRealTime.checkStatusByDate(date);
+            log.info("Non Real Time Status Completed {} Real Time Status", date);
+            realTime.checkStatusByDate(date);
+            log.info("Non Real Time Status Completed {}", date);
+            repository.updateMissingStatusSent();
         }
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.add(Calendar.DATE, -1);
-        String yyyyMMdd = dateFormat.format(calendar.getTime());
-        String year = yyyyMMdd.substring(0, 4);
-        String month = yyyyMMdd.substring(4, 6);
-        String day = yyyyMMdd.substring(6, 8);
-        String date = year + "-" + month + "-" + day;
-        log.info("{} Non Real Time Status", date);
-        nonRealTime.checkStatusByDate(date);
-        log.info("Non Real Time Status Completed {} Real Time Status", date);
-        realTime.checkStatusByDate(date);
-        log.info("Non Real Time Status Completed {}", date);
-        repository.updateMissingStatusSent();
     }
 
     @Scheduled(cron = "0 50 21 * * *")
     public void fetchBankAccountDetails() {
-        if (!isProdService.isProdService()) {
-            return;
+        if (isProdService.isProdService()) {
+            bankAccountDetailsService.fetchBankAccountDetails();
         }
-        bankAccountDetailsService.fetchBankAccountDetails();
     }
 }

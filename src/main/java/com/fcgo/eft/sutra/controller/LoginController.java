@@ -14,6 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/public/api/")
@@ -40,7 +43,17 @@ public class LoginController {
     }
 
     @GetMapping("/realtime/{instructionId}")
-    public ResponseEntity<Object> realTransaction(@PathVariable String instructionId) {
-        return ResponseEntity.status(HttpStatus.OK).body(realTimeCheckStatusService.checkStatusByInstructionId(instructionId));
+    public ResponseEntity<List<Object>> realTransaction(@PathVariable String instructionId) {
+        List<Object> resp = new ArrayList<>();
+        for (String s : instructionId.split(",")) {
+            try {
+                if (s.length() > 5) {
+                    resp.add(realTimeCheckStatusService.checkStatusByInstructionId(s));
+                }
+            } catch (Exception ex) {
+                resp.add(s + " " + ex.getMessage());
+            }
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 }

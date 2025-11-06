@@ -112,6 +112,8 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                         repository.updateNextTryInstructionId((tryCount + 1), dateTime, instructionId);
                         reconciledRepository.save(Long.parseLong(instructionId), "000", "Waiting...", "SENT", description + ". We will try again " + (10 - tryCount) + " Time", instructionId, new Date());
                     }
+                } else {
+                    realTime.checkStatusByInstructionId(instructionId);
                 }
             }
             log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} {}", instructionId, e.getMessage());

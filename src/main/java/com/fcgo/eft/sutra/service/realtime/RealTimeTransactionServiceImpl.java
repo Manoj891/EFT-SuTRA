@@ -98,6 +98,7 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
 
         } catch (Exception e) {
             if (tryCount == null) tryCount = 1;
+            repository.updateRealTimeTransactionStatus("SENT", dateTime, (tryCount + 1), instructionId);
             JsonNode node = jsonNode.toJsonNode(e.getMessage());
             if (node != null) {
                 String code = node.get("responseCode").asText();
@@ -106,7 +107,6 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                     realTime.checkStatusByInstructionId(instructionId);
                 } else if (getStatus(code)) {
                     if (tryCount > 10) {
-                        repository.updateRealTimeTransactionStatus("SENT", dateTime, (tryCount + 1), instructionId);
                         failure(code, description, instructionId);
                     } else {
                         repository.updateNextTryInstructionId((tryCount + 1), dateTime, instructionId);

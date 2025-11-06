@@ -90,7 +90,7 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
 
         JsonNode node = jsonNode.toJsonNode(res);
         if (node != null) {
-            String instructionId= node.path("recDate").asText();
+            String instructionId = node.path("batchId").asText();
             long id = node.path("id").asLong();
             String recDate = node.path("recDate").asText();
             String batchCrncy = node.path("batchCrncy").asText();
@@ -117,58 +117,58 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
                     .settlementDate(settlementDate)
                     .txnResponse(debitReasonDesc)
                     .build();
+            jsonNode.toJsonNode(node.get("cipsTransactionDetailList").toString())
+                    .forEach(d -> {
+                        long did = d.path("id").asLong();
 
-            node.get("cipsTransactionDetailList").forEach(d -> {
-                long did = node.path("id").asLong();
-
-                Date dRecDate = null;
-                try {
-                    dRecDate = dateFormat.parse(node.path("recDate").asText());
-                } catch (Exception ignored) {
-                }
-                String endToEndId = node.path("endToEndId").asText();
-                double amount = node.path("amount").asDouble();
-                double chargeAmount = node.path("chargeAmount").asDouble();
-                String chargeLiability = node.path("chargeLiability").asText();
-                String purpose = node.path("purpose").asText();
-                String creditorAgent = node.path("creditorAgent").asText();
-                String creditorBranch = node.path("creditorBranch").asText();
-                String creditorName = node.path("creditorName").asText();
-                String creditorAccount = node.path("creditorAccount").asText();
-                long addenda1 = node.path("addenda1").asLong();
-                String addenda2 = node.path("addenda2").asText();
-                String addenda3 = node.path("addenda3").asText();
-                String addenda4 = node.path("addenda4").asText();
-                String creditStatus = node.path("creditStatus").asText();
-                String reasonDesc = node.path("reasonDesc").asText();
-                String refId = node.path("refId").asText();
-                String particulars = node.path("particulars").asText();
-                RealTimeTransactionDetail detail = RealTimeTransactionDetail.builder()
-                        .id(did)
-                        .recDate(dRecDate)
-                        .instructionId(Long.parseLong(instructionId))
-                        .endToEndId(endToEndId)
-                        .chargeLiability(chargeLiability)
-                        .purpose(purpose)
-                        .creditStatus(creditStatus)
-                        .reasonCode(reasonDesc)
-                        .remarks(reasonDesc)
-                        .particulars(particulars)
-                        .reasonDesc(reasonDesc)
-                        .amount(amount)
-                        .chargeAmount(chargeAmount)
-                        .creditorAgent(creditorAgent)
-                        .creditorBranch(creditorBranch)
-                        .creditorName(creditorName)
-                        .creditorAccount(creditorAccount)
-                        .addenda1(addenda1)
-                        .addenda2(addenda2)
-                        .addenda3(addenda3)
-                        .addenda4(addenda4)
-                        .refId(refId)
-                        .build();
-                reconciledTransactionService.save(batch, detail, time);
-            });
+                        Date dRecDate = null;
+                        try {
+                            dRecDate = dateFormat.parse(d.path("recDate").asText());
+                        } catch (Exception ignored) {
+                        }
+                        String endToEndId = d.path("endToEndId").asText();
+                        double amount = d.path("amount").asDouble();
+                        double chargeAmount = d.path("chargeAmount").asDouble();
+                        String chargeLiability = d.path("chargeLiability").asText();
+                        String purpose = d.path("purpose").asText();
+                        String creditorAgent = d.path("creditorAgent").asText();
+                        String creditorBranch = d.path("creditorBranch").asText();
+                        String creditorName = d.path("creditorName").asText();
+                        String creditorAccount = d.path("creditorAccount").asText();
+                        long addenda1 = d.path("addenda1").asLong();
+                        String addenda2 = d.path("addenda2").asText();
+                        String addenda3 = d.path("addenda3").asText();
+                        String addenda4 = d.path("addenda4").asText();
+                        String creditStatus = d.path("creditStatus").asText();
+                        String reasonDesc = d.path("reasonDesc").asText();
+                        String refId = d.path("refId").asText();
+                        String particulars = d.path("particulars").asText();
+                        RealTimeTransactionDetail detail = RealTimeTransactionDetail.builder()
+                                .id(did)
+                                .recDate(dRecDate)
+                                .instructionId(Long.parseLong(instructionId))
+                                .endToEndId(endToEndId)
+                                .chargeLiability(chargeLiability)
+                                .purpose(purpose)
+                                .creditStatus(creditStatus)
+                                .reasonCode(reasonDesc)
+                                .remarks(reasonDesc)
+                                .particulars(particulars)
+                                .reasonDesc(reasonDesc)
+                                .amount(amount)
+                                .chargeAmount(chargeAmount)
+                                .creditorAgent(creditorAgent)
+                                .creditorBranch(creditorBranch)
+                                .creditorName(creditorName)
+                                .creditorAccount(creditorAccount)
+                                .addenda1(addenda1)
+                                .addenda2(addenda2)
+                                .addenda3(addenda3)
+                                .addenda4(addenda4)
+                                .refId(refId)
+                                .build();
+                        reconciledTransactionService.save(batch, detail, time);
+                    });
 
         }
 

@@ -39,8 +39,8 @@ public class LoginController {
         return ResponseEntity.status(HttpStatus.OK).body(statusFromNchl.checkByBatchId(batchId));
     }
 
-    @GetMapping("/realtime/{batchId}")
-    public ResponseEntity<Object> realTransaction(@PathVariable String batchId) {
-        return ResponseEntity.status(HttpStatus.OK).body(realTimeCheckStatusService.getRealTimeByBatch(batchId));
+    @GetMapping("/realtime/{instructionId}")
+    public ResponseEntity<Object> realTransaction(@PathVariable String instructionId) {
+        return ResponseEntity.status(HttpStatus.OK).body(realTimeCheckStatusService.checkStatusByInstructionId(instructionId));
     }
 }

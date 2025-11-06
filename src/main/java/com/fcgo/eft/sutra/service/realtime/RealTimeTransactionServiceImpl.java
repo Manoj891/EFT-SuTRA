@@ -102,7 +102,9 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
             if (node != null) {
                 String code = node.get("responseCode").asText();
                 String description = node.get("responseDescription").asText();
-                if (getStatus(code)) {
+                if (code.equalsIgnoreCase("099")) {
+                    realTime.checkStatusByInstructionId(instructionId);
+                } else if (getStatus(code)) {
                     if (tryCount > 10) {
                         repository.updateRealTimeTransactionStatus("SENT", dateTime, (tryCount + 1), instructionId);
                         failure(code, description, instructionId);

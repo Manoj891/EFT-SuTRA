@@ -69,10 +69,12 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
     }
 
     @Override
-    public void checkStatusByInstructionId(String instructionId) {
+    public Object checkStatusByInstructionId(String instructionId) {
         long time = new Date().getTime();
+        String res = null;
+
         try {
-            String res = getRealTimeByBatch(instructionId);
+            res = getRealTimeByBatch(instructionId);
             if (res != null && res.length() > 50) {
                 JsonNode node = jsonNode.toJsonNode(res);
                 if (node != null) {
@@ -162,10 +164,10 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
         } catch (Exception e) {
             log.info(e.getMessage());
         }
-
+        return res;
     }
 
-    @Override
+
     public String getRealTimeByBatch(String instructionId) {
         try {
             return Objects.requireNonNull(webClient.post()

@@ -6,6 +6,7 @@ import com.fcgo.eft.sutra.dto.res.LoginRes;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
 import com.fcgo.eft.sutra.service.EftPaymentReceiveService;
 import com.fcgo.eft.sutra.service.LoginService;
+import com.fcgo.eft.sutra.service.RealTimeCheckStatusService;
 import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeStatusFromNchl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class LoginController {
     private final LoginService service;
     private final EftPaymentReceiveService paymentReceiveService;
     private final NonRealTimeStatusFromNchl statusFromNchl;
+    private final RealTimeCheckStatusService realTimeCheckStatusService;
 
     @PostMapping("/login")
     public ResponseEntity<LoginRes> login(@RequestBody LoginReq req, HttpServletRequest request) {
@@ -33,7 +35,12 @@ public class LoginController {
     }
 
     @GetMapping("/nonrealtime/{batchId}")
-    public ResponseEntity<Object> paymentSTart(@PathVariable String batchId) {
+    public ResponseEntity<Object> nonRealTransaction(@PathVariable String batchId) {
         return ResponseEntity.status(HttpStatus.OK).body(statusFromNchl.checkByBatchId(batchId));
+    }
+
+    @GetMapping("/realtime/{batchId}")
+    public ResponseEntity<Object> realTransaction(@PathVariable String batchId) {
+        return ResponseEntity.status(HttpStatus.OK).body(realTimeCheckStatusService.getRealTimeByBatch(batchId));
     }
 }

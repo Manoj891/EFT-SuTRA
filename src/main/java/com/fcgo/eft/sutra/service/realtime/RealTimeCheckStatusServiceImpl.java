@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -166,8 +165,8 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
 
     }
 
+    @Override
     public String getRealTimeByBatch(String instructionId) {
-
         try {
             return Objects.requireNonNull(webClient.post()
                     .uri(url + "/api/getcipstxnlistbybatchid")

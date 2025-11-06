@@ -76,88 +76,7 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
         try {
             res = getRealTimeByBatch(instructionId);
             if (res != null && res.length() > 50) {
-                JsonNode node = jsonNode.toJsonNode(res);
-                if (node != null) {
-                    long id = node.path("id").asLong();
-                    String recDate = node.path("recDate").asText();
-                    String batchCrncy = node.path("batchCrncy").asText();
-                    String categoryPurpose = node.path("categoryPurpose").asText();
-                    String debtorAgent = node.path("debtorAgent").asText();
-                    String debtorBranch = node.path("debtorBranch").asText();
-                    String debtorName = node.path("debtorName").asText();
-                    String debtorAccount = node.path("debtorAccount").asText();
-                    String debitStatus = node.path("debitStatus").asText();
-                    String settlementDate = node.path("settlementDate").asText();
-                    String debitReasonDesc = node.path("debitReasonDesc").asText();
-                    RealTimeTransaction batch = RealTimeTransaction.builder()
-                            .id(id)
-                            .batchId(instructionId)
-                            .recDate(recDate)
-                            .batchCrncy(batchCrncy)
-                            .categoryPurpose(categoryPurpose)
-                            .debtorAgent(debtorAgent)
-                            .debtorBranch(debtorBranch)
-                            .debtorName(debtorName)
-                            .debtorAccount(debtorAccount)
-                            .debitStatus(debitStatus)
-                            .debitReasonDesc(debitReasonDesc)
-                            .settlementDate(settlementDate)
-                            .txnResponse(debitReasonDesc)
-                            .build();
-
-                    node.get("cipsTransactionDetailList").forEach(d -> {
-                        long did = node.path("id").asLong();
-
-                        Date dRecDate = null;
-                        try {
-                            dRecDate = dateFormat.parse(node.path("recDate").asText());
-                        } catch (Exception e) {
-                        }
-                        String endToEndId = node.path("endToEndId").asText();
-                        double amount = node.path("amount").asDouble();
-                        double chargeAmount = node.path("chargeAmount").asDouble();
-                        String chargeLiability = node.path("chargeLiability").asText();
-                        String purpose = node.path("purpose").asText();
-                        String creditorAgent = node.path("creditorAgent").asText();
-                        String creditorBranch = node.path("creditorBranch").asText();
-                        String creditorName = node.path("creditorName").asText();
-                        String creditorAccount = node.path("creditorAccount").asText();
-                        long addenda1 = node.path("addenda1").asLong();
-                        String addenda2 = node.path("addenda2").asText();
-                        String addenda3 = node.path("addenda3").asText();
-                        String addenda4 = node.path("addenda4").asText();
-                        String creditStatus = node.path("creditStatus").asText();
-                        String reasonDesc = node.path("reasonDesc").asText();
-                        String refId = node.path("refId").asText();
-                        String particulars = node.path("particulars").asText();
-                        RealTimeTransactionDetail detail = RealTimeTransactionDetail.builder()
-                                .id(did)
-                                .recDate(dRecDate)
-                                .instructionId(Long.parseLong(instructionId))
-                                .endToEndId(endToEndId)
-                                .chargeLiability(chargeLiability)
-                                .purpose(purpose)
-                                .creditStatus(creditStatus)
-                                .reasonCode(reasonDesc)
-                                .remarks(reasonDesc)
-                                .particulars(particulars)
-                                .reasonDesc(reasonDesc)
-                                .amount(amount)
-                                .chargeAmount(chargeAmount)
-                                .creditorAgent(creditorAgent)
-                                .creditorBranch(creditorBranch)
-                                .creditorName(creditorName)
-                                .creditorAccount(creditorAccount)
-                                .addenda1(addenda1)
-                                .addenda2(addenda2)
-                                .addenda3(addenda3)
-                                .addenda4(addenda4)
-                                .refId(refId)
-                                .build();
-                        reconciledTransactionService.save(batch, detail, time);
-                    });
-
-                }
+                convert(res, time);
             } else {
                 log.info(res);
             }
@@ -167,6 +86,93 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
         return res;
     }
 
+    public void convert(String res, long time) {
+
+        JsonNode node = jsonNode.toJsonNode(res);
+        if (node != null) {
+            String instructionId= node.path("recDate").asText();
+            long id = node.path("id").asLong();
+            String recDate = node.path("recDate").asText();
+            String batchCrncy = node.path("batchCrncy").asText();
+            String categoryPurpose = node.path("categoryPurpose").asText();
+            String debtorAgent = node.path("debtorAgent").asText();
+            String debtorBranch = node.path("debtorBranch").asText();
+            String debtorName = node.path("debtorName").asText();
+            String debtorAccount = node.path("debtorAccount").asText();
+            String debitStatus = node.path("debitStatus").asText();
+            String settlementDate = node.path("settlementDate").asText();
+            String debitReasonDesc = node.path("debitReasonDesc").asText();
+            RealTimeTransaction batch = RealTimeTransaction.builder()
+                    .id(id)
+                    .batchId(instructionId)
+                    .recDate(recDate)
+                    .batchCrncy(batchCrncy)
+                    .categoryPurpose(categoryPurpose)
+                    .debtorAgent(debtorAgent)
+                    .debtorBranch(debtorBranch)
+                    .debtorName(debtorName)
+                    .debtorAccount(debtorAccount)
+                    .debitStatus(debitStatus)
+                    .debitReasonDesc(debitReasonDesc)
+                    .settlementDate(settlementDate)
+                    .txnResponse(debitReasonDesc)
+                    .build();
+
+            node.get("cipsTransactionDetailList").forEach(d -> {
+                long did = node.path("id").asLong();
+
+                Date dRecDate = null;
+                try {
+                    dRecDate = dateFormat.parse(node.path("recDate").asText());
+                } catch (Exception ignored) {
+                }
+                String endToEndId = node.path("endToEndId").asText();
+                double amount = node.path("amount").asDouble();
+                double chargeAmount = node.path("chargeAmount").asDouble();
+                String chargeLiability = node.path("chargeLiability").asText();
+                String purpose = node.path("purpose").asText();
+                String creditorAgent = node.path("creditorAgent").asText();
+                String creditorBranch = node.path("creditorBranch").asText();
+                String creditorName = node.path("creditorName").asText();
+                String creditorAccount = node.path("creditorAccount").asText();
+                long addenda1 = node.path("addenda1").asLong();
+                String addenda2 = node.path("addenda2").asText();
+                String addenda3 = node.path("addenda3").asText();
+                String addenda4 = node.path("addenda4").asText();
+                String creditStatus = node.path("creditStatus").asText();
+                String reasonDesc = node.path("reasonDesc").asText();
+                String refId = node.path("refId").asText();
+                String particulars = node.path("particulars").asText();
+                RealTimeTransactionDetail detail = RealTimeTransactionDetail.builder()
+                        .id(did)
+                        .recDate(dRecDate)
+                        .instructionId(Long.parseLong(instructionId))
+                        .endToEndId(endToEndId)
+                        .chargeLiability(chargeLiability)
+                        .purpose(purpose)
+                        .creditStatus(creditStatus)
+                        .reasonCode(reasonDesc)
+                        .remarks(reasonDesc)
+                        .particulars(particulars)
+                        .reasonDesc(reasonDesc)
+                        .amount(amount)
+                        .chargeAmount(chargeAmount)
+                        .creditorAgent(creditorAgent)
+                        .creditorBranch(creditorBranch)
+                        .creditorName(creditorName)
+                        .creditorAccount(creditorAccount)
+                        .addenda1(addenda1)
+                        .addenda2(addenda2)
+                        .addenda3(addenda3)
+                        .addenda4(addenda4)
+                        .refId(refId)
+                        .build();
+                reconciledTransactionService.save(batch, detail, time);
+            });
+
+        }
+
+    }
 
     public String getRealTimeByBatch(String instructionId) {
         try {

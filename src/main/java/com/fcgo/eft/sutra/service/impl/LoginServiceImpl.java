@@ -43,7 +43,10 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public void checkValidId(String remoteIp) {
-        if (ips.size() != 5) init();
+        if (ips.size() != 5) {
+            log.info("LISTED IP: {}", ips.size());
+            init();
+        }
         boolean valid = false;
         for (String ip : ips) {
             if (ip.contains(remoteIp)) {

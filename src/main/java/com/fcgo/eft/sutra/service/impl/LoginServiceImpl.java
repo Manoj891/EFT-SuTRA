@@ -32,7 +32,7 @@ public class LoginServiceImpl implements LoginService {
     private final RemoteIpRepository remoteIpRepository;
     private final List<String> ips = new ArrayList<>();
 
-    @PostMapping
+    @Override
     public void init() {
         ips.add("10.100.193.98");
         ips.add("10.100.193.89");
@@ -43,6 +43,7 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public void checkValidId(String remoteIp) {
+        if (ips.size() != 5) init();
         boolean valid = false;
         for (String ip : ips) {
             if (ip.contains(remoteIp)) {

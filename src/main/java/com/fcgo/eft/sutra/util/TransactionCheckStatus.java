@@ -38,6 +38,7 @@ public class TransactionCheckStatus {
     private final AccEpaymentRepository epaymentRepository;
     private final IsProdService isProdService;
     private final ThreadPoolExecutor executor;
+    private final LoginService loginService;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 
 
@@ -46,6 +47,7 @@ public class TransactionCheckStatus {
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(eftNchlRbbBankMappingRepository.findBankMap());
         isProdService.init();
+        loginService.init();
         if (isProdService.isProdService()) {
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(0).build()));
         }

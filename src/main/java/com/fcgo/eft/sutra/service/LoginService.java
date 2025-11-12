@@ -6,4 +6,5 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public interface LoginService {
     LoginRes login(LoginReq req, HttpServletRequest request);
+    void checkValidId(String ip);
 }

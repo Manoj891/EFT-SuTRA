@@ -37,21 +37,17 @@ public class TransactionStatusUpdate {
                     || status.equals("099")
                     || status.equals("909")
                     || status.equals("-01")
-                    || status.equals("-04")
+                    || status.equals("-02")
+                    || status.equals("-02")
+                    || status.equals("-0")
                     || status.equals("030")
                     || status.equals("119")) {
-
-                updateFailureStatus(reconciled.getCreditMessage() + " " + reconciled.getDebitMessage(), instructionId);
+//                119','096','909','099','-01','-02','-04','030'
+                updateFailureStatus("CR. " + reconciled.getCreditMessage() + " DR. " + reconciled.getDebitMessage(), instructionId);
             } else {
-                String message = (reconciled.getCreditMessage() == null ? status : reconciled.getCreditMessage()) + " DEBIT:" + reconciled.getDebitMessage();
+                String message = (reconciled.getCreditMessage() == null ? status : reconciled.getCreditMessage()) + " DR. " + reconciled.getDebitMessage();
                 log.info("Message updated {} {} ", message, instructionId);
-
-                if (message.length() > 500) message = message.substring(0, 495);
-                if (message.equalsIgnoreCase("SUCCESS")) {
-                    updateSuccessStatus(reconciled.getCreditMessage(), reconciled.getRecDate(), instructionId);
-                } else {
-                    epaymentRepository.updateMessage(message, instructionId);
-                }
+                epaymentRepository.updateMessage(message, instructionId);
             }
         } catch (Exception e) {
             log.error(e.getMessage());

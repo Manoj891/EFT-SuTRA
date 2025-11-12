@@ -1,7 +1,6 @@
 package com.fcgo.eft.sutra.repository.oracle;
 
 import com.fcgo.eft.sutra.entity.oracle.EftBatchPayment;
-import jakarta.persistence.Column;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

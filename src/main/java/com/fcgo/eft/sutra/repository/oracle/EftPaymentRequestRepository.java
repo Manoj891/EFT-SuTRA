@@ -25,4 +25,9 @@ public interface EftPaymentRequestRepository extends JpaRepository<EftBatchPayme
     @Transactional
     @Query(value = "UPDATE EFT_PAYMENT_BATCH SET OFFUS=?1 WHERE ID=?2", nativeQuery = true)
     void update(int offus, BigInteger id);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE EFT_PAYMENT_BATCH SET CATEGORY_PURPOSE=?1 WHERE ID=?2", nativeQuery = true)
+    void updateCategory(String category, BigInteger id);
 }

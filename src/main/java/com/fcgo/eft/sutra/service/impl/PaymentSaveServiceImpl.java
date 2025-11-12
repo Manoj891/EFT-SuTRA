@@ -82,7 +82,9 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
         else if (sn < 100) tempId = date + "" + b.getPoCode() + "00" + sn;
         else tempId = date + "" + b.getPoCode() + "0" + sn;
         BigInteger id = new BigInteger(tempId);
-        repository.insert(id, batchId, CategoryPurpose.get(b.getCategoryPurpose()), user.getAppName(), debtorAccount, debtorAgent, debtorName, user.getDeploymentType(), 0, "N", b.getPoCode(), date, time, sn);
+        String category = CategoryPurpose.get(b.getCategoryPurpose());
+        boolean categoryUpdate = false;
+        repository.insert(id, batchId, category, user.getAppName(), debtorAccount, debtorAgent, debtorName, user.getDeploymentType(), 0, "N", b.getPoCode(), date, time, sn);
         List<EftBatchPaymentDetail> details = new ArrayList<>();
         int rowNo = 1;
         long addenda1 = now.getTime();
@@ -103,6 +105,10 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
                 String nchlTransactionType;
                 if (debtorAgent.equals(creditorAgent)) {
                     nchlTransactionType = "ONUS";
+                    if (!(category.equalsIgnoreCase("GTAX") || category.equalsIgnoreCase("GSAL"))) {
+                        category = "GSAL";
+                        categoryUpdate = true;
+                    }
                     onus++;
                 } else {
                     nchlTransactionType = "OFFUS";
@@ -122,6 +128,9 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
         PaymentSaved saved = PaymentSaved.builder().details(detailRepository.saveAll(details)).onus(onus).offus(offus).build();
         if (offus > 0) {
             repository.update(offus, id);
+        }
+        if (categoryUpdate) {
+            repository.updateCategory(category, id);
         }
         return saved;
     }
@@ -151,7 +160,9 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
         else if (sn < 100) tempId = date + "" + receive.getPoCode() + "00" + sn;
         else tempId = date + "" + receive.getPoCode() + "0" + sn;
         BigInteger id = new BigInteger(tempId);
-        repository.insert(id, batchId, CategoryPurpose.get(receive.getCategoryPurpose()), user.getAppName(), debtorAccount, debtorAgent, debtorName, user.getDeploymentType(), 0, "N", receive.getPoCode(), date, time, sn);
+        String category = CategoryPurpose.get(receive.getCategoryPurpose());
+        boolean categoryUpdate = false;
+        repository.insert(id, batchId, category, user.getAppName(), debtorAccount, debtorAgent, debtorName, user.getDeploymentType(), 0, "N", receive.getPoCode(), date, time, sn);
         List<EftBatchPaymentDetail> details = new ArrayList<>();
         int rowNo = 1;
         long addenda1 = now.getTime();
@@ -173,6 +184,10 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
                 if (debtorAgent.equals(creditorAgent)) {
                     nchlTransactionType = "ONUS";
                     onus++;
+                    if (!(category.equalsIgnoreCase("GTAX") || category.equalsIgnoreCase("GSAL"))) {
+                        category = "GSAL";
+                        categoryUpdate = true;
+                    }
                 } else {
                     nchlTransactionType = "OFFUS";
                     offus++;
@@ -191,6 +206,9 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
         PaymentSaved saved = PaymentSaved.builder().details(detailRepository.saveAll(details)).onus(onus).offus(offus).build();
         if (offus > 0) {
             repository.update(offus, id);
+        }
+        if (categoryUpdate) {
+            repository.updateCategory(category, id);
         }
         return saved;
 

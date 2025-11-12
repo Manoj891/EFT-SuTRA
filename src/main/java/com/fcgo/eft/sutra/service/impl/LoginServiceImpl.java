@@ -39,14 +39,11 @@ public class LoginServiceImpl implements LoginService {
         ips.add("10.100.193.128");
         ips.add("10.100.193.129");
         ips.add("10.100.193.99");
+        ips.add("10.100.100.106");
     }
 
     @Override
     public void checkValidId(String remoteIp) {
-        if (ips.size() != 5) {
-            log.info("LISTED IP: {}", ips.size());
-            init();
-        }
         boolean valid = false;
         for (String ip : ips) {
             if (ip.contains(remoteIp)) {

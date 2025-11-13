@@ -26,7 +26,6 @@ public class LoginServiceImpl implements LoginService {
     private final JwtHelper jwtHelper;
     private final PasswordEncoder passwordEncoder;
     private final ApplicationUserRepository repository;
-    private final RemoteIpRepository remoteIpRepository;
     private final List<String> ips = new ArrayList<>();
 
     @Override

@@ -6,7 +6,6 @@ import com.fcgo.eft.sutra.entity.oracle.ApplicationUser;
 import com.fcgo.eft.sutra.exception.CustomException;
 import com.fcgo.eft.sutra.exception.PermissionDeniedException;
 import com.fcgo.eft.sutra.repository.oracle.ApplicationUserRepository;
-import com.fcgo.eft.sutra.repository.oracle.RemoteIpRepository;
 import com.fcgo.eft.sutra.security.JwtHelper;
 import com.fcgo.eft.sutra.service.LoginService;
 import jakarta.servlet.http.HttpServletRequest;

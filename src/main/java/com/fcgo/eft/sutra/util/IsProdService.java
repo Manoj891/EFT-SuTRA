@@ -11,6 +11,8 @@ import java.util.Enumeration;
 public class IsProdService {
     @Getter
     private boolean isProdService = false;
+    @Getter
+    private String prodIpAddress = "";
 
     public void init() {
         try {
@@ -23,7 +25,10 @@ public class IsProdService {
                 Enumeration<InetAddress> addresses = iface.getInetAddresses();
                 while (addresses.hasMoreElements()) {
                     InetAddress addr = addresses.nextElement();
-                    if (addr.getHostAddress().contains("10.100.193.76")) isProdService = true;
+                    if (addr.getHostAddress().contains("10.100.193.76")) {
+                        isProdService = true;
+                        prodIpAddress = "10.100.193.76";
+                    }
                     System.out.println("Local IP Address: " + addr.getHostAddress());
                 }
             }

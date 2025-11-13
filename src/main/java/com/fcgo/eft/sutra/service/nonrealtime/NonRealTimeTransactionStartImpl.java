@@ -7,8 +7,7 @@ import com.fcgo.eft.sutra.dto.res.PaymentBatchPendingRes;
 import com.fcgo.eft.sutra.entity.oracle.EftBatchPaymentDetail;
 import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.service.BankHeadOfficeService;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import com.fcgo.eft.sutra.util.IsProdService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -31,13 +30,15 @@ public class NonRealTimeTransactionStartImpl implements NonRealTimeTransactionSt
     private final EftBatchPaymentDetailRepository repository;
     private final BatchPaymentService service;
     private final BankHeadOfficeService ho;
+    private final IsProdService isProdService;
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 
-    public NonRealTimeTransactionStartImpl(@Qualifier("nonRealTime") ThreadPoolExecutor executor, EftBatchPaymentDetailRepository repository, BatchPaymentService batch, BankHeadOfficeService ho) {
+    public NonRealTimeTransactionStartImpl(@Qualifier("nonRealTime") ThreadPoolExecutor executor, EftBatchPaymentDetailRepository repository, BatchPaymentService batch, BankHeadOfficeService ho, IsProdService isProdService) {
         this.executor = executor;
         this.repository = repository;
         this.service = batch;
         this.ho = ho;
+        this.isProdService =isProdService;
     }
 
     @Override
@@ -83,7 +84,7 @@ public class NonRealTimeTransactionStartImpl implements NonRealTimeTransactionSt
                                         .creditorAccount(d.getCreditorAccount())
                                         .addenda1(d.getAddenda1())
                                         .addenda2(d.getAddenda2())
-                                        .addenda3(d.getAddenda3())
+                                        .addenda3(isProdService.getProdIpAddress())
                                         .addenda4(d.getAddenda4())
                                         .refId(d.getRefId())
                                         .remarks(d.getRemarks())

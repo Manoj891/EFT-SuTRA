@@ -12,6 +12,7 @@ import com.fcgo.eft.sutra.repository.oracle.EftPaymentRequestRepository;
 import com.fcgo.eft.sutra.security.AuthenticatedUser;
 import com.fcgo.eft.sutra.service.PaymentSaveService;
 import com.fcgo.eft.sutra.util.CategoryPurpose;
+import com.fcgo.eft.sutra.util.IsProdService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
     private final EftBatchPaymentDetailRepository detailRepository;
     private final BankAccountWhitelistRepository bankAccountWhitelistRepository;
     private final AccEpaymentRepository epaymentRepository;
+    private final IsProdService isProdService;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final SimpleDateFormat yyMMdd = new SimpleDateFormat("yyMMdd");
     private final SimpleDateFormat yyyyMMddHHmmss = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -115,7 +117,7 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
                     offus++;
                 }
                 String addenda4 = (dto.getAddenda4() == null || dto.getAddenda4().isEmpty()) ? dto.getInstructionId() : dto.getAddenda4();
-                String addenda3 = "10.100.193.76";
+                String addenda3 = isProdService.getProdIpAddress();
                 String tempDetailsId;
                 if (rowNo < 10) tempDetailsId = tempId + "000" + rowNo;
                 else if (rowNo < 100) tempDetailsId = tempId + "00" + rowNo;
@@ -193,7 +195,7 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
                     offus++;
                 }
                 String addenda4 = (dto.getAddenda4() == null || dto.getAddenda4().isEmpty()) ? dto.getInstructionId() : dto.getAddenda4();
-                String addenda3 = "10.100.193.76";
+                String addenda3 = isProdService.getProdIpAddress();
                 String tempDetailsId;
                 if (rowNo < 10) tempDetailsId = tempId + "000" + rowNo;
                 else if (rowNo < 100) tempDetailsId = tempId + "00" + rowNo;

@@ -56,17 +56,13 @@ public class LoginServiceImpl implements LoginService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public LoginRes login(LoginReq req, HttpServletRequest request) {
-
+        String remoteIp = request.getRemoteAddr();
+        checkValidId(remoteIp);
         ApplicationUser user = repository.findByUsernameOrEmail(req.getUsername(), req.getUsername()).orElseThrow(() -> new CustomException("Invalid credentials!!"));
         if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
             throw new CustomException("Invalid credentials!!");
         }
-        String remoteIp = request.getRemoteAddr();
-        checkValidId(remoteIp);
 
-        RemoteIp ip = remoteIpRepository.findByIdAndUsername(remoteIp, req.getUsername())
-                .orElse(RemoteIp.builder().id(UUID.randomUUID().toString()).ip(remoteIp).username(req.getUsername()).build());
-        remoteIpRepository.save(ip);
         return jwtHelper.generateToken(user);
     }
 

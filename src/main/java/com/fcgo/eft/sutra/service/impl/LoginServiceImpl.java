@@ -3,7 +3,6 @@ package com.fcgo.eft.sutra.service.impl;
 import com.fcgo.eft.sutra.dto.req.LoginReq;
 import com.fcgo.eft.sutra.dto.res.LoginRes;
 import com.fcgo.eft.sutra.entity.oracle.ApplicationUser;
-import com.fcgo.eft.sutra.entity.oracle.RemoteIp;
 import com.fcgo.eft.sutra.exception.CustomException;
 import com.fcgo.eft.sutra.exception.PermissionDeniedException;
 import com.fcgo.eft.sutra.repository.oracle.ApplicationUserRepository;
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service

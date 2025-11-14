@@ -65,7 +65,7 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
         String apiUrl = url + "/api/postcipsbatch";
         long dateTime = Long.parseLong(sdf.format(new Date()));
         try {
-            RealTimeResponse response = webClient.post()
+            String response = webClient.post()
                     .uri(apiUrl)
                     .header("Authorization", "Bearer " + accessToken)
                     .header("Content-Type", "application/json")
@@ -73,9 +73,10 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, clientResponse -> clientResponse.bodyToMono(String.class)
                             .map(CustomException::new))
-                    .bodyToMono(RealTimeResponse.class).block();
-
-
+                    .bodyToMono(String.class).block();
+            log.info(response);
+            realTime.checkStatusByInstructionId(instructionId);
+/*
             assert response != null;
             CipsBatchResponse nchl = response.getCipsBatchResponse();
             repository.updateRealTimeTransactionStatus("SENT", dateTime, (tryCount + 1), instructionId);
@@ -97,6 +98,8 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                 log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} Not Success", instructionId);
                 realTime.checkStatusByInstructionId(instructionId);
             }
+
+ */
 
         } catch (Exception e) {
             if (tryCount == null) tryCount = 1;

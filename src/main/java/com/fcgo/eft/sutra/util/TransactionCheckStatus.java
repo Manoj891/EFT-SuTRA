@@ -48,6 +48,7 @@ public class TransactionCheckStatus {
         bankMapService.setBankMaps(eftNchlRbbBankMappingRepository.findBankMap());
         isProdService.init();
         loginService.init();
+        tryForNextAttempt();
         if (isProdService.isProdService()) {
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(0).build()));
         }
@@ -72,7 +73,10 @@ public class TransactionCheckStatus {
 
             epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
             repository.updateMissingStatusSent();
+            tryForNextAttempt();
+            tryTimeOutToReject();
             executor.submit(() -> repository.findByPushed("N").forEach(statusUpdate::update));
+
         }
     }
 
@@ -95,6 +99,8 @@ public class TransactionCheckStatus {
                     } catch (InterruptedException ignored) {
                     }
                 });
+                tryForNextAttempt();
+                tryTimeOutToReject();
                 repository.updateMissingStatusSent();
                 repository.findByPushed("N").forEach(statusUpdate::update);
             });
@@ -118,6 +124,8 @@ public class TransactionCheckStatus {
             realTime.checkStatusByDate(date);
             log.info("Non Real Time Status Completed {}", date);
             repository.updateMissingStatusSent();
+            tryForNextAttempt();
+            tryTimeOutToReject();
         }
     }
 
@@ -126,5 +134,22 @@ public class TransactionCheckStatus {
         if (isProdService.isProdService()) {
             bankAccountDetailsService.fetchBankAccountDetails();
         }
+    }
+
+    private void tryForNextAttempt() {
+        repository.findTryForNextAttempt().forEach(id -> {
+            repository.missingStatusSent(id);
+            log.info("{} Trying For Next Attempt", id);
+        });
+    }
+
+    public void tryTimeOutToReject() {
+        repository.findTryTimeOutToReject().forEach(m -> {
+            long instructionId = Long.parseLong(m.get("INSTRUCTION_ID").toString());
+            String message = m.get("CREDIT_MESSAGE").toString();
+            message = (message.substring(0, message.indexOf(". We will try again"))) + " Reject after " + m.get("TRY_COUNT") + " times on " + m.get("TRY_TIME") + ".";
+            repository.updateRejectTransaction("1000", message, "997", "Reject", instructionId);
+            log.info("Reject Transaction: {}", instructionId);
+        });
     }
 }

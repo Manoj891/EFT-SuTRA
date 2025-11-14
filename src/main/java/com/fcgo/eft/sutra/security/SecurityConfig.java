@@ -24,7 +24,7 @@ public class SecurityConfig {
     private final EndpointRequestFilter endpointRequestFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 // ✅ Enable CORS and use our configuration below
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))

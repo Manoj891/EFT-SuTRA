@@ -96,18 +96,20 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                 }
             }
         } catch (Exception e) {
-            log.info("Realtime {} Exception", e.getMessage());
             JsonNode  node = jsonNode.toJsonNode(e.getMessage());
             try {
                 String code = node.get("responseCode").asText();
                 String description = node.get("responseDescription").asText();
                 if (getStatus(code)) {
                     getErrorE0N(tryCount, code, description, instructionId, dateTime);
+                }else{
+                    realTime.checkStatusByInstructionId(instructionId);
                 }
+                log.info("Realtime Transaction Error: {} {}", code,description);
             }catch (Exception e1) {
+                log.info("Realtime {} Exception", e1.getMessage());
                 realTime.checkStatusByInstructionId(instructionId);
             }
-
         }
     }
 

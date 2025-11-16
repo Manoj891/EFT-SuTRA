@@ -75,9 +75,7 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
             JsonNode n = node.get("cipsBatchResponse");
             if (n != null) {
                 String responseCode = n.get("responseCode").asText();
-                if (getStatus(responseCode)) {
-                    getErrorE0N(tryCount, responseCode, n.get("responseMessage").asText(), instructionId, dateTime);
-                } else if (responseCode.equalsIgnoreCase("000")) {
+                if (responseCode.equalsIgnoreCase("000")) {
                     int finalTryCount = tryCount;
                     node.get("cipsTxnResponseList").forEach(nd -> {
                         String creditStatus = nd.get("creditStatus").asText();
@@ -90,23 +88,26 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                             }
                         }
                     });
-                } else if (responseCode.equalsIgnoreCase("099")) {
+                } else if (getStatus(responseCode)) {
+                    getErrorE0N(tryCount, responseCode, n.get("responseMessage").asText(), instructionId, dateTime);
+                } else {
                     log.info(responseCode);
                     realTime.checkStatusByInstructionId(instructionId);
                 }
             }
         } catch (Exception e) {
-            JsonNode  node = jsonNode.toJsonNode(e.getMessage());
+            JsonNode node = jsonNode.toJsonNode(e.getMessage());
             try {
                 String code = node.get("responseCode").asText();
                 String description = node.get("responseDescription").asText();
+                log.info("Realtime Transaction Error: {} {} {}", code, description,instructionId);
                 if (getStatus(code)) {
                     getErrorE0N(tryCount, code, description, instructionId, dateTime);
-                }else{
+                } else {
                     realTime.checkStatusByInstructionId(instructionId);
                 }
-                log.info("Realtime Transaction Error: {} {}", code,description);
-            }catch (Exception e1) {
+
+            } catch (Exception e1) {
                 log.info("Realtime {} Exception", e1.getMessage());
                 realTime.checkStatusByInstructionId(instructionId);
             }

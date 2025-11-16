@@ -9,9 +9,6 @@ import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.service.RealTimeCheckStatusService;
 import com.fcgo.eft.sutra.service.impl.NchlReconciledService;
-import com.fcgo.eft.sutra.service.realtime.response.CipsBatchResponse;
-import com.fcgo.eft.sutra.service.realtime.response.CipsTxnResponse;
-import com.fcgo.eft.sutra.service.realtime.response.RealTimeResponse;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
 import com.fcgo.eft.sutra.token.TokenGenerate;
 import com.fcgo.eft.sutra.util.IsProdService;
@@ -65,7 +62,7 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
         String apiUrl = url + "/api/postcipsbatch";
         long dateTime = Long.parseLong(sdf.format(new Date()));
         try {
-            String response = webClient.post()
+            JsonNode node = jsonNode.toJsonNode(webClient.post()
                     .uri(apiUrl)
                     .header("Authorization", "Bearer " + accessToken)
                     .header("Content-Type", "application/json")
@@ -73,57 +70,37 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, clientResponse -> clientResponse.bodyToMono(String.class)
                             .map(CustomException::new))
-                    .bodyToMono(String.class).block();
-            log.info(response);
-            realTime.checkStatusByInstructionId(instructionId);
-/*
-            assert response != null;
-            CipsBatchResponse nchl = response.getCipsBatchResponse();
+                    .bodyToMono(String.class).block());
             repository.updateRealTimeTransactionStatus("SENT", dateTime, (tryCount + 1), instructionId);
-            if (!response.getCipsTxnResponseList().isEmpty()) {
-                CipsTxnResponse txn = response.getCipsTxnResponseList().get(0);
-                if (nchl.getDebitStatus().equals("000") && txn.getCreditStatus().equals("000")) {
-                    long eftNo = Long.parseLong(instructionId);
-                    NchlReconciled reconciled = reconciledRepository.save(eftNo, "000", nchl.getResponseMessage(), txn.getCreditStatus(), txn.getResponseMessage(), String.valueOf(txn.getId()), new Date());
-                    String message = reconciled.getCreditMessage();
-                    if (message != null && message.length() > 500) message = message.substring(0, 500);
-                    epaymentRepository.updateSuccessEPayment(message, reconciled.getRecDate(), eftNo);
-                    reconciledRepository.updateStatus(instructionId);
-                    log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} Success", instructionId);
-                } else {
-                    log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} Not Success", instructionId);
+            JsonNode n = node.get("cipsBatchResponse");
+            if (n != null) {
+                String responseCode = n.get("responseCode").asText();
+                if (getStatus(responseCode)) {
+                    getErrorE0N(tryCount, responseCode, n.get("responseMessage").asText(), instructionId, dateTime);
+                } else if (responseCode.equalsIgnoreCase("000")) {
+                    int finalTryCount = tryCount;
+                    node.get("cipsTxnResponseList").forEach(nd -> {
+                        String creditStatus = nd.get("creditStatus").asText();
+                        if (creditStatus.equalsIgnoreCase("000")) {
+                            try {
+                                success(finalTryCount, dateTime, instructionId, nd.get("id").asText());
+                            } catch (Exception e) {
+                                success(finalTryCount, dateTime, instructionId, instructionId);
+                                log.info("{}Success Exception", e.getMessage());
+                            }
+                        }
+                    });
+                } else if (responseCode.equalsIgnoreCase("099")) {
+                    log.info(responseCode);
                     realTime.checkStatusByInstructionId(instructionId);
                 }
-            } else {
-                log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} Not Success", instructionId);
-                realTime.checkStatusByInstructionId(instructionId);
             }
-
- */
-
         } catch (Exception e) {
-            if (tryCount == null) tryCount = 1;
-            repository.updateRealTimeTransactionStatus("SENT", dateTime, (tryCount + 1), instructionId);
-            JsonNode node = jsonNode.toJsonNode(e.getMessage());
-            if (node != null) {
-                String code = node.get("responseCode").asText();
-                String description = node.get("responseDescription").asText();
-                if (code.equalsIgnoreCase("099")) {
-                    realTime.checkStatusByInstructionId(instructionId);
-                } else if (getStatus(code)) {
-                    if (tryCount > 10) {
-                        failure(code, description, instructionId);
-                    } else {
-                        repository.updateNextTryInstructionId((tryCount + 1), dateTime, instructionId);
-                        reconciledRepository.save(Long.parseLong(instructionId), "000", "Waiting...", "SENT", description + ". We will try again " + (10 - tryCount) + " Time", instructionId, new Date());
-                    }
-                } else {
-                    realTime.checkStatusByInstructionId(instructionId);
-                }
-            }
-            log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} {}", instructionId, e.getMessage());
+            log.info("Realtime {} Exception", e.getMessage());
+            realTime.checkStatusByInstructionId(instructionId);
         }
     }
+
 
     private boolean getStatus(String code) {
         return (code.equalsIgnoreCase("E001")
@@ -140,6 +117,15 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                 || code.equalsIgnoreCase("E012"));
     }
 
+    private void getErrorE0N(int tryCount, String code, String description, String instructionId, long dateTime) {
+        if (tryCount > 10) {
+            failure(code, description, instructionId);
+        } else {
+            repository.updateNextTryInstructionId((tryCount + 1), dateTime, instructionId);
+            reconciledRepository.save(Long.parseLong(instructionId), "000", "Waiting...", "SENT", description + ". We will try again " + (10 - tryCount) + " Time", instructionId, new Date());
+        }
+    }
+
     private void failure(String code, String description, String instructionId) {
         long eftNo = Long.parseLong(instructionId);
         reconciledRepository.save(eftNo, code, description, "1000", description, instructionId, new Date());
@@ -148,4 +134,14 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
         reconciledRepository.updateStatus(instructionId);
     }
 
+    private void success(int finalTryCount, long dateTime, String instructionId, String id) {
+        repository.updateRealTimeTransactionStatus("SENT", dateTime, (finalTryCount + 1), instructionId);
+        long eftNo = Long.parseLong(instructionId);
+        NchlReconciled reconciled = reconciledRepository.save(eftNo, "000", " ", "000", "Success", id, new Date());
+        String message = reconciled.getCreditMessage();
+        if (message != null && message.length() > 500) message = message.substring(0, 500);
+        epaymentRepository.updateSuccessEPayment(message, reconciled.getRecDate(), eftNo);
+        reconciledRepository.updateStatus(instructionId);
+        log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} Success", instructionId);
+    }
 }

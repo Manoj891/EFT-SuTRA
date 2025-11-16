@@ -141,8 +141,9 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
 
     private void failure(String code, String description, String instructionId) {
         long eftNo = Long.parseLong(instructionId);
-        reconciledRepository.save(eftNo, code, description, "1000", description, instructionId, new Date());
         if (description.length() > 500) description = description.substring(0, 490);
+        reconciledRepository.save(eftNo, code, description, "1000", description, instructionId, new Date());
+
         epaymentRepository.updateFailureEPayment(description, eftNo);
         reconciledRepository.updateStatus(instructionId);
     }

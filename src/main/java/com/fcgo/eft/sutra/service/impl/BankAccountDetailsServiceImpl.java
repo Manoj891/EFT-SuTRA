@@ -96,7 +96,7 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
 
 
     @Override
-    public void fetchBankAccountDetails() {
+    public synchronized void fetchBankAccountDetails() {
         try {
             String access_token = oauthToken.getAccessToken();
             if (Objects.isNull(access_token)) {

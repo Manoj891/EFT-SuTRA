@@ -4,6 +4,7 @@ package com.fcgo.eft.sutra.controller;
 import com.fcgo.eft.sutra.dto.req.LoginReq;
 import com.fcgo.eft.sutra.dto.res.LoginRes;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
+import com.fcgo.eft.sutra.service.BankAccountDetailsService;
 import com.fcgo.eft.sutra.service.EftPaymentReceiveService;
 import com.fcgo.eft.sutra.service.LoginService;
 import com.fcgo.eft.sutra.service.RealTimeCheckStatusService;
@@ -25,6 +26,7 @@ public class LoginController {
     private final EftPaymentReceiveService paymentReceiveService;
     private final NonRealTimeStatusFromNchl statusFromNchl;
     private final RealTimeCheckStatusService realTimeCheckStatusService;
+    private final BankAccountDetailsService bankAccountDetailsService;
 
     @PostMapping("/login")
     public ResponseEntity<LoginRes> login(@RequestBody LoginReq req, HttpServletRequest request) {
@@ -32,8 +34,14 @@ public class LoginController {
     }
 
     @GetMapping("/payment-start")
-    public ResponseEntity<Void> paymentSTart() {
+    public ResponseEntity<Void> paymentStart() {
         paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/bank-account/details")
+    public ResponseEntity<Void> bankAccountDetails() {
+        bankAccountDetailsService.fetchBankAccountDetails();
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

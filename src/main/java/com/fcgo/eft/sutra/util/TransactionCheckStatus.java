@@ -129,7 +129,7 @@ public class TransactionCheckStatus {
         }
     }
 
-    @Scheduled(cron = "0 50 21 * * *")
+    @Scheduled(cron = "0 01 02 * * *")
     public void fetchBankAccountDetails() {
         if (isProdService.isProdService()) {
             bankAccountDetailsService.fetchBankAccountDetails();

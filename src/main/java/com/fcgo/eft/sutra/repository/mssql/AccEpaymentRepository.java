@@ -1,6 +1,7 @@
 package com.fcgo.eft.sutra.repository.mssql;
 
 import com.fcgo.eft.sutra.entity.mssql.AccEpayment;
+import com.fcgo.eft.sutra.test.AccEpaymentRes;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +15,15 @@ import java.util.Optional;
 @Repository
 @Transactional
 public interface AccEpaymentRepository extends JpaRepository<AccEpayment, Long> {
+
+
+    @Query(value = "select transtatus,pstatus,StatusMessage message from acc_epayment where eftno=?1", nativeQuery = true)
+    Optional<AccEpaymentRes> findByEftNumber(long eftNumber);
+
+
+
+    @Query(value = "select jm.eftno from acc_epayment as jm inner join acc_epayment_resendlog as b on jm.id = b.id inner join acc_journalmaster as jv on jv.jid = jm.journalid where jm.fyid = 22", nativeQuery = true)
+    List<Long> eftNumberRejected();
 
     Optional<AccEpayment> findByEftNo(long eftNo);
 

@@ -26,19 +26,19 @@ public class WebClientConfig {
                 .sslContext(SslContextBuilder.forClient()
                         .trustManager(InsecureTrustManagerFactory.INSTANCE) // trust-all (testing only)
                         .build())  // build SslContext here
-                .handshakeTimeout(Duration.ofSeconds(60)) // handshake timeout
+                .handshakeTimeout(Duration.ofSeconds(300)) // handshake timeout
                 .build();
 
         HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000 * 60) // TCP connect timeout
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000 * 300) // TCP connect timeout
                 .secure(sslProvider)                                // custom SSL provider
-                .responseTimeout(Duration.ofSeconds(60));           // response timeout
+                .responseTimeout(Duration.ofSeconds(300));           // response timeout
 
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer.defaultCodecs()
-                                .maxInMemorySize(100 * 1024 * 1024)) // 512 MB
+                                .maxInMemorySize(512 * 1024 * 1024)) // 512 MB
                         .build())
                 .build();
     }

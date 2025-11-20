@@ -16,6 +16,7 @@ import com.fcgo.eft.sutra.service.realtime.RealTimeCheckStatusServiceImpl;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -30,12 +31,12 @@ import java.util.Objects;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class BankAccountDetailsServiceImpl implements BankAccountDetailsService {
     @Value("${nchl.npi.url}")
     private String url;
     @Value("${nchl.npi.username}")
     private String username;
+
     private final NchlOauthToken oauthToken;
     private final WebClient webClient;
     private final BankAccountWhitelistRepository whitelistRepository;
@@ -43,6 +44,17 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
     private final RealTimeCheckStatusServiceImpl getRealTimeStatus;
     private final NonRealTimeStatusFromNchl nonRealTimeStatusFromNchl;
     private final BankAccountWhitelistErrorRepository whitelistErrorRepository;
+
+    public BankAccountDetailsServiceImpl(@Qualifier("fetchBankAccountDetails") WebClient webClient, BankAccountWhitelistRepository whitelistRepository, AccountWhiteListSave accountWhiteListSave, RealTimeCheckStatusServiceImpl getRealTimeStatus, NonRealTimeStatusFromNchl nonRealTimeStatusFromNchl, BankAccountWhitelistErrorRepository whitelistErrorRepository, NchlOauthToken oauthToken) {
+        this.webClient = webClient;
+        this.whitelistRepository = whitelistRepository;
+        this.accountWhiteListSave = accountWhiteListSave;
+        this.getRealTimeStatus = getRealTimeStatus;
+        this.nonRealTimeStatusFromNchl = nonRealTimeStatusFromNchl;
+        this.whitelistErrorRepository = whitelistErrorRepository;
+        this.oauthToken = oauthToken;
+    }
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
@@ -92,21 +104,21 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
             }
             log.info("Fetching Bank Account Details: {}/api/bank-account/details", url);
             accountWhiteListSave.setSetDate(new Date().getTime());
-            webClient.post()
-                    .uri(url + "/api/bank-account/details")
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + access_token)
-                    .retrieve()
-                    .onStatus(HttpStatusCode::isError, clientResponse ->
-                            clientResponse.bodyToMono(String.class)
-                                    .publishOn(Schedulers.boundedElastic())
-                                    .flatMap(errorBody -> {
-                                        whitelistErrorRepository.saveAndFlush(BankAccountWhitelistError.builder().id(1).error(errorBody).build());
-                                        log.error("Error fetching bank account details: {}", errorBody);
-                                        return Mono.error(new CustomException(errorBody));
-                                    })
-                    )
-                    .bodyToMono(BankAccountDetailsRes.class)
-                    .block()
+            Objects.requireNonNull(webClient.post()
+                            .uri(url + "/api/bank-account/details")
+                            .header(HttpHeaders.AUTHORIZATION, "Bearer " + access_token)
+                            .retrieve()
+                            .onStatus(HttpStatusCode::isError, clientResponse ->
+                                    clientResponse.bodyToMono(String.class)
+                                            .publishOn(Schedulers.boundedElastic())
+                                            .flatMap(errorBody -> {
+                                                whitelistErrorRepository.saveAndFlush(BankAccountWhitelistError.builder().id(1).error(errorBody).build());
+                                                log.error("Error fetching bank account details: {}", errorBody);
+                                                return Mono.error(new CustomException(errorBody));
+                                            })
+                            )
+                            .bodyToMono(BankAccountDetailsRes.class)
+                            .block())
                     .getData()
                     .forEach(d -> {
                         log.info("{} {} {}", d.getAccountId(), d.getBankId(), d.getAccountName());

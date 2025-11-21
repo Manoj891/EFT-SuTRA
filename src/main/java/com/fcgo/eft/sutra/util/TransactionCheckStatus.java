@@ -65,7 +65,7 @@ public class TransactionCheckStatus {
     public void executeEveryHour30Min() {
         if (isProdService.isProdService()) {
             long startTime = 20251018000000L;
-            long dateTime = Long.parseLong(dateFormat.format(new Date())) - (3000);
+            long dateTime = Long.parseLong(dateFormat.format(new Date())) - (12000);
 
             headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
             headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
@@ -137,19 +137,19 @@ public class TransactionCheckStatus {
     }
 
     private void tryForNextAttempt() {
-        repository.findTryForNextAttempt().forEach(id -> {
-            repository.missingStatusSent(id);
-            log.info("{} Trying For Next Attempt", id);
-        });
+//        repository.findTryForNextAttempt().forEach(id -> {
+//            repository.missingStatusSent(id);
+//            log.info("{} Trying For Next Attempt", id);
+//        });
     }
 
     public void tryTimeOutToReject() {
-        repository.findTryTimeOutToReject().forEach(m -> {
-            long instructionId = Long.parseLong(m.get("INSTRUCTION_ID").toString());
-            String message = m.get("CREDIT_MESSAGE").toString();
-            message = (message.substring(0, message.indexOf(". We will try again"))) + " Reject after " + m.get("TRY_COUNT") + " times on " + m.get("TRY_TIME") + ".";
-            repository.updateRejectTransaction("1000", message, "997", "Reject", instructionId);
-            log.info("Reject Transaction: {}", instructionId);
-        });
+//        repository.findTryTimeOutToReject().forEach(m -> {
+//            long instructionId = Long.parseLong(m.get("INSTRUCTION_ID").toString());
+//            String message = m.get("CREDIT_MESSAGE").toString();
+//            message = (message.substring(0, message.indexOf(". We will try again"))) + " Reject after " + m.get("TRY_COUNT") + " times on " + m.get("TRY_TIME") + ".";
+//            repository.updateRejectTransaction("1000", message, "997", "Reject", instructionId);
+//            log.info("Reject Transaction: {}", instructionId);
+//        });
     }
 }

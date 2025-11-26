@@ -25,24 +25,22 @@ public class TransactionStatusUpdate {
             status = (status == null ? "" : status);
             String debitStatus = reconciled.getDebitStatus();
             debitStatus = (debitStatus == null ? "000" : debitStatus);
-
             if (!debitStatus.equals("000")) {
-                updateFailureStatus(reconciled.getCreditMessage() + " " + reconciled.getDebitMessage(), instructionId);
+                updateFailureStatus("CR."+reconciled.getCreditMessage() + ", DR." + reconciled.getDebitMessage(), instructionId);
             } else if (status.equals("000") || status.equals("ACSC")) {
-                updateSuccessStatus(reconciled.getCreditMessage(), reconciled.getRecDate(), instructionId);
+                updateSuccessStatus(reconciled.getRecDate(), instructionId);
             } else if (status.equals("RJCT")
-                    || status.equals("1000")
-                    || status.equals("096")
                     || status.equals("1001")
-                    || status.equals("099")
+                    || status.equals("1000")
                     || status.equals("909")
+                    || status.equals("099")
+                    || status.equals("096")
                     || status.equals("-01")
                     || status.equals("-02")
-                    || status.equals("-02")
+                    || status.equals("-04")
                     || status.equals("-0")
                     || status.equals("030")
                     || status.equals("119")) {
-//                119','096','909','099','-01','-02','-04','030'
                 updateFailureStatus("CR. " + reconciled.getCreditMessage() + " DR. " + reconciled.getDebitMessage(), instructionId);
             } else {
                 String message = (reconciled.getCreditMessage() == null ? status : reconciled.getCreditMessage()) + " DR. " + reconciled.getDebitMessage();
@@ -63,10 +61,8 @@ public class TransactionStatusUpdate {
         log.info("Updated reconciled status: {} failure", instructionId);
     }
 
-    private void updateSuccessStatus(String creditMessage, Date recDate, long instructionId) {
-        if (creditMessage == null || creditMessage.length() < 3) creditMessage = "Success";
-        else if (creditMessage.length() > 500) creditMessage = creditMessage.substring(0, 495);
-        epaymentRepository.updateSuccessEPayment(creditMessage, recDate, instructionId);
+    private void updateSuccessStatus( Date recDate, long instructionId) {
+        epaymentRepository.updateSuccessEPayment( "SUCCESS", recDate, instructionId);
         repository.updateStatus(String.valueOf(instructionId));
         log.info("Updated reconciled status: {} Success", instructionId);
     }

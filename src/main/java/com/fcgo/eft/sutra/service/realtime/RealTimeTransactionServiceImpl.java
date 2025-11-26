@@ -142,7 +142,7 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
     private void failure(String code, String description, String instructionId) {
         long eftNo = Long.parseLong(instructionId);
         if (description.length() > 500) description = description.substring(0, 490);
-        reconciledRepository.save(eftNo, code, description, "1000", description, instructionId, new Date());
+        reconciledRepository.save(eftNo, code,"-", "1000", description, instructionId, new Date());
 
         epaymentRepository.updateFailureEPayment(description, eftNo);
         reconciledRepository.updateStatus(instructionId);
@@ -151,11 +151,11 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
     private void success(int finalTryCount, long dateTime, String instructionId, String id) {
         repository.updateRealTimeTransactionStatus("SENT", dateTime, (finalTryCount + 1), instructionId);
         long eftNo = Long.parseLong(instructionId);
-        NchlReconciled reconciled = reconciledRepository.save(eftNo, "000", " ", "000", "Success", id, new Date());
+        NchlReconciled reconciled = reconciledRepository.save(eftNo, "000", "-", "000", "SUCCESS", id, new Date());
         String message = reconciled.getCreditMessage();
         if (message != null && message.length() > 500) message = message.substring(0, 500);
         epaymentRepository.updateSuccessEPayment(message, reconciled.getRecDate(), eftNo);
         reconciledRepository.updateStatus(instructionId);
-        log.info("REAL TIME TRANSACTION PUSHED IN  NCHL  {} Success", instructionId);
+        log.info("REAL TIME TRANSACTION PUSHED IN NCHL {} SUCCESS", instructionId);
     }
 }

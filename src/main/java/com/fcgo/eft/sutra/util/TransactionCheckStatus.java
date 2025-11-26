@@ -54,13 +54,6 @@ public class TransactionCheckStatus {
         }
     }
 
-    @Scheduled(cron = "0 */05 * * * *")
-    public void executeEvery05Min() {
-        if (isProdService.isProdService()) {
-            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
-        }
-    }
-
     @Scheduled(cron = "0 30 08,09,10,11,12,13,14,15,16,17,18,20,22 * * *")
     public void executeEveryHour30Min() {
         if (isProdService.isProdService()) {
@@ -76,7 +69,7 @@ public class TransactionCheckStatus {
             tryForNextAttempt();
             tryTimeOutToReject();
             executor.submit(() -> repository.findByPushed("N").forEach(statusUpdate::update));
-
+            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
         }
     }
 

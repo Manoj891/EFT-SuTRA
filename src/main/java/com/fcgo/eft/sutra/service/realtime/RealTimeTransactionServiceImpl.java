@@ -15,9 +15,12 @@ import com.fcgo.eft.sutra.util.IsProdService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -61,21 +64,49 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
         String accessToken = oauthToken.getAccessToken();
         String apiUrl = url + "/api/postcipsbatch";
         long dateTime = Long.parseLong(sdf.format(new Date()));
-        try {
-            JsonNode node = jsonNode.toJsonNode(webClient.post()
-                    .uri(apiUrl)
-                    .header("Authorization", "Bearer " + accessToken)
-                    .header("Content-Type", "application/json")
-                    .bodyValue(payload)
-                    .retrieve()
-                    .onStatus(HttpStatusCode::isError, clientResponse -> clientResponse.bodyToMono(String.class)
-                            .map(CustomException::new))
-                    .bodyToMono(String.class).block());
-            repository.updateRealTimeTransactionStatus("SENT", dateTime, (tryCount + 1), instructionId);
-            JsonNode n = node.get("cipsBatchResponse");
-            if (n != null) {
-                String responseCode = n.get("responseCode").asText();
-                if (responseCode.equalsIgnoreCase("000")) {
+        String response = webClient.post()
+                .uri(apiUrl)
+                .header("Authorization", "Bearer " + accessToken)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(payload)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, clientResponse ->
+                        clientResponse.bodyToMono(String.class)
+                                .doOnNext(errorBody -> {
+                                    try {
+                                        JsonNode node = jsonNode.toJsonNode(errorBody);
+                                        String code = node.get("responseCode").asText();
+                                        String message;
+                                        if (getStatus(code)) {
+                                            message = node.get("responseMessage").asText();
+                                            log.info("{} {} {} {} {}", code, message, instructionId, tryCount, errorBody);
+                                            getErrorE0N(tryCount, code, message, instructionId, dateTime);
+                                        } else if (code.equalsIgnoreCase("099")) {
+                                            message = node.get("responseDescription").asText();
+                                            log.info("{} {} {} {}", code, instructionId, tryCount, message);
+                                            realTime.checkStatusByInstructionId(instructionId);
+                                        } else {
+                                            log.info("{} {} {} {}", code, instructionId, tryCount, errorBody);
+                                            realTime.checkStatusByInstructionId(instructionId);
+                                        }
+                                    } catch (Exception ex) {
+                                        log.info("API Error: {} {} {} {}", errorBody, instructionId, tryCount, ex.getMessage());
+                                        realTime.checkStatusByInstructionId(instructionId);
+                                    }
+                                })
+                                .then(Mono.empty())    // do NOT throw exception
+                )
+                .bodyToMono(String.class)
+                .onErrorResume(e -> Mono.empty())   // safety: catch any unexpected errors
+                .block();
+
+        JsonNode node = response != null ? jsonNode.toJsonNode(response) : null;
+        if (node != null) {
+            try {
+                JsonNode n = node.get("cipsBatchResponse");
+                String code = n.get("responseCode").asText();
+                String message = n.get("responseMessage").asText();
+                if (code.equalsIgnoreCase("000")) {
                     int finalTryCount = tryCount;
                     node.get("cipsTxnResponseList").forEach(nd -> {
                         String creditStatus = nd.get("creditStatus").asText();
@@ -83,33 +114,19 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                             try {
                                 success(finalTryCount, dateTime, instructionId, nd.get("id").asText());
                             } catch (Exception e) {
-                                success(finalTryCount, dateTime, instructionId, instructionId);
-                                log.info("{}Success Exception", e.getMessage());
+                                log.info("{} {} {}", code, message, instructionId);
+                                realTime.checkStatusByInstructionId(instructionId);
                             }
                         }
                     });
-                } else if (getStatus(responseCode)) {
-                    getErrorE0N(tryCount, responseCode, n.get("responseMessage").asText(), instructionId, dateTime);
+                } else if (getStatus(code)) {
+                    getErrorE0N(tryCount, code, message, instructionId, dateTime);
                 } else {
-                    log.info(responseCode);
+                    log.info("{} {} {}", code, message, instructionId);
                     realTime.checkStatusByInstructionId(instructionId);
                 }
-            }
-        } catch (Exception e) {
-            JsonNode node = jsonNode.toJsonNode(e.getMessage());
-            try {
-                String code = node.get("responseCode").asText();
-                String description = node.get("responseDescription").asText();
-                log.info("Realtime Transaction Error: {} {} {}", code, description,instructionId);
-                if (getStatus(code)) {
-                    getErrorE0N(tryCount, code, description, instructionId, dateTime);
-                } else {
-                    realTime.checkStatusByInstructionId(instructionId);
-                }
-
-            } catch (Exception e1) {
-                log.info("Realtime {} Exception", e1.getMessage());
-                realTime.checkStatusByInstructionId(instructionId);
+            } catch (Exception ex) {
+                log.info("{} {}", ex.getMessage(), instructionId);
             }
         }
     }
@@ -131,18 +148,23 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
     }
 
     private void getErrorE0N(int tryCount, String code, String description, String instructionId, long dateTime) {
-        if (tryCount > 10) {
+        if (tryCount > 15) {
             failure(code, description, instructionId);
         } else {
-            repository.updateNextTryInstructionId((tryCount + 1), dateTime, instructionId);
-            reconciledRepository.save(Long.parseLong(instructionId), "000", "Waiting...", "SENT", description + ". We will try again " + (10 - tryCount) + " Time", instructionId, new Date());
+            int count = (tryCount + 1);
+            String time = count == 1 ? "1st" :
+                    count == 2 ? "2nd" :
+                            count == 3 ? "3rd" :
+                                    (count + "th");
+            repository.updateNextTryInstructionId(count, dateTime, instructionId);
+            reconciledRepository.save(Long.parseLong(instructionId), "000", "Waiting...", "SENT", description + ". We Tried " + time + " times.", instructionId, new Date());
         }
     }
 
     private void failure(String code, String description, String instructionId) {
         long eftNo = Long.parseLong(instructionId);
         if (description.length() > 500) description = description.substring(0, 490);
-        reconciledRepository.save(eftNo, code,"-", "1000", description, instructionId, new Date());
+        reconciledRepository.save(eftNo, "EFT", "SuTRA", code, description, instructionId, new Date());
 
         epaymentRepository.updateFailureEPayment(description, eftNo);
         reconciledRepository.updateStatus(instructionId);

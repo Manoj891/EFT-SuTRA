@@ -47,4 +47,5 @@ public class NchlReconciled {
     public void setUpdatedAt() {
         this.updatedAt = LocalDateTime.now();
     }
+
 }

@@ -1,6 +1,7 @@
 package com.fcgo.eft.sutra.dto.res;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public interface EftPaymentRequestDetailProjection {
     String getId();
@@ -31,7 +32,7 @@ public interface EftPaymentRequestDetailProjection {
 
     String getNchlTransactionType();
 
-    java.time.LocalDateTime getRecDate();
+    LocalDateTime getRecDate();
 
     String getRefId();
 
@@ -48,6 +49,7 @@ public interface EftPaymentRequestDetailProjection {
     String getDebtorBranch();
 
     Long getPoCode();
+
     Integer getTryCount();
 }
 

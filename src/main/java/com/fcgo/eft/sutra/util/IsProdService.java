@@ -7,11 +7,10 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
 
+@Getter
 @Service
 public class IsProdService {
-    @Getter
     private boolean isProdService = false;
-    @Getter
     private String prodIpAddress = "";
 
     public void init() {

@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -61,6 +62,7 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                 "\"cipsTransactionDetailList\":[{\"instructionId\":\"" + m.getInstructionId() + "\",\"endToEndId\":\"" + m.getEndToEndId() + "\",\"amount\":\"" + amount + "\",\"purpose\":\"" + m.getCategoryPurpose() + "\",\"creditorAgent\":\"" + creditorAgent + "\",\"creditorBranch\":\"" + creditorBranch + "\",\"creditorName\":\"" + creditorName + "\",\"creditorAccount\":\"" + creditorAccount + "\",\"addenda1\":\"" + m.getAddenda1() + "\",\"addenda2\":\"" + m.getAddenda2() + "\",\"addenda3\":\"" + isProdService.getProdIpAddress() + "\",\"addenda4\":\"" + m.getAddenda4() + "\",\"channelId\":\"IPS\",\"refId\":\"" + m.getRefId() + "\",\"remarks\":\"" + m.getRemarks() + "\"}]," +
                 "\"token\":\"" + token + "\"}";
         String instructionId = m.getInstructionId();
+        long eftNo=Long.parseLong(instructionId);
         String accessToken = oauthToken.getAccessToken();
         String apiUrl = url + "/api/postcipsbatch";
         long dateTime = Long.parseLong(sdf.format(new Date()));
@@ -72,6 +74,7 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, clientResponse ->
                         clientResponse.bodyToMono(String.class)
+                                .publishOn(Schedulers.boundedElastic())
                                 .doOnNext(errorBody -> {
                                     try {
                                         JsonNode node = jsonNode.toJsonNode(errorBody);
@@ -90,14 +93,18 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                                                     if (message.length() > 500) message = message.substring(0, 499);
                                                 }
                                                 log.info("{} {} {} {} ", code, message, instructionId, tryCount);
+                                                epaymentRepository.updateMessage(message, eftNo);
                                                 getErrorE0N(tryCount, code, message, instructionId, dateTime);
                                             } else {
                                                 log.info("{} {} {} {}", code, instructionId, tryCount, errorBody);
+                                                epaymentRepository.updateMessage(errorBody, eftNo);
                                                 realTime.checkStatusByInstructionId(instructionId);
+
                                             }
                                         }
                                     } catch (Exception ex) {
                                         log.info("API Error: {} {} {} {}", errorBody, instructionId, tryCount, ex.getMessage());
+                                        epaymentRepository.updateMessage(errorBody, eftNo);
                                         realTime.checkStatusByInstructionId(instructionId);
                                     }
                                 })
@@ -122,14 +129,17 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                                 success(finalTryCount, dateTime, instructionId, nd.get("id").asText());
                             } catch (Exception e) {
                                 log.info("{} {} {}", code, message, instructionId);
+                                epaymentRepository.updateMessage(message, eftNo);
                                 realTime.checkStatusByInstructionId(instructionId);
                             }
                         }
                     });
                 } else if (getStatus(code)) {
+                    epaymentRepository.updateMessage(message, eftNo);
                     getErrorE0N(tryCount, code, message, instructionId, dateTime);
                 } else {
                     log.info("{} {} {}", code, message, instructionId);
+                    epaymentRepository.updateMessage(message, eftNo);
                     realTime.checkStatusByInstructionId(instructionId);
                 }
             } catch (Exception ex) {

@@ -75,24 +75,26 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                                 .doOnNext(errorBody -> {
                                     try {
                                         JsonNode node = jsonNode.toJsonNode(errorBody);
-                                        String code = node.get("responseCode").asText();
-                                        String message;
-                                        if (getStatus(code)) {
-                                            JsonNode nMessage = node.get("responseMessage");
-                                            JsonNode nDescription = node.get("responseDescription");
-                                            if (nMessage != null) {
-                                                message = nMessage.asText();
-                                            } else if (nDescription != null) {
-                                                message = nDescription.asText();
+                                        if (node != null) {
+                                            String code = node.get("responseCode").asText();
+                                            String message;
+                                            if (getStatus(code)) {
+                                                JsonNode nMessage = node.get("responseMessage");
+                                                JsonNode nDescription = node.get("responseDescription");
+                                                if (nMessage != null) {
+                                                    message = nMessage.asText();
+                                                } else if (nDescription != null) {
+                                                    message = nDescription.asText();
+                                                } else {
+                                                    message = errorBody;
+                                                    if (message.length() > 500) message = message.substring(0, 499);
+                                                }
+                                                log.info("{} {} {} {} ", code, message, instructionId, tryCount);
+                                                getErrorE0N(tryCount, code, message, instructionId, dateTime);
                                             } else {
-                                                message = errorBody;
-                                                if (message.length() > 500) message = message.substring(0, 499);
+                                                log.info("{} {} {} {}", code, instructionId, tryCount, errorBody);
+                                                realTime.checkStatusByInstructionId(instructionId);
                                             }
-                                            log.info("{} {} {} {} ", code, message, instructionId, tryCount);
-                                            getErrorE0N(tryCount, code, message, instructionId, dateTime);
-                                        } else {
-                                            log.info("{} {} {} {}", code, instructionId, tryCount, errorBody);
-                                            realTime.checkStatusByInstructionId(instructionId);
                                         }
                                     } catch (Exception ex) {
                                         log.info("API Error: {} {} {} {}", errorBody, instructionId, tryCount, ex.getMessage());

@@ -148,14 +148,14 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
     }
 
     private void getErrorE0N(int tryCount, String code, String description, String instructionId, long dateTime) {
+        int count = (tryCount + 1);
+        String time = count == 1 ? "1st" :
+                count == 2 ? "2nd" :
+                        count == 3 ? "3rd" :
+                                (count + "th");
         if (tryCount > 15) {
-            failure(code, description, instructionId);
+            failure(code, description+". Transaction reject after tried "+time+" times.", instructionId);
         } else {
-            int count = (tryCount + 1);
-            String time = count == 1 ? "1st" :
-                    count == 2 ? "2nd" :
-                            count == 3 ? "3rd" :
-                                    (count + "th");
             repository.updateNextTryInstructionId(count, dateTime, instructionId);
             reconciledRepository.save(Long.parseLong(instructionId), "000", "Waiting...", "SENT", description + ". We Tried " + time + " times.", instructionId, new Date());
         }

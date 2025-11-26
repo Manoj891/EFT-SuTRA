@@ -78,13 +78,18 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                                         String code = node.get("responseCode").asText();
                                         String message;
                                         if (getStatus(code)) {
-                                            message = node.get("responseMessage").asText();
-                                            log.info("{} {} {} {} {}", code, message, instructionId, tryCount, errorBody);
+                                            JsonNode nMessage = node.get("responseMessage");
+                                            JsonNode nDescription = node.get("responseDescription");
+                                            if (nMessage != null) {
+                                                message = nMessage.asText();
+                                            } else if (nDescription != null) {
+                                                message = nDescription.asText();
+                                            } else {
+                                                message = errorBody;
+                                                if (message.length() > 500) message = message.substring(0, 499);
+                                            }
+                                            log.info("{} {} {} {} ", code, message, instructionId, tryCount);
                                             getErrorE0N(tryCount, code, message, instructionId, dateTime);
-                                        } else if (code.equalsIgnoreCase("099")) {
-                                            message = node.get("responseDescription").asText();
-                                            log.info("{} {} {} {}", code, instructionId, tryCount, message);
-                                            realTime.checkStatusByInstructionId(instructionId);
                                         } else {
                                             log.info("{} {} {} {}", code, instructionId, tryCount, errorBody);
                                             realTime.checkStatusByInstructionId(instructionId);
@@ -154,7 +159,7 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                         count == 3 ? "3rd" :
                                 (count + "th");
         if (tryCount > 15) {
-            failure(code, description+". Transaction reject after tried "+time+" times.", instructionId);
+            failure(code, description + ". Transaction reject after tried " + time + " times.", instructionId);
         } else {
             repository.updateNextTryInstructionId(count, dateTime, instructionId);
             reconciledRepository.save(Long.parseLong(instructionId), "000", "Waiting...", "SENT", description + ". We Tried " + time + " times.", instructionId, new Date());

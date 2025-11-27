@@ -8,6 +8,7 @@ import com.fcgo.eft.sutra.exception.CustomException;
 import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.service.RealTimeCheckStatusService;
+import com.fcgo.eft.sutra.service.impl.CheckTransactionList;
 import com.fcgo.eft.sutra.service.impl.NchlReconciledService;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
 import com.fcgo.eft.sutra.token.TokenGenerate;

@@ -3,6 +3,7 @@ package com.fcgo.eft.sutra.service.realtime;
 import com.fcgo.eft.sutra.dto.res.EftPaymentRequestDetailProjection;
 import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.service.BankHeadOfficeService;
+import com.fcgo.eft.sutra.service.impl.CheckTransactionList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -17,17 +18,19 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class RealTimeTransactionStartImpl implements RealTimeTransactionStart {
 
     private final EftBatchPaymentDetailRepository repository;
+    private final CheckTransactionList checkTransactionList;
     private final RealTimeTransactionService service;
     private final BankHeadOfficeService ho;
     private final ThreadPoolExecutor executor;
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
     private boolean started = false;
 
-    public RealTimeTransactionStartImpl(@Qualifier("realTime") ThreadPoolExecutor executor, EftBatchPaymentDetailRepository repository, RealTimeTransactionService service, BankHeadOfficeService ho) {
+    public RealTimeTransactionStartImpl(@Qualifier("realTime") ThreadPoolExecutor executor, EftBatchPaymentDetailRepository repository, RealTimeTransactionService service, BankHeadOfficeService ho, CheckTransactionList checkTransactionList) {
         this.repository = repository;
         this.service = service;
         this.ho = ho;
         this.executor = executor;
+        this.checkTransactionList = checkTransactionList;
     }
 
     @Override
@@ -38,11 +41,8 @@ public class RealTimeTransactionStartImpl implements RealTimeTransactionStart {
     @Override
     public synchronized void start() {
         while (true) {
-            long start = Long.parseLong(sdf.format(new Date())) - 100;
-            List<EftPaymentRequestDetailProjection> list = repository.findRealTimePending();
-            log.info("Regular Size {}", list.size());
-            list.addAll(repository.findRealTimePending(start));
-            log.info("Total Size {}", list.size());
+            long start = Long.parseLong(sdf.format(new Date())) - 1500;
+            List<EftPaymentRequestDetailProjection> list = checkTransactionList.getList(repository.findRealTimePending(), repository.findRealTimePending(start));
             if (list.isEmpty()) {
                 started = false;
                 break;

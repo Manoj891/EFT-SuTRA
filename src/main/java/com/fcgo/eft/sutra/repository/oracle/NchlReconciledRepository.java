@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Repository
-public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, String> {
+public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, Long> {
 
 
     @Query(value = "SELECT TRY_COUNT, TRY_TIME, R.CREDIT_MESSAGE, D.INSTRUCTION_ID FROM EFT_PAYMENT_BATCH_DETAIL D JOIN NCHL_RECONCILED R on D.INSTRUCTION_ID = R.INSTRUCTION_ID where PUSHED = 'N' AND R.CREDIT_STATUS = 'SENT' AND NCHL_TRANSACTION_TYPE = 'ONUS' AND TRY_COUNT >= 15", nativeQuery = true)

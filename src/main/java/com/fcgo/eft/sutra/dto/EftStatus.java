@@ -1,7 +1,7 @@
 package com.fcgo.eft.sutra.dto;
 
 public interface EftStatus {
-    Integer getTstatus();
+    int getTranstatus();
 
     Integer getPstatus();
 

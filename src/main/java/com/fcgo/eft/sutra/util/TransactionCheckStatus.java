@@ -49,10 +49,9 @@ public class TransactionCheckStatus {
         isProdService.init();
         loginService.init();
         tryForNextAttempt();
-
-//        if (isProdService.isProdService()) {
-//            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
-//        }
+        if (isProdService.isProdService()) {
+            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
+        }
     }
 
     @Scheduled(cron = "0 30 08,09,10,11,12,13,14,15,16,17,18,20,22 * * *")

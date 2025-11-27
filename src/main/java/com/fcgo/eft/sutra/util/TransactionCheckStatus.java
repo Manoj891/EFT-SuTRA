@@ -130,6 +130,7 @@ public class TransactionCheckStatus {
     }
 
     private void tryForNextAttempt() {
+        repository.missingStatusSent();
         repository.findTryForNextAttempt().forEach(id -> {
             repository.missingStatusSent(id);
             log.info("{} Trying For Next Attempt", id);

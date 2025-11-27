@@ -194,7 +194,7 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
 
 
     private void failure(String instructionId) {
-        reconciledRepository.findById(instructionId).ifPresent(reconciled -> {
+        reconciledRepository.findById(Long.parseLong(instructionId)).ifPresent(reconciled -> {
             if (reconciled.getCreditStatus().equals("SENT")) {
                 reconciledRepository.updateManualReject(instructionId);
                 reconciledRepository.updateManualReject(Long.parseLong(sdf.format(new Date())), instructionId);

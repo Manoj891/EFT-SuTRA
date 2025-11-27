@@ -22,7 +22,6 @@ public class PaymentReceiveController {
 
     @PostMapping
     public ResponseEntity<String> paymentReceive(@RequestBody EftPaymentReceive receive, HttpServletRequest request) {
-      if(true)  throw new CustomException("System Busy");
         String remoteIp = request.getRemoteAddr();
         service.checkValidId(remoteIp);
         paymentReceiveService.paymentReceive(receive);
@@ -31,7 +30,6 @@ public class PaymentReceiveController {
 
     @PutMapping
     public ResponseEntity<String> paymentReceiveNew(@RequestBody PaymentRequestNew receive, HttpServletRequest request) {
-        if(true)  throw new CustomException("System Busy");
         String remoteIp = request.getRemoteAddr();
         service.checkValidId(remoteIp);
         paymentReceiveService.paymentReceive(receive);

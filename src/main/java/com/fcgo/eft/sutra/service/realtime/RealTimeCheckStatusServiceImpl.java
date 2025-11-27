@@ -2,8 +2,11 @@ package com.fcgo.eft.sutra.service.realtime;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fcgo.eft.sutra.configure.StringToJsonNode;
+import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
+import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
 import com.fcgo.eft.sutra.service.RealTimeCheckStatusService;
 import com.fcgo.eft.sutra.service.ReconciledTransactionService;
+import com.fcgo.eft.sutra.service.impl.NchlReconciledService;
 import com.fcgo.eft.sutra.service.realtime.response.ByDatePostCipsByDateResponseWrapper;
 import com.fcgo.eft.sutra.service.realtime.response.RealTimeTransaction;
 import com.fcgo.eft.sutra.service.realtime.response.RealTimeTransactionDetail;
@@ -31,6 +34,7 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
     private final NchlOauthToken oauthToken;
     private final WebClient webClient;
     private final ReconciledTransactionService reconciledTransactionService;
+    private final NchlReconciledRepository reconciledRepository;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final StringToJsonNode jsonNode;
 
@@ -69,7 +73,7 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
     }
 
     @Override
-    public Object checkStatusByInstructionId(String instructionId) {
+    public Object checkStatusByInstructionId(String instructionId, int times) {
         long time = new Date().getTime();
         String res = null;
 
@@ -77,9 +81,9 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
             res = getRealTimeByBatch(instructionId);
             if (res != null && res.length() > 50) {
                 convert(res, time);
-            } else {
-                log.info(res);
-            }
+            } else if (times >= 15) {
+                failure(instructionId);
+            } else log.info(res);
         } catch (Exception e) {
             log.info(e.getMessage());
         }
@@ -187,4 +191,17 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
             return e.getMessage();
         }
     }
+
+
+    private void failure(String instructionId) {
+        reconciledRepository.findById(instructionId).ifPresent(reconciled -> {
+            if (reconciled.getCreditStatus().equals("SENT")) {
+                reconciledRepository.updateManualReject(instructionId);
+                reconciledRepository.updateManualReject(Long.parseLong(sdf.format(new Date())), instructionId);
+                log.info("Manually rejected {}", instructionId);
+            }
+        });
+    }
+
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 }

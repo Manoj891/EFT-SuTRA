@@ -62,7 +62,7 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                 "\"cipsTransactionDetailList\":[{\"instructionId\":\"" + m.getInstructionId() + "\",\"endToEndId\":\"" + m.getEndToEndId() + "\",\"amount\":\"" + amount + "\",\"purpose\":\"" + m.getCategoryPurpose() + "\",\"creditorAgent\":\"" + creditorAgent + "\",\"creditorBranch\":\"" + creditorBranch + "\",\"creditorName\":\"" + creditorName + "\",\"creditorAccount\":\"" + creditorAccount + "\",\"addenda1\":\"" + m.getAddenda1() + "\",\"addenda2\":\"" + m.getAddenda2() + "\",\"addenda3\":\"" + isProdService.getProdIpAddress() + "\",\"addenda4\":\"" + m.getAddenda4() + "\",\"channelId\":\"IPS\",\"refId\":\"" + m.getRefId() + "\",\"remarks\":\"" + m.getRemarks() + "\"}]," +
                 "\"token\":\"" + token + "\"}";
         String instructionId = m.getInstructionId();
-        long eftNo=Long.parseLong(instructionId);
+        long eftNo = Long.parseLong(instructionId);
         String accessToken = oauthToken.getAccessToken();
         String apiUrl = url + "/api/postcipsbatch";
         long dateTime = Long.parseLong(sdf.format(new Date()));
@@ -98,14 +98,14 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                                             } else {
                                                 log.info("{} {} {} {}", code, instructionId, tryCount, errorBody);
                                                 epaymentRepository.updateMessage(errorBody, eftNo);
-                                                realTime.checkStatusByInstructionId(instructionId);
+                                                realTime.checkStatusByInstructionId(instructionId, tryCount);
 
                                             }
                                         }
                                     } catch (Exception ex) {
                                         log.info("API Error: {} {} {} {}", errorBody, instructionId, tryCount, ex.getMessage());
                                         epaymentRepository.updateMessage(errorBody, eftNo);
-                                        realTime.checkStatusByInstructionId(instructionId);
+                                        realTime.checkStatusByInstructionId(instructionId, tryCount);
                                     }
                                 })
                                 .then(Mono.empty())    // do NOT throw exception
@@ -130,7 +130,7 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                             } catch (Exception e) {
                                 log.info("{} {} {}", code, message, instructionId);
                                 epaymentRepository.updateMessage(message, eftNo);
-                                realTime.checkStatusByInstructionId(instructionId);
+                                realTime.checkStatusByInstructionId(instructionId, tryCount);
                             }
                         }
                     });
@@ -140,7 +140,7 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                 } else {
                     log.info("{} {} {}", code, message, instructionId);
                     epaymentRepository.updateMessage(message, eftNo);
-                    realTime.checkStatusByInstructionId(instructionId);
+                    realTime.checkStatusByInstructionId(instructionId, tryCount);
                 }
             } catch (Exception ex) {
                 log.info("{} {}", ex.getMessage(), instructionId);

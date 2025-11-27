@@ -45,16 +45,18 @@ public class EftPaymentReceiveServiceImpl implements EftPaymentReceiveService {
 
     @Override
     public void startTransactionThread(PaymentReceiveStatus status) {
-        if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
-            try {
-                if (status.getOffus() > 0) {
-                    if (!nonRealTimeThread.isStarted()) {
-                        nonRealTimeThread.start();
-                    }
-                }
-            } catch (Exception e) {
-                log.info(e.getMessage());
-            }
+        System.out.println("Payment Starting................"+status.getOnus()+" "+isProdService.isProdService() );
+        if (isProdService.isProdService()) {
+//            try {
+//                if (status.getOffus() > 0) {
+//                    if (!nonRealTimeThread.isStarted()) {
+//                        nonRealTimeThread.start();
+//                    }
+//                }
+//            } catch (Exception e) {
+//                log.info(e.getMessage());
+//            }
+
             try {
                 if (status.getOnus() > 0) {
                     if (!realTimeThread.isStarted()) {

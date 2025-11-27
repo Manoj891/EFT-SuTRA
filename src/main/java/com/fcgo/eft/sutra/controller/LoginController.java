@@ -56,7 +56,7 @@ public class LoginController {
         for (String s : instructionId.split(",")) {
             try {
                 if (s.length() > 5) {
-                    resp.add(realTimeCheckStatusService.checkStatusByInstructionId(s));
+                    resp.add(realTimeCheckStatusService.checkStatusByInstructionId(s,0));
                 }
             } catch (Exception ex) {
                 resp.add(s + " " + ex.getMessage());

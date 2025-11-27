@@ -49,12 +49,13 @@ public class TransactionCheckStatus {
         isProdService.init();
         loginService.init();
         tryForNextAttempt();
+        System.out.println(isProdService.isProdService());
         if (isProdService.isProdService()) {
-            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(0).build()));
+            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
         }
     }
 
-    @Scheduled(cron = "0 30 08,09,10,11,12,13,14,15,16,17,18,20,22 * * *")
+//    @Scheduled(cron = "0 30 08,09,10,11,12,13,14,15,16,17,18,20,22 * * *")
     public void executeEveryHour30Min() {
         if (isProdService.isProdService()) {
             long startTime = 20251018000000L;
@@ -73,12 +74,12 @@ public class TransactionCheckStatus {
         }
     }
 
-    @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
+//    @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
     public void executeStatus() {
         if (isProdService.isProdService()) {
             executor.submit(() -> {
                 repository.findRealTimePendingInstructionId().forEach(instructionId -> {
-                    realTime.checkStatusByInstructionId(instructionId);
+                    realTime.checkStatusByInstructionId(instructionId,0);
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException ignored) {
@@ -100,7 +101,7 @@ public class TransactionCheckStatus {
         }
     }
 
-    @Scheduled(cron = "0 05 00 * * *")
+//    @Scheduled(cron = "0 05 00 * * *")
     public void executeCheckTransactionStatus() {
         if (isProdService.isProdService()) {
             Calendar calendar = Calendar.getInstance();
@@ -122,7 +123,7 @@ public class TransactionCheckStatus {
         }
     }
 
-    @Scheduled(cron = "0 01 02 * * *")
+//    @Scheduled(cron = "0 01 02 * * *")
     public void fetchBankAccountDetails() {
         if (isProdService.isProdService()) {
             bankAccountDetailsService.fetchBankAccountDetails();

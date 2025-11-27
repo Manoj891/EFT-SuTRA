@@ -35,11 +35,14 @@ public class RealTimeTransactionStartImpl implements RealTimeTransactionStart {
         return started;
     }
 
-    public void start() {
+    @Override
+    public synchronized void start() {
         while (true) {
-            long start = Long.parseLong(sdf.format(new Date())) - 3000;
+            long start = Long.parseLong(sdf.format(new Date())) - 100;
             List<EftPaymentRequestDetailProjection> list = repository.findRealTimePending();
+            log.info("Regular Size {}", list.size());
             list.addAll(repository.findRealTimePending(start));
+            log.info("Total Size {}", list.size());
             if (list.isEmpty()) {
                 started = false;
                 break;

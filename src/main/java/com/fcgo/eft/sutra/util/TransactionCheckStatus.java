@@ -51,6 +51,7 @@ public class TransactionCheckStatus {
         bankMapService.setBankMaps(eftNchlRbbBankMappingRepository.findBankMap());
         isProdService.init();
         loginService.init();
+        repository.findByPushed("N").forEach(statusUpdate::update);
         tryForNextAttempt();
         if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(0).onus(1).build()));

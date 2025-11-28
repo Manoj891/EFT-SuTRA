@@ -29,7 +29,7 @@ public class DbPrimary {
         } catch (SQLException ignored) {
             try {
                 init();
-            } catch (SQLException e) {
+            } catch (SQLException ignored1) {
             }
         }
         return 0;

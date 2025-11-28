@@ -80,6 +80,11 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                 .bodyToMono(String.class)
                 .onErrorResume(e -> Mono.empty())   // safety: catch any unexpected errors
                 .block();
+        handelSuccess(response, instructionId, tryCount, dateTime);
+
+    }
+
+    private void handelSuccess(String response, String instructionId, int tryCount, long dateTime) {
 
         JsonNode node = response != null ? jsonNode.toJsonNode(response) : null;
         if (node != null) {
@@ -88,12 +93,11 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                 String code = n.get("responseCode").asText();
                 String message = n.get("responseMessage").asText();
                 if (code.equalsIgnoreCase("000")) {
-                    int finalTryCount = tryCount;
                     node.get("cipsTxnResponseList").forEach(nd -> {
                         String creditStatus = nd.get("creditStatus").asText();
                         if (creditStatus.equalsIgnoreCase("000")) {
                             try {
-                                success(finalTryCount, dateTime, instructionId, nd.get("id").asText());
+                                success(tryCount, dateTime, instructionId, nd.get("id").asText());
                             } catch (Exception e) {
                                 log.info("{} {} {}", code, message, instructionId);
                                 realTime.checkStatusByInstructionId(instructionId, tryCount);

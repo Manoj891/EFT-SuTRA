@@ -6,13 +6,13 @@ import com.fcgo.eft.sutra.dto.res.PaymentSaved;
 import com.fcgo.eft.sutra.entity.oracle.BankAccountWhitelist;
 import com.fcgo.eft.sutra.entity.oracle.EftBatchPaymentDetail;
 import com.fcgo.eft.sutra.exception.CustomException;
-import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.BankAccountWhitelistRepository;
 import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.repository.oracle.EftPaymentRequestRepository;
 import com.fcgo.eft.sutra.security.AuthenticatedUser;
 import com.fcgo.eft.sutra.service.PaymentSaveService;
 import com.fcgo.eft.sutra.util.CategoryPurpose;
+import com.fcgo.eft.sutra.util.DbPrimary;
 import com.fcgo.eft.sutra.util.IsProdService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
     private final EftPaymentRequestRepository repository;
     private final EftBatchPaymentDetailRepository detailRepository;
     private final BankAccountWhitelistRepository bankAccountWhitelistRepository;
-    private final AccEpaymentRepository epaymentRepository;
+    private final DbPrimary epaymentRepository;
     private final IsProdService isProdService;
     private final StringToJsonNode jsonNode;
 
@@ -95,7 +95,7 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
         for (EftPaymentRequestDetailReq dto : receive.getEftPaymentRequestDetail()) {
             Optional<EftBatchPaymentDetail> optional = detailRepository.findByInstructionId(dto.getInstructionId());
             if (optional.isPresent()) {
-                epaymentRepository.updateStatusProcessing(Long.parseLong(dto.getInstructionId()));
+                epaymentRepository.updateStatusProcessing(dto.getInstructionId());
             } else {
                 String creditorAgent = bankMap.get(dto.getCreditorAgent().trim());
                 String creditorAccount = dto.getCreditorAccount().trim();
@@ -173,7 +173,7 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
         for (EftPaymentRequestDetailReq dto : receive.getDetails()) {
             Optional<EftBatchPaymentDetail> optional = detailRepository.findByInstructionId(dto.getInstructionId());
             if (optional.isPresent()) {
-                epaymentRepository.updateStatusProcessing(Long.parseLong(dto.getInstructionId()));
+                epaymentRepository.updateStatusProcessing(dto.getInstructionId());
             } else {
                 String creditorAgent = bankMap.get(dto.getCreditorAgent().trim());
                 String creditorAccount = dto.getCreditorAccount().trim();

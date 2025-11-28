@@ -2,7 +2,6 @@ package com.fcgo.eft.sutra.util;
 
 import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
-import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.BankHeadOfficeRepository;
 import com.fcgo.eft.sutra.repository.oracle.EftNchlRbbBankMappingRepository;
 import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
@@ -37,7 +36,7 @@ public class TransactionCheckStatus {
     private final PaymentReceiveService bankMapService;
     private final EftPaymentReceiveService paymentReceiveService;
     private final SuTRAProcessingStatus suTRAProcessingStatus;
-    private final AccEpaymentRepository epaymentRepository;
+    private final DB2nd epaymentRepository;
     private final IsProdService isProdService;
     private final ThreadPoolExecutor executor;
     private final LoginService loginService;

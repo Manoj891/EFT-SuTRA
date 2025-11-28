@@ -7,12 +7,11 @@ import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
 import com.fcgo.eft.sutra.dto.res.PaymentSaved;
 import com.fcgo.eft.sutra.entity.oracle.EftBatchPaymentDetail;
 import com.fcgo.eft.sutra.exception.PermissionDeniedException;
-import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.security.AuthenticatedUser;
 import com.fcgo.eft.sutra.security.AuthenticationFacade;
 import com.fcgo.eft.sutra.service.PaymentReceiveService;
 import com.fcgo.eft.sutra.service.PaymentSaveService;
-import com.fcgo.eft.sutra.util.IsProdService;
+import com.fcgo.eft.sutra.util.DbPrimary;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,7 +26,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class PaymentReceiveServiceImpl implements PaymentReceiveService {
     private final AuthenticationFacade facade;
     private final PaymentSaveService service;
-    private final AccEpaymentRepository epaymentRepository;
+    private final DbPrimary epaymentRepository;
     private final ThreadPoolExecutor executor;
 
 
@@ -54,7 +53,7 @@ public class PaymentReceiveServiceImpl implements PaymentReceiveService {
 
         executor.submit(() -> {
             for (EftBatchPaymentDetail detail : saved.getDetails()) {
-                epaymentRepository.updateStatusProcessing(Long.parseLong(detail.getInstructionId()));
+                epaymentRepository.updateStatusProcessing(detail.getInstructionId());
             }
         });
 
@@ -75,7 +74,7 @@ public class PaymentReceiveServiceImpl implements PaymentReceiveService {
 
         executor.submit(() -> {
             for (EftBatchPaymentDetail detail : saved.getDetails()) {
-                epaymentRepository.updateStatusProcessing(Long.parseLong(detail.getInstructionId()));
+                epaymentRepository.updateStatusProcessing(detail.getInstructionId());
             }
         });
 

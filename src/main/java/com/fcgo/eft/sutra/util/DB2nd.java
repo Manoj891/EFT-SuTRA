@@ -10,6 +10,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,5 +34,18 @@ public class DB2nd {
         } catch (SQLException ignored) {
         }
         return null;
+    }
+    public List<Long> updateSuccessEPayment() {
+        List<Long> list = new ArrayList<>();
+        try {
+            if (con == null || con.isClosed()) init();
+
+            ResultSet rs = con.prepareStatement("select eftno from acc_epayment where transtatus =2 and pstatus=2  and paymentdate < dateadd(minute, -30, getdate())").executeQuery();
+            while (rs.next()) {
+                list.add(rs.getLong("eftno"));
+            }
+        } catch (Exception ignored1) {
+        }
+        return list;
     }
 }

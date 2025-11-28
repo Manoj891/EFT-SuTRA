@@ -3,11 +3,15 @@ package com.fcgo.eft.sutra.util;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,4 +38,14 @@ public class DbPrimary {
         }
         return 0;
     }
+
+    public void updateStatusProcessing(String instructionId) {
+        try {
+            if (con == null || con.isClosed()) init();
+            con.prepareStatement("update acc_epayment set transtatus=2,pstatus=2,paymentdate=GETDATE() where eftno=" + instructionId).executeUpdate();
+        } catch (Exception ignored1) {
+        }
+    }
+
+
 }

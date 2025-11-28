@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.text.SimpleDateFormat;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -33,7 +33,6 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
     private final WebClient webClient;
     private final ReconciledTransactionService reconciledTransactionService;
     private final NchlReconciledRepository reconciledRepository;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final StringToJsonNode jsonNode;
 
     @Override
@@ -125,7 +124,7 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
 
                         Date dRecDate = null;
                         try {
-                            dRecDate = dateFormat.parse(d.path("recDate").asText());
+                            dRecDate = jsonNode.getDateFormat().parse(d.path("recDate").asText());
                         } catch (Exception ignored) {
                         }
                         String endToEndId = d.path("endToEndId").asText();

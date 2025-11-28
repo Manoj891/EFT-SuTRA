@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
+
 import java.util.List;
 
 @Slf4j
@@ -28,7 +28,6 @@ public class ReconciledTransactionServiceImpl implements ReconciledTransactionSe
     private final ReconciledTransactionRepository transactionRepository;
     private final ReconciledTransactionDetailRepository detailRepository;
     private final NchlReconciledRepository repository;
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
     @Transactional(rollbackFor = RuntimeException.class)

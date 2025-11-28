@@ -9,7 +9,7 @@ import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;

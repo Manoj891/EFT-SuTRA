@@ -8,7 +8,6 @@ import com.fcgo.eft.sutra.service.RealTimeCheckStatusService;
 import com.fcgo.eft.sutra.service.ReconciledTransactionService;
 import com.fcgo.eft.sutra.service.realtime.response.ByDatePostCipsByDateResponseWrapper;
 import com.fcgo.eft.sutra.service.realtime.response.RealTimeTransaction;
-import com.fcgo.eft.sutra.service.realtime.response.RealTimeTransactionDetail;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
-
 
 import java.util.Date;
 import java.util.List;

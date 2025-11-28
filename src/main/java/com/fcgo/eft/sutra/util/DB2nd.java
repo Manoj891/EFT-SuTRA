@@ -19,21 +19,17 @@ public class DB2nd {
 
     private void init() throws ClassNotFoundException, SQLException {
         Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        log.info("Connecting to database...");
         con = DriverManager.getConnection("jdbc:sqlserver://10.100.199.149:1433;databaseName=SuTRA5;encrypt=false", "SuTRA_FCGO_SEC", "caPsKJSkD2-k38lE2082");
-        log.info("Connected to database");
     }
 
     public EftStatus getRecord(String eftNo) throws SQLException, ClassNotFoundException {
         if (con == null || con.isClosed()) init();
-        System.out.println("select transtatus,pstatus from acc_epayment where eftno=" + eftNo);
         try {
             ResultSet rs = con.prepareStatement("select transtatus,pstatus from acc_epayment where eftno=" + eftNo).executeQuery();
             if (rs.next()) {
                 return EftStatus.builder().pstatus(rs.getInt("pstatus")).transtatus(rs.getInt("transtatus")).build();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ignored) {
         }
         return null;
     }

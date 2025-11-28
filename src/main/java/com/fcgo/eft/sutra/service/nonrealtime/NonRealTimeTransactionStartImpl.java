@@ -69,7 +69,6 @@ public class NonRealTimeTransactionStartImpl implements NonRealTimeTransactionSt
                     String purpose = batch.getPurpose();
                     String batchId = batch.getBatchId();
                     int batchCount = batch.getOffus();
-
                     NchlIpsBatchDetail batchDetail = NchlIpsBatchDetail.builder().categoryPurpose(purpose).debtorAgent(agent).debtorBranch(branch).debtorName(name).debtorAccount(account).batchId(batchId).batchCount(batch.getOffus()).batchCrncy("NPR").build();
                     List<NchlIpsTransactionDetailList> data = new ArrayList<>();
 

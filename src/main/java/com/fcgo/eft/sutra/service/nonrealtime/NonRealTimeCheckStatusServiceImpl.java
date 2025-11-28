@@ -37,7 +37,19 @@ public class NonRealTimeCheckStatusServiceImpl implements NonRealTimeCheckStatus
             return;
         }
         log.info("Check status by batch id {} found.", batchId);
-        batch.getNchlIpsTransactionDetailList().forEach(detail -> repository.save(NchlReconciled.builder().instructionId(detail.getInstructionId()).debitStatus(batch.getDebitStatus()).debitMessage(batch.getDebitReasonDesc()).creditStatus(detail.getCreditStatus()).creditMessage(detail.getReasonDesc()).recDate(detail.getRecDate()).transactionId(detail.getInstructionId() + "").pushed("N").pushedDatetime(time).build()));
+
+        batch.getNchlIpsTransactionDetailList()
+                .forEach(detail -> repository.save(NchlReconciled.builder()
+                        .instructionId(detail.getInstructionId())
+                        .debitStatus(batch.getDebitStatus())
+                        .debitMessage(batch.getDebitReasonDesc())
+                        .creditStatus(detail.getCreditStatus())
+                        .creditMessage(detail.getReasonDesc())
+                        .recDate(detail.getRecDate())
+                        .transactionId(batch.getId() + "")
+                        .pushedDatetime(time)
+                        .pushed("N")
+                        .build()));
     }
 
 

@@ -19,7 +19,6 @@ public class SuTRAProcessingStatus {
     private final NchlReconciledRepository reconciledRepository;
     private final TransactionStatusUpdate statusUpdate;
     private final EftBatchPaymentDetailRepository detailRepository;
-        private final AccEpaymentRepository epaymentRepository;
     private final DbPrimary dbPrimary;
 
     public void check(long eftNo) {
@@ -33,8 +32,7 @@ public class SuTRAProcessingStatus {
                 if (batchPaymentDetail.isPresent()) {
                     log.info("Transaction found in EftBatchPaymentDetail: {}", instructionId);
                 } else {
-                    dbPrimary.update("update acc_epayment set transtatus=1,pstatus=0 where eftno="+eftNo);
-//                    epaymentRepository.updateRevertInSuTra(eftNo);
+                    dbPrimary.update("update acc_epayment set transtatus=1,pstatus=0 where eftno=" + eftNo);
                     log.info("EFT No. {} has been reverted to sutra", eftNo);
                 }
             }

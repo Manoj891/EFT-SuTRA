@@ -2,6 +2,7 @@ package com.fcgo.eft.sutra.service.realtime;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fcgo.eft.sutra.configure.StringToJsonNode;
+import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
 import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
 import com.fcgo.eft.sutra.service.RealTimeCheckStatusService;
 import com.fcgo.eft.sutra.service.ReconciledTransactionService;
@@ -91,85 +92,90 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
 
         JsonNode node = jsonNode.toJsonNode(res);
         if (node != null) {
-            String instructionId = node.path("batchId").asText();
-            long id = node.path("id").asLong();
-            String recDate = node.path("recDate").asText();
-            String batchCrncy = node.path("batchCrncy").asText();
-            String categoryPurpose = node.path("categoryPurpose").asText();
-            String debtorAgent = node.path("debtorAgent").asText();
-            String debtorBranch = node.path("debtorBranch").asText();
-            String debtorName = node.path("debtorName").asText();
-            String debtorAccount = node.path("debtorAccount").asText();
+            String id = node.path("id").asText();
             String debitStatus = node.path("debitStatus").asText();
-            String settlementDate = node.path("settlementDate").asText();
             String debitReasonDesc = node.path("debitReasonDesc").asText();
-            RealTimeTransaction batch = RealTimeTransaction.builder()
-                    .id(id)
-                    .batchId(instructionId)
-                    .recDate(recDate)
-                    .batchCrncy(batchCrncy)
-                    .categoryPurpose(categoryPurpose)
-                    .debtorAgent(debtorAgent)
-                    .debtorBranch(debtorBranch)
-                    .debtorName(debtorName)
-                    .debtorAccount(debtorAccount)
-                    .debitStatus(debitStatus)
-                    .debitReasonDesc(debitReasonDesc)
-                    .settlementDate(settlementDate)
-                    .txnResponse(debitReasonDesc)
-                    .build();
-            jsonNode.toJsonNode(node.get("cipsTransactionDetailList").toString())
-                    .forEach(d -> {
-                        long did = d.path("id").asLong();
+//            String recDate = node.path("recDate").asText();
+//            String batchCrncy = node.path("batchCrncy").asText();
+//            String categoryPurpose = node.path("categoryPurpose").asText();
+//            String debtorAgent = node.path("debtorAgent").asText();
+//            String debtorBranch = node.path("debtorBranch").asText();
+//            String debtorName = node.path("debtorName").asText();
+//            String debtorAccount = node.path("debtorAccount").asText();
 
-                        Date dRecDate = null;
-                        try {
-                            dRecDate = jsonNode.getDateFormat().parse(d.path("recDate").asText());
-                        } catch (Exception ignored) {
-                        }
-                        String endToEndId = d.path("endToEndId").asText();
-                        double amount = d.path("amount").asDouble();
-                        double chargeAmount = d.path("chargeAmount").asDouble();
-                        String chargeLiability = d.path("chargeLiability").asText();
-                        String purpose = d.path("purpose").asText();
-                        String creditorAgent = d.path("creditorAgent").asText();
-                        String creditorBranch = d.path("creditorBranch").asText();
-                        String creditorName = d.path("creditorName").asText();
-                        String creditorAccount = d.path("creditorAccount").asText();
-                        long addenda1 = d.path("addenda1").asLong();
-                        String addenda2 = d.path("addenda2").asText();
-                        String addenda3 = d.path("addenda3").asText();
-                        String addenda4 = d.path("addenda4").asText();
-                        String creditStatus = d.path("creditStatus").asText();
-                        String reasonDesc = d.path("reasonDesc").asText();
-                        String refId = d.path("refId").asText();
-                        String particulars = d.path("particulars").asText();
-                        RealTimeTransactionDetail detail = RealTimeTransactionDetail.builder()
-                                .id(did)
-                                .recDate(dRecDate)
-                                .instructionId(Long.parseLong(instructionId))
-                                .endToEndId(endToEndId)
-                                .chargeLiability(chargeLiability)
-                                .purpose(purpose)
-                                .creditStatus(creditStatus)
-                                .reasonCode(reasonDesc)
-                                .remarks(reasonDesc)
-                                .particulars(particulars)
-                                .reasonDesc(reasonDesc)
-                                .amount(amount)
-                                .chargeAmount(chargeAmount)
-                                .creditorAgent(creditorAgent)
-                                .creditorBranch(creditorBranch)
-                                .creditorName(creditorName)
-                                .creditorAccount(creditorAccount)
-                                .addenda1(addenda1)
-                                .addenda2(addenda2)
-                                .addenda3(addenda3)
-                                .addenda4(addenda4)
-                                .refId(refId)
-                                .build();
-                        reconciledTransactionService.save(batch, detail, time);
-                    });
+//            String settlementDate = node.path("settlementDate").asText();
+
+//            RealTimeTransaction batch = RealTimeTransaction.builder()
+//                    .id(id)
+//                    .batchId(instructionId)
+//                    .recDate(recDate)
+//                    .batchCrncy(batchCrncy)
+//                    .categoryPurpose(categoryPurpose)
+//                    .debtorAgent(debtorAgent)
+//                    .debtorBranch(debtorBranch)
+//                    .debtorName(debtorName)
+//                    .debtorAccount(debtorAccount)
+//                    .debitStatus(debitStatus)
+//                    .debitReasonDesc(debitReasonDesc)
+//                    .settlementDate(settlementDate)
+//                    .txnResponse(debitReasonDesc)
+//                    .build();
+
+            node.get("cipsTransactionDetailList").forEach(d -> {
+                Date dRecDate = null;
+                try {
+                    dRecDate = jsonNode.getDateFormat().parse(d.path("recDate").asText());
+                } catch (Exception ignored) {
+                }
+                long instructionId = d.path("instructionId").asLong();
+                String creditStatus = d.path("creditStatus").asText();
+                String reasonDesc = d.path("reasonDesc").asText();
+                reconciledRepository.save(NchlReconciled.builder().instructionId(instructionId).debitStatus(debitStatus).debitMessage(debitReasonDesc).creditStatus(creditStatus).creditMessage(reasonDesc).recDate(dRecDate).transactionId(id).pushed("N").pushedDatetime(time).build());
+                log.info("InstructionId: {} status: {} {}", instructionId, creditStatus, reasonDesc);
+//                        String endToEndId = d.path("endToEndId").asText();
+//                        double amount = d.path("amount").asDouble();
+//                        double chargeAmount = d.path("chargeAmount").asDouble();
+//                        String chargeLiability = d.path("chargeLiability").asText();
+//                        String purpose = d.path("purpose").asText();
+//                        String creditorAgent = d.path("creditorAgent").asText();
+//                        String creditorBranch = d.path("creditorBranch").asText();
+//                        String creditorName = d.path("creditorName").asText();
+//                        String creditorAccount = d.path("creditorAccount").asText();
+//                        long addenda1 = d.path("addenda1").asLong();
+//                        String addenda2 = d.path("addenda2").asText();
+//                        String addenda3 = d.path("addenda3").asText();
+//                        String addenda4 = d.path("addenda4").asText();
+
+//                        String refId = d.path("refId").asText();
+//                        String particulars = d.path("particulars").asText();
+//                        RealTimeTransactionDetail detail = RealTimeTransactionDetail.builder()
+//                                .id(did)
+//                                .recDate(dRecDate)
+//                                .instructionId(Long.parseLong(instructionId))
+//                                .endToEndId(endToEndId)
+//                                .chargeLiability(chargeLiability)
+//                                .purpose(purpose)
+//                                .creditStatus(creditStatus)
+//                                .reasonCode(reasonDesc)
+//                                .remarks(reasonDesc)
+//                                .particulars(particulars)
+//                                .reasonDesc(reasonDesc)
+//                                .amount(amount)
+//                                .chargeAmount(chargeAmount)
+//                                .creditorAgent(creditorAgent)
+//                                .creditorBranch(creditorBranch)
+//                                .creditorName(creditorName)
+//                                .creditorAccount(creditorAccount)
+//                                .addenda1(addenda1)
+//                                .addenda2(addenda2)
+//                                .addenda3(addenda3)
+//                                .addenda4(addenda4)
+//                                .refId(refId)
+//                                .build();
+//                        reconciledTransactionService.save(batch, detail, time);
+
+
+            });
 
         }
 

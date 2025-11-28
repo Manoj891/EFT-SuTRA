@@ -3,12 +3,8 @@ package com.fcgo.eft.sutra.service.realtime;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.res.EftPaymentRequestDetailProjection;
-import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
-import com.fcgo.eft.sutra.exception.CustomException;
-import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.service.RealTimeCheckStatusService;
-import com.fcgo.eft.sutra.service.impl.CheckTransactionList;
 import com.fcgo.eft.sutra.service.impl.NchlReconciledService;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
 import com.fcgo.eft.sutra.token.TokenGenerate;
@@ -25,14 +21,12 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.text.DecimalFormat;
-
 import java.util.Date;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class RealTimeTransactionServiceImpl implements RealTimeTransactionService {
-
     @Value("${nchl.npi.url}")
     private String url;
     private final NchlOauthToken oauthToken;
@@ -80,14 +74,17 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                 .bodyToMono(String.class)
                 .onErrorResume(e -> Mono.empty())   // safety: catch any unexpected errors
                 .block();
-        handelSuccess(response, instructionId, tryCount, dateTime);
+        try {
+            handelSuccess(response, instructionId, tryCount, dateTime);
+        } catch (Exception ignored) {
+        }
 
     }
 
     private void handelSuccess(String response, String instructionId, int tryCount, long dateTime) {
-
         JsonNode node = response != null ? jsonNode.toJsonNode(response) : null;
         if (node != null) {
+            repository.updateRealTimeTransactionStatus("SENT", dateTime, (tryCount + 1), instructionId);
             try {
                 JsonNode n = node.get("cipsBatchResponse");
                 String code = n.get("responseCode").asText();
@@ -97,7 +94,7 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                         String creditStatus = nd.get("creditStatus").asText();
                         if (creditStatus.equalsIgnoreCase("000")) {
                             try {
-                                success(tryCount, dateTime, instructionId, nd.get("id").asText());
+                                success(instructionId, nd.get("id").asText());
                             } catch (Exception e) {
                                 log.info("{} {} {}", code, message, instructionId);
                                 realTime.checkStatusByInstructionId(instructionId, tryCount);
@@ -116,8 +113,23 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
         }
     }
 
-    private void handelError(String errorBody, String instructionId, int tryCount, long dateTime) {
+    private boolean getStatus(String code) {
+        return (code.equalsIgnoreCase("E001")
+                || code.equalsIgnoreCase("E002")
+                || code.equalsIgnoreCase("E003")
+                || code.equalsIgnoreCase("E004")
+                || code.equalsIgnoreCase("E005")
+                || code.equalsIgnoreCase("E006")
+                || code.equalsIgnoreCase("E007")
+                || code.equalsIgnoreCase("E008")
+                || code.equalsIgnoreCase("E009")
+                || code.equalsIgnoreCase("E010")
+                || code.equalsIgnoreCase("E011")
+                || code.equalsIgnoreCase("E012"));
+    }
 
+    private void handelError(String errorBody, String instructionId, int tryCount, long dateTime) {
+        repository.updateRealTimeTransactionStatus("SENT", dateTime, (tryCount + 1), instructionId);
         try {
             JsonNode node = jsonNode.toJsonNode(errorBody);
             if (node != null) {
@@ -155,20 +167,6 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
         }
     }
 
-    private boolean getStatus(String code) {
-        return (code.equalsIgnoreCase("E001")
-                || code.equalsIgnoreCase("E002")
-                || code.equalsIgnoreCase("E003")
-                || code.equalsIgnoreCase("E004")
-                || code.equalsIgnoreCase("E005")
-                || code.equalsIgnoreCase("E006")
-                || code.equalsIgnoreCase("E007")
-                || code.equalsIgnoreCase("E008")
-                || code.equalsIgnoreCase("E009")
-                || code.equalsIgnoreCase("E010")
-                || code.equalsIgnoreCase("E011")
-                || code.equalsIgnoreCase("E012"));
-    }
 
     private void getErrorE0N(int tryCount, String code, String description, String instructionId, long dateTime) {
         int count = (tryCount + 1);
@@ -190,8 +188,7 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
         reconciledRepository.save(eftNo, "EFT", "SuTRA", code, description, instructionId, new Date());
     }
 
-    private void success(int finalTryCount, long dateTime, String instructionId, String id) {
-        repository.updateRealTimeTransactionStatus("SENT", dateTime, (finalTryCount + 1), instructionId);
+    private void success(String instructionId, String id) {
         long eftNo = Long.parseLong(instructionId);
         reconciledRepository.save(eftNo, "000", "-", "000", "SUCCESS", id, new Date());
         log.info("REAL TIME TRANSACTION PUSHED IN NCHL {} SUCCESS", instructionId);

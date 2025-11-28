@@ -50,7 +50,7 @@ public class TransactionCheckStatus {
         loginService.init();
         tryForNextAttempt();
         if (isProdService.isProdService()) {
-            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
+            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(0).onus(1).build()));
         }
     }
 
@@ -67,7 +67,7 @@ public class TransactionCheckStatus {
             epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
             repository.updateMissingStatusSent();
             tryForNextAttempt();
-            tryTimeOutToReject();
+//            tryTimeOutToReject();
             executor.submit(() -> repository.findByPushed("N").forEach(statusUpdate::update));
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
         }
@@ -93,7 +93,7 @@ public class TransactionCheckStatus {
                     }
                 });
                 tryForNextAttempt();
-                tryTimeOutToReject();
+//                tryTimeOutToReject();
                 repository.updateMissingStatusSent();
                 repository.findByPushed("N").forEach(statusUpdate::update);
             });
@@ -114,7 +114,7 @@ public class TransactionCheckStatus {
             log.info("Non Real Time Status Completed {}", date);
             repository.updateMissingStatusSent();
             tryForNextAttempt();
-            tryTimeOutToReject();
+//            tryTimeOutToReject();
         }
     }
 

@@ -52,7 +52,7 @@ public class TransactionCheckStatus {
         isProdService.init();
         loginService.init();
         tryForNextAttempt();
-        if (isProdService.isProdService()) {
+        if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(0).onus(1).build()));
         }
     }

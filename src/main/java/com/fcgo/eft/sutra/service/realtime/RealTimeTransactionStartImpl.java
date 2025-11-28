@@ -50,7 +50,7 @@ public class RealTimeTransactionStartImpl implements RealTimeTransactionStart {
                 break;
             }
             started = true;
-
+            System.out.println("Total size: " + list.size());
             list.forEach(d -> {
                 try {
                     long time = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));

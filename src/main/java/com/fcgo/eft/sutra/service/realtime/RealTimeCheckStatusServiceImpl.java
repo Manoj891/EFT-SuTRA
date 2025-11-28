@@ -70,13 +70,14 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
 
     @Override
     public Object checkStatusByInstructionId(String instructionId, int times) {
-        long time = new Date().getTime();
+
         String res = null;
 
         try {
+            long pushedDatetime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
             res = getRealTimeByBatch(instructionId);
             if (res != null && res.length() > 50) {
-                convert(res, time);
+                convert(res, pushedDatetime);
             } else if (times >= 15) {
                 failure(instructionId);
             } else log.info(res);
@@ -86,7 +87,7 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
         return res;
     }
 
-    public void convert(String res, long time) {
+    public void convert(String res, long pushedDatetime) {
 
         JsonNode node = jsonNode.toJsonNode(res);
         if (node != null) {
@@ -102,7 +103,7 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
                 long instructionId = d.path("instructionId").asLong();
                 String creditStatus = d.path("creditStatus").asText();
                 String reasonDesc = d.path("reasonDesc").asText();
-                reconciledRepository.save(NchlReconciled.builder().instructionId(instructionId).debitStatus(debitStatus).debitMessage(debitReasonDesc).creditStatus(creditStatus).creditMessage(reasonDesc).recDate(dRecDate).transactionId(id).pushed("N").pushedDatetime(time).build());
+                reconciledRepository.save(NchlReconciled.builder().instructionId(instructionId).debitStatus(debitStatus).debitMessage(debitReasonDesc).creditStatus(creditStatus).creditMessage(reasonDesc).recDate(dRecDate).transactionId(id).pushed("N").pushedDatetime(pushedDatetime).build());
                 log.info("InstructionId: {} status: {} {}", instructionId, creditStatus, reasonDesc);
             });
 

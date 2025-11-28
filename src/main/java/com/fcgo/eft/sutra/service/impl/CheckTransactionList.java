@@ -22,19 +22,16 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class CheckTransactionList {
-    private final AccEpaymentRepository epaymentRepository;
     private final NchlReconciledRepository reconciledRepository;
     private final StringToJsonNode jsonNode;
     private final DB2nd db2nd;
 
 
     public synchronized List<EftPaymentRequestDetailProjection> getList(List<EftPaymentRequestDetailProjection> l1, List<EftPaymentRequestDetailProjection> l2) {
-        log.info("getList {} {}", l1.size(), l2.size());
         List<EftPaymentRequestDetailProjection> list = new ArrayList<>();
         try {
             l1.forEach(d -> {
                 long eftNo = Long.parseLong(d.getInstructionId());
-                log.info("eftNo: {}", eftNo);
                 try {
                     EftStatus status = db2nd.getRecord(d.getInstructionId());
                     if (status != null) {
@@ -51,7 +48,6 @@ public class CheckTransactionList {
 
             l2.forEach(d -> {
                 long eftNo = Long.parseLong(d.getInstructionId());
-                log.info("eftNo: {}", eftNo);
                 try {
                     EftStatus status = db2nd.getRecord(d.getInstructionId());
                     if (status != null) {

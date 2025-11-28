@@ -1,7 +1,7 @@
 package com.fcgo.eft.sutra.util;
 
+import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
-import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,9 @@ import java.util.Date;
 @Transactional(rollbackFor = Exception.class)
 public class TransactionStatusUpdate {
     private final NchlReconciledRepository repository;
-    private final AccEpaymentRepository epaymentRepository;
+    private final DbPrimary dbPrimary;
+    private final StringToJsonNode jsonNode;
+
 
     public void update(NchlReconciled reconciled) {
         try {
@@ -30,11 +32,14 @@ public class TransactionStatusUpdate {
             } else if (status.equals("000") || status.equals("ACSC")) {
                 updateSuccessStatus(reconciled.getRecDate(), instructionId);
             } else if (getRejectStatus(status)) {
-                updateFailureStatus("CR. ("+status+") "+ reconciled.getCreditMessage() + " DR. " + reconciled.getDebitMessage(), instructionId);
+                updateFailureStatus("CR. (" + status + ") " + reconciled.getCreditMessage() + " DR. " + reconciled.getDebitMessage(), instructionId);
             } else {
-                String message = (reconciled.getCreditMessage() == null ? status : reconciled.getCreditMessage()) + " DR. " + reconciled.getDebitMessage();
+                String message = (reconciled.getCreditMessage() == null ?
+                        status : reconciled.getCreditMessage()) + " DR. " + reconciled.getDebitMessage()
+                        .replace("'", "");
                 log.info("Message updated {} {} ", message, instructionId);
-                epaymentRepository.updateMessage(message, instructionId);
+                dbPrimary.update("update acc_epayment set StatusMessage='" + message + "' where eftno=" + instructionId);
+
             }
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -73,14 +78,27 @@ public class TransactionStatusUpdate {
     private void updateFailureStatus(String creditMessage, long instructionId) {
         if (creditMessage == null || creditMessage.length() < 3) creditMessage = "Clearly message not found.";
         else if (creditMessage.length() > 500) creditMessage = creditMessage.substring(0, 495);
-        epaymentRepository.updateFailureEPayment(creditMessage, instructionId);
-        repository.updateStatus(String.valueOf(instructionId));
-        log.info("Updated reconciled status: {} failure", instructionId);
+        try {
+            int i = dbPrimary.update("update acc_epayment set pstatus=-1, StatusMessage='" + creditMessage + "' where eftno=" + instructionId);
+            if (i > 0) {
+                repository.updateStatus(String.valueOf(instructionId));
+                log.info("Updated reconciled status: {} failure", instructionId);
+            }
+
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+        }
     }
 
     private void updateSuccessStatus(Date recDate, long instructionId) {
-        epaymentRepository.updateSuccessEPayment("SUCCESS", recDate, instructionId);
-        repository.updateStatus(String.valueOf(instructionId));
-        log.info("Updated reconciled status: {} Success", instructionId);
+        try {
+            int i = dbPrimary.update("update acc_epayment set transtatus=2,pstatus=1,StatusMessage='SUCCESS', paymentdate='" + jsonNode.getDateTime().format(recDate) + "' where eftno=" + instructionId);
+            if (i > 0) {
+                repository.updateStatus(String.valueOf(instructionId));
+                log.info("Updated reconciled status: {} Success", instructionId);
+            }
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+        }
     }
 }

@@ -18,7 +18,7 @@ public class StringToJsonNodeImpl implements StringToJsonNode {
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final SimpleDateFormat yyMMdd = new SimpleDateFormat("yyMMdd");
     private final SimpleDateFormat yyyyMMddHHmmss = new SimpleDateFormat("yyyyMMddHHmmss");
-
+    private final SimpleDateFormat dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public JsonNode toJsonNode(String jsonData) {
         try {
             return mapper.readTree(factory.createParser(jsonData));
@@ -31,6 +31,11 @@ public class StringToJsonNodeImpl implements StringToJsonNode {
     @Override
     public SimpleDateFormat getYyyyMMddHHmmss() {
         return yyyyMMddHHmmss;
+    }
+
+    @Override
+    public SimpleDateFormat getDateTime() {
+        return dateTime;
     }
 
     @Override

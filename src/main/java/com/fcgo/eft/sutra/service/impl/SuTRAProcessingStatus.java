@@ -6,6 +6,7 @@ import com.fcgo.eft.sutra.exception.CustomException;
 import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
+import com.fcgo.eft.sutra.util.DbPrimary;
 import com.fcgo.eft.sutra.util.TransactionStatusUpdate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,8 @@ public class SuTRAProcessingStatus {
     private final NchlReconciledRepository reconciledRepository;
     private final TransactionStatusUpdate statusUpdate;
     private final EftBatchPaymentDetailRepository detailRepository;
-    private final AccEpaymentRepository epaymentRepository;
+        private final AccEpaymentRepository epaymentRepository;
+    private final DbPrimary dbPrimary;
 
     public void check(long eftNo) {
         try {
@@ -34,7 +36,8 @@ public class SuTRAProcessingStatus {
                 if (batchPaymentDetail.isPresent()) {
                     log.info("Transaction found in EftBatchPaymentDetail: {}", instructionId);
                 } else {
-                    epaymentRepository.updateRevertInSuTra(eftNo);
+                    dbPrimary.update("update acc_epayment set transtatus=1,pstatus=0 where eftno="+eftNo);
+//                    epaymentRepository.updateRevertInSuTra(eftNo);
                     log.info("EFT No. {} has been reverted to sutra", eftNo);
                 }
             }

@@ -13,4 +13,5 @@ public interface StringToJsonNode {
     SimpleDateFormat getYyMMdd();
 
     SimpleDateFormat getYyyyMMddHHmmss();
+    SimpleDateFormat getDateTime();
 }

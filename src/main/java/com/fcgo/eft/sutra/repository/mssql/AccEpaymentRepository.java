@@ -18,9 +18,6 @@ public interface AccEpaymentRepository extends JpaRepository<AccEpayment, Long> 
 
     Optional<AccEpayment> findByEftNo(long eftNo);
 
-    @Query(value = "  select transtatus,pstatus from acc_epayment where eftno=?1", nativeQuery = true)
-    Optional<EftStatus> findAccEpaymentByEftNo(long eftNo);
-
     @Query(value = "select eftno from acc_epayment where transtatus =2 and pstatus=2  and paymentdate < dateadd(minute, -30, getdate())", nativeQuery = true)
     List<Long> updateSuccessEPayment();
 
@@ -28,24 +25,4 @@ public interface AccEpaymentRepository extends JpaRepository<AccEpayment, Long> 
     @Transactional
     @Query(value = "update acc_epayment set transtatus=2,pstatus=2,paymentdate=GETDATE() where eftno=?1", nativeQuery = true)
     void updateStatusProcessing(long instructionId);
-
-    @Modifying
-    @Transactional
-    @Query(value = "update acc_epayment set transtatus=1,pstatus=0 where eftno=?1", nativeQuery = true)
-    void updateRevertInSuTra(long instructionId);
-
-    @Modifying
-    @Transactional
-    @Query(value = "update acc_epayment set transtatus=2,pstatus=1,StatusMessage=?1, paymentdate=?2 where eftno=?3", nativeQuery = true)
-    void updateSuccessEPayment(String message, Date settelmentDate, long instructionId);
-
-    @Modifying
-    @Transactional
-    @Query(value = "update acc_epayment set pstatus=-1, StatusMessage=?1 where eftno=?2", nativeQuery = true)
-    void updateFailureEPayment(String message, long instructionId);
-
-    @Modifying
-    @Transactional
-    @Query(value = "update acc_epayment set StatusMessage=?1 where eftno=?2", nativeQuery = true)
-    void updateMessage(String message, long instructionId);
 }

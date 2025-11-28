@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 @Slf4j
@@ -17,8 +18,9 @@ public class StringToJsonNodeImpl implements StringToJsonNode {
     private final JsonFactory factory = mapper.getFactory();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final SimpleDateFormat yyMMdd = new SimpleDateFormat("yyMMdd");
-    private final SimpleDateFormat yyyyMMddHHmmss = new SimpleDateFormat("yyyyMMddHHmmss");
+    private static final SimpleDateFormat yyyyMMddHHmmss = new SimpleDateFormat("yyyyMMddHHmmss");
     private final SimpleDateFormat dateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     public JsonNode toJsonNode(String jsonData) {
         try {
             return mapper.readTree(factory.createParser(jsonData));
@@ -46,5 +48,9 @@ public class StringToJsonNodeImpl implements StringToJsonNode {
     @Override
     public SimpleDateFormat getDateFormat() {
         return dateFormat;
+    }
+
+    public static long getDateTimeLong() {
+        return Long.parseLong(yyyyMMddHHmmss.format(new Date()));
     }
 }

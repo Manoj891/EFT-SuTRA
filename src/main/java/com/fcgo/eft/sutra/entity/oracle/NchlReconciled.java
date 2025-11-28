@@ -1,5 +1,6 @@
 package com.fcgo.eft.sutra.entity.oracle;
 
+import com.fcgo.eft.sutra.configure.StringToJsonNodeImpl;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,6 +18,7 @@ import java.util.Date;
         @Index(name = "INDEX_NCHL_RECONCILED_CREDIT_STATUS", columnList = "CREDIT_STATUS")
 })
 public class NchlReconciled {
+
     @Id
     @Column(name = "INSTRUCTION_ID", length = 30, nullable = false)
     private long instructionId;
@@ -43,12 +45,15 @@ public class NchlReconciled {
     private LocalDateTime updatedAt;
 
     @Column(name = "PUSHED_DATETIME")
-    private long pushedDatetime;
+    private Long pushedDatetime;
 
     @PrePersist
     @PreUpdate
     public void setUpdatedAt() {
         this.updatedAt = LocalDateTime.now();
+        if (pushedDatetime == null) {
+            pushedDatetime = StringToJsonNodeImpl.getDateTimeLong();
+        }
     }
 
 }

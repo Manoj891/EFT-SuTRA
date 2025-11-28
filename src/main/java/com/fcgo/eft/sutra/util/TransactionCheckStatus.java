@@ -66,8 +66,6 @@ public class TransactionCheckStatus {
             headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
             headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
             headOfficeRepository.updatePaymentPendingStatusDetail();
-
-            epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
             repository.updateMissingStatusSent();
             tryForNextAttempt();
 //            tryTimeOutToReject();
@@ -78,7 +76,7 @@ public class TransactionCheckStatus {
 
     @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
     public void executeStatus() {
-        if (isProdService.isProdService()  && port.equalsIgnoreCase("7891")) {
+        if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
             executor.submit(() -> {
                 repository.findRealTimePendingInstructionId().forEach(instructionId -> {
                     realTime.checkStatusByInstructionId(instructionId, 0);
@@ -105,7 +103,7 @@ public class TransactionCheckStatus {
 
     @Scheduled(cron = "0 05 00 * * *")
     public void executeCheckTransactionStatus() {
-        if (isProdService.isProdService()  && port.equalsIgnoreCase("7891")) {
+        if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(new Date());
             calendar.add(Calendar.DATE, -1);
@@ -123,7 +121,7 @@ public class TransactionCheckStatus {
 
     @Scheduled(cron = "0 01 02 * * *")
     public void fetchBankAccountDetails() {
-        if (isProdService.isProdService()  && port.equalsIgnoreCase("7891")) {
+        if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
             bankAccountDetailsService.fetchBankAccountDetails();
         }
     }

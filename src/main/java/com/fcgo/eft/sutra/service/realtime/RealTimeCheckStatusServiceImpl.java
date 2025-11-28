@@ -2,11 +2,9 @@ package com.fcgo.eft.sutra.service.realtime;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fcgo.eft.sutra.configure.StringToJsonNode;
-import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
 import com.fcgo.eft.sutra.service.RealTimeCheckStatusService;
 import com.fcgo.eft.sutra.service.ReconciledTransactionService;
-import com.fcgo.eft.sutra.service.impl.NchlReconciledService;
 import com.fcgo.eft.sutra.service.realtime.response.ByDatePostCipsByDateResponseWrapper;
 import com.fcgo.eft.sutra.service.realtime.response.RealTimeTransaction;
 import com.fcgo.eft.sutra.service.realtime.response.RealTimeTransactionDetail;

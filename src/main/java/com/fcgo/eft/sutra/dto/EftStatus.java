@@ -1,8 +1,17 @@
 package com.fcgo.eft.sutra.dto;
 
-public interface EftStatus {
-    int getTranstatus();
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-    Integer getPstatus();
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class EftStatus {
+    int transtatus;
+
+    int pstatus;
 
 }

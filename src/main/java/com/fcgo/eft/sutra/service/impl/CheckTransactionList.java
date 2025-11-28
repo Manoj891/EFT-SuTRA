@@ -6,7 +6,9 @@ import com.fcgo.eft.sutra.dto.res.EftPaymentRequestDetailProjection;
 import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
 import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
+import com.fcgo.eft.sutra.util.DB2nd;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 
@@ -16,21 +18,27 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CheckTransactionList {
     private final AccEpaymentRepository epaymentRepository;
     private final NchlReconciledRepository reconciledRepository;
     private final StringToJsonNode jsonNode;
+    private final DB2nd db2nd;
+
+
     public synchronized List<EftPaymentRequestDetailProjection> getList(List<EftPaymentRequestDetailProjection> l1, List<EftPaymentRequestDetailProjection> l2) {
+        log.info("getList {} {}", l1.size(), l2.size());
         List<EftPaymentRequestDetailProjection> list = new ArrayList<>();
         try {
             l1.forEach(d -> {
                 long eftNo = Long.parseLong(d.getInstructionId());
+                log.info("eftNo: {}", eftNo);
                 try {
-                    Optional<EftStatus> status = epaymentRepository.findAccEpaymentByEftNo(eftNo);
-                    if (status.isPresent()) {
-                        EftPaymentRequestDetailProjection obj = getData(status.get(), d, eftNo);
+                    EftStatus status = db2nd.getRecord(d.getInstructionId());
+                    if (status != null) {
+                        EftPaymentRequestDetailProjection obj = getData(status, d, eftNo);
                         if (obj != null) {
                             list.add(obj);
                         }
@@ -43,10 +51,11 @@ public class CheckTransactionList {
 
             l2.forEach(d -> {
                 long eftNo = Long.parseLong(d.getInstructionId());
+                log.info("eftNo: {}", eftNo);
                 try {
-                    Optional<EftStatus> status = epaymentRepository.findAccEpaymentByEftNo(eftNo);
-                    if (status.isPresent()) {
-                        EftPaymentRequestDetailProjection obj = getData(status.get(), d, eftNo);
+                    EftStatus status = db2nd.getRecord(d.getInstructionId());
+                    if (status != null) {
+                        EftPaymentRequestDetailProjection obj = getData(status, d, eftNo);
                         if (obj != null) {
                             list.add(obj);
                         }

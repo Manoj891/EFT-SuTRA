@@ -44,12 +44,9 @@ public class RealTimeTransactionStartImpl implements RealTimeTransactionStart {
     public synchronized void start() {
         while (true) {
             long start = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())) - 1500;
-            List<EftPaymentRequestDetailProjection> list =
-                    checkTransactionList.getList(
-                            repository.findRealTimePending()
-                            , repository.findRealTimePending(start)
-                    );
+            List<EftPaymentRequestDetailProjection> list = checkTransactionList.getList(repository.findRealTimePending(), repository.findRealTimePending(start));
             if (list.isEmpty()) {
+                log.info("LIST SIZE 0");
                 started = false;
                 break;
             }
@@ -64,6 +61,7 @@ public class RealTimeTransactionStartImpl implements RealTimeTransactionStart {
                     log.error("Real Time Transaction Start ERROR:{}", e.getMessage());
                 }
             });
+            if (true) break;
             int activeThread = executor.getActiveCount();
             while (activeThread > 5) {
                 int sleep;

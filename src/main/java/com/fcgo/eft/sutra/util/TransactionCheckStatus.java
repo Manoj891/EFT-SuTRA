@@ -12,6 +12,7 @@ import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeCheckStatusService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +42,8 @@ public class TransactionCheckStatus {
     private final ThreadPoolExecutor executor;
     private final LoginService loginService;
     private final StringToJsonNode jsonNode;
+    @Value("${server.port}")
+    private String port;
 
     @PostConstruct
     public void executePostConstruct() {
@@ -56,7 +59,7 @@ public class TransactionCheckStatus {
 
     @Scheduled(cron = "0 30 08,09,10,11,12,13,14,15,16,17,18,20,22 * * *")
     public void executeEveryHour30Min() {
-        if (isProdService.isProdService()) {
+        if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
             long startTime = 20251018000000L;
             long dateTime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())) - (12000);
 
@@ -75,7 +78,7 @@ public class TransactionCheckStatus {
 
     @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
     public void executeStatus() {
-        if (isProdService.isProdService()) {
+        if (isProdService.isProdService()  && port.equalsIgnoreCase("7891")) {
             executor.submit(() -> {
                 repository.findRealTimePendingInstructionId().forEach(instructionId -> {
                     realTime.checkStatusByInstructionId(instructionId, 0);
@@ -102,7 +105,7 @@ public class TransactionCheckStatus {
 
     @Scheduled(cron = "0 05 00 * * *")
     public void executeCheckTransactionStatus() {
-        if (isProdService.isProdService()) {
+        if (isProdService.isProdService()  && port.equalsIgnoreCase("7891")) {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(new Date());
             calendar.add(Calendar.DATE, -1);
@@ -120,7 +123,7 @@ public class TransactionCheckStatus {
 
     @Scheduled(cron = "0 01 02 * * *")
     public void fetchBankAccountDetails() {
-        if (isProdService.isProdService()) {
+        if (isProdService.isProdService()  && port.equalsIgnoreCase("7891")) {
             bankAccountDetailsService.fetchBankAccountDetails();
         }
     }

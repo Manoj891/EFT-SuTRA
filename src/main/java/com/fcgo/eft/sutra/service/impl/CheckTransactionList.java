@@ -35,9 +35,13 @@ public class CheckTransactionList {
                 try {
                     EftStatus status = db2nd.getRecord(d.getInstructionId());
                     if (status != null) {
-                        EftPaymentRequestDetailProjection obj = getData(status, d, eftNo);
-                        if (obj != null) {
-                            list.add(obj);
+                        if (status.getPstatus() == 2) {
+                            EftPaymentRequestDetailProjection obj = getData(status, d, eftNo);
+                            if (obj != null) {
+                                list.add(obj);
+                            }
+                        } else if (status.getPstatus() == -1) {
+                            reject(eftNo);
                         }
                     } else {
                         reject(eftNo);
@@ -51,9 +55,13 @@ public class CheckTransactionList {
                 try {
                     EftStatus status = db2nd.getRecord(d.getInstructionId());
                     if (status != null) {
-                        EftPaymentRequestDetailProjection obj = getData(status, d, eftNo);
-                        if (obj != null) {
-                            list.add(obj);
+                        if (status.getPstatus() == 2) {
+                            EftPaymentRequestDetailProjection obj = getData(status, d, eftNo);
+                            if (obj != null) {
+                                list.add(obj);
+                            }
+                        } else if (status.getPstatus() == -1) {
+                            reject(eftNo);
                         }
                     } else {
                         reject(eftNo);
@@ -73,6 +81,20 @@ public class CheckTransactionList {
             return obj;
         } else if (status.getPstatus() == -1) {
             reject(eftNo);
+        } else if (status.getPstatus() == 1) {
+            long datetime=Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
+            reconciledRepository.save(NchlReconciled.builder().instructionId(eftNo).
+                    debitStatus("000").
+                    debitMessage("-").
+                    creditStatus("000").
+                    creditMessage("Success").
+                    recDate(new Date()).
+                    pushed("N").
+                    transactionId("NA").
+                    updatedAt(LocalDateTime.now())
+                    .pushedDatetime(datetime)
+                    .build());
+            reconciledRepository.updateManualReject(datetime,String.valueOf(eftNo));
         }
         return null;
     }
@@ -88,7 +110,9 @@ public class CheckTransactionList {
                     recDate(new Date()).
                     pushed("N").
                     transactionId("NA").
-                    updatedAt(LocalDateTime.now()).build());
+                    updatedAt(LocalDateTime.now())
+                    .pushedDatetime(Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())))
+                    .build());
             reconciledRepository.updateManualReject(String.valueOf(instructionId));
         } else {
             NchlReconciled reconciled = optional.get();
@@ -97,6 +121,7 @@ public class CheckTransactionList {
                 reconciled.setCreditMessage("Record Not found, Please Conform with bank before new transaction initialized");
                 reconciled.setDebitStatus("097");
                 reconciled.setDebitMessage("Not Found");
+                reconciled.setPushedDatetime(Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())));
                 reconciledRepository.save(reconciled);
                 reconciledRepository.updateManualReject(Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())), String.valueOf(instructionId));
             }

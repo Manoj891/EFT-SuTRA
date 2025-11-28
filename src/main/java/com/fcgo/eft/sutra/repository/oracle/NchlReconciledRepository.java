@@ -42,6 +42,7 @@ public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, 
     @Transactional
     @Query(value = "UPDATE NCHL_RECONCILED  SET PUSHED = 'Y' WHERE INSTRUCTION_ID = ?1", nativeQuery = true)
     void updateStatus(String id);
+
     @Modifying
     @Transactional
     @Query(value = "UPDATE NCHL_RECONCILED  SET CREDIT_STATUS='1000',DEBIT_STATUS='1000',DEBIT_MESSAGE='Rejected' WHERE INSTRUCTION_ID = ?1", nativeQuery = true)
@@ -50,7 +51,7 @@ public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, 
     @Modifying
     @Transactional
     @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL  SET NCHL_CREDIT_STATUS='SENT',NCHL_PUSHED_DATE_TIME=?1 WHERE INSTRUCTION_ID = ?1", nativeQuery = true)
-    void updateManualReject(long time,String id);
+    void updateManualReject(long time, String id);
 
     @Modifying
     @Transactional
@@ -60,7 +61,7 @@ public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, 
     @Modifying
     @Transactional
     @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS=null,NCHL_PUSHED_DATE_TIME=NULL WHERE ID =?1", nativeQuery = true)
-    void missingStatusSent(BigInteger  id);
+    void missingStatusSent(BigInteger id);
 
 
     @Modifying

@@ -1,5 +1,6 @@
 package com.fcgo.eft.sutra.service.nonrealtime;
 
+import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.req.CipsFundTransfer;
 import com.fcgo.eft.sutra.dto.req.NchlIpsBatchDetail;
 import com.fcgo.eft.sutra.dto.req.NchlIpsTransactionDetailList;
@@ -9,6 +10,7 @@ import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.service.BankHeadOfficeService;
 import com.fcgo.eft.sutra.util.IsProdService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -31,14 +33,15 @@ public class NonRealTimeTransactionStartImpl implements NonRealTimeTransactionSt
     private final BatchPaymentService service;
     private final BankHeadOfficeService ho;
     private final IsProdService isProdService;
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+    @Autowired
+    private StringToJsonNode jsonNode;
 
     public NonRealTimeTransactionStartImpl(@Qualifier("nonRealTime") ThreadPoolExecutor executor, EftBatchPaymentDetailRepository repository, BatchPaymentService batch, BankHeadOfficeService ho, IsProdService isProdService) {
         this.executor = executor;
         this.repository = repository;
         this.service = batch;
         this.ho = ho;
-        this.isProdService =isProdService;
+        this.isProdService = isProdService;
     }
 
     @Override
@@ -55,7 +58,7 @@ public class NonRealTimeTransactionStartImpl implements NonRealTimeTransactionSt
                 break;
             }
             started = true;
-            long dateTime = Long.parseLong(sdf.format(new Date()));
+            long dateTime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
             list.forEach(batch -> {
                 try {
                     BigInteger id = batch.getId();

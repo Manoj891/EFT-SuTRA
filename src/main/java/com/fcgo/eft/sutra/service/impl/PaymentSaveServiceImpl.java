@@ -1,5 +1,6 @@
 package com.fcgo.eft.sutra.service.impl;
 
+import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.req.*;
 import com.fcgo.eft.sutra.dto.res.PaymentSaved;
 import com.fcgo.eft.sutra.entity.oracle.BankAccountWhitelist;
@@ -31,9 +32,8 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
     private final BankAccountWhitelistRepository bankAccountWhitelistRepository;
     private final AccEpaymentRepository epaymentRepository;
     private final IsProdService isProdService;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    private final SimpleDateFormat yyMMdd = new SimpleDateFormat("yyMMdd");
-    private final SimpleDateFormat yyyyMMddHHmmss = new SimpleDateFormat("yyyyMMddHHmmss");
+    private final StringToJsonNode jsonNode;
+
     private final Map<Long, Boolean> status = new HashMap<>();
     private final Map<String, String> bankMap = new HashMap<>();
 
@@ -76,8 +76,8 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
         }
         String batchId = b.getBatchId();
         Date now = new Date();
-        int date = Integer.parseInt(yyMMdd.format(now));
-        long time = Long.parseLong(yyyyMMddHHmmss.format(now));
+        int date = Integer.parseInt(jsonNode.getYyMMdd().format(now));
+        long time = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(now));
         int sn = repository.findMaxSn(date, b.getPoCode());
         String tempId;
         if (sn < 10) tempId = date + "" + b.getPoCode() + "000" + sn;
@@ -90,7 +90,7 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
         List<EftBatchPaymentDetail> details = new ArrayList<>();
         int rowNo = 1;
         long addenda1 = now.getTime();
-        String addenda2 = dateFormat.format(now);
+        String addenda2 = jsonNode.getDateFormat().format(now);
         int offus = 0, onus = 0;
         for (EftPaymentRequestDetailReq dto : receive.getEftPaymentRequestDetail()) {
             Optional<EftBatchPaymentDetail> optional = detailRepository.findByInstructionId(dto.getInstructionId());
@@ -154,8 +154,8 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
         }
         String batchId = receive.getBatchId();
         Date now = new Date();
-        int date = Integer.parseInt(yyMMdd.format(now));
-        long time = Long.parseLong(yyyyMMddHHmmss.format(now));
+        int date = Integer.parseInt(jsonNode.getYyMMdd().format(now));
+        long time = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(now));
         int sn = repository.findMaxSn(date, receive.getPoCode());
         String tempId;
         if (sn < 10) tempId = date + "" + receive.getPoCode() + "000" + sn;
@@ -168,7 +168,7 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
         List<EftBatchPaymentDetail> details = new ArrayList<>();
         int rowNo = 1;
         long addenda1 = now.getTime();
-        String addenda2 = dateFormat.format(now);
+        String addenda2 = jsonNode.getDateFormat().format(now);
         int offus = 0, onus = 0;
         for (EftPaymentRequestDetailReq dto : receive.getDetails()) {
             Optional<EftBatchPaymentDetail> optional = detailRepository.findByInstructionId(dto.getInstructionId());

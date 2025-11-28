@@ -197,11 +197,9 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
         reconciledRepository.findById(Long.parseLong(instructionId)).ifPresent(reconciled -> {
             if (reconciled.getCreditStatus().equals("SENT")) {
                 reconciledRepository.updateManualReject(instructionId);
-                reconciledRepository.updateManualReject(Long.parseLong(sdf.format(new Date())), instructionId);
+                reconciledRepository.updateManualReject(Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())), instructionId);
                 log.info("Manually rejected {}", instructionId);
             }
         });
     }
-
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 }

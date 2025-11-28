@@ -1,5 +1,6 @@
 package com.fcgo.eft.sutra.service.impl;
 
+import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
 import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import java.util.Date;
 @Transactional(rollbackFor = Exception.class)
 public class NchlReconciledService {
     private final NchlReconciledRepository repository;
+    private final StringToJsonNode jsonNode;
 
     public NchlReconciled save(long instructionId, String debitResponseCode, String debitResponseMessage, String creditStatus, String reasonDesc, String transactionId, Date recDate) {
         if (debitResponseMessage == null || debitResponseMessage.isEmpty()) {
@@ -33,11 +35,7 @@ public class NchlReconciledService {
                 .recDate(recDate)
                 .transactionId(transactionId)
                 .pushed("N")
+                .pushedDatetime(Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())))
                 .build());
-    }
-
-
-    public void updateStatus(String instructionId) {
-        repository.updateStatus(instructionId);
     }
 }

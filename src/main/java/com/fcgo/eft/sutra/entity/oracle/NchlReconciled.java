@@ -42,6 +42,9 @@ public class NchlReconciled {
     @Column(name = "UPDATED_AT")
     private LocalDateTime updatedAt;
 
+    @Column(name = "PUSHED_DATETIME")
+    private long pushedDatetime;
+
     @PrePersist
     @PreUpdate
     public void setUpdatedAt() {

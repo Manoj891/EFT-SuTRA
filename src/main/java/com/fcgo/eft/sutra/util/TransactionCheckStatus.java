@@ -1,5 +1,6 @@
 package com.fcgo.eft.sutra.util;
 
+import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
 import com.fcgo.eft.sutra.repository.mssql.AccEpaymentRepository;
 import com.fcgo.eft.sutra.repository.oracle.BankHeadOfficeRepository;
@@ -39,8 +40,7 @@ public class TransactionCheckStatus {
     private final IsProdService isProdService;
     private final ThreadPoolExecutor executor;
     private final LoginService loginService;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-
+    private final StringToJsonNode jsonNode;
 
     @PostConstruct
     public void executePostConstruct() {
@@ -58,7 +58,7 @@ public class TransactionCheckStatus {
     public void executeEveryHour30Min() {
         if (isProdService.isProdService()) {
             long startTime = 20251018000000L;
-            long dateTime = Long.parseLong(dateFormat.format(new Date())) - (12000);
+            long dateTime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())) - (12000);
 
             headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
             headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
@@ -106,11 +106,7 @@ public class TransactionCheckStatus {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(new Date());
             calendar.add(Calendar.DATE, -1);
-            String yyyyMMdd = dateFormat.format(calendar.getTime());
-            String year = yyyyMMdd.substring(0, 4);
-            String month = yyyyMMdd.substring(4, 6);
-            String day = yyyyMMdd.substring(6, 8);
-            String date = year + "-" + month + "-" + day;
+            String date = jsonNode.getDateFormat().format(calendar.getTime());
             log.info("{} Non Real Time Status", date);
             nonRealTime.checkStatusByDate(date);
             log.info("Non Real Time Status Completed {} Real Time Status", date);

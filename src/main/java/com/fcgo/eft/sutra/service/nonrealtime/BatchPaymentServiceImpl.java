@@ -1,5 +1,6 @@
 package com.fcgo.eft.sutra.service.nonrealtime;
 
+import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.req.CipsFundTransfer;
 import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
@@ -28,9 +29,9 @@ public class BatchPaymentServiceImpl implements BatchPaymentService {
     private final TokenGenerate tokenGenerate;
     private final WebClient webClient;
     private final EftBatchPaymentDetailRepository repository;
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
     private final NonRealTimeCheckStatusService statusService;
     private final ThreadPoolExecutor executor;
+    private final StringToJsonNode jsonNode;
 
 
     @Override
@@ -44,7 +45,7 @@ public class BatchPaymentServiceImpl implements BatchPaymentService {
         }
         try {
             cipsFundTransfer.setToken(tokenGenerate.generateHash(cipsFundTransfer));
-            long dateTime = Long.parseLong(sdf.format(new Date()));
+            long dateTime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
             String res = webClient.post()
                     .uri(apiUrl)
                     .header("Authorization", "Bearer " + accessToken)

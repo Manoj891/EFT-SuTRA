@@ -3,17 +3,24 @@ package com.fcgo.eft.sutra.configure;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 
 @Slf4j
 @Service
 public class StringToJsonNodeImpl implements StringToJsonNode {
     private final ObjectMapper mapper = new ObjectMapper();
     private final JsonFactory factory = mapper.getFactory();
-
+    @Getter
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    @Getter
+    private final SimpleDateFormat yyMMdd = new SimpleDateFormat("yyMMdd");
+    @Getter
+    private final SimpleDateFormat yyyyMMddHHmmss = new SimpleDateFormat("yyyyMMddHHmmss");
     @Override
     public JsonNode toJsonNode(String jsonData) {
         try {
@@ -22,6 +29,6 @@ public class StringToJsonNodeImpl implements StringToJsonNode {
             log.error("{} Converting Json Error: {}", jsonData, e.getMessage());
         }
         return null;
-
     }
+
 }

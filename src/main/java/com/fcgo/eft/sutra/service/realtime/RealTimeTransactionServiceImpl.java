@@ -40,12 +40,11 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
     private final WebClient webClient;
     private final EftBatchPaymentDetailRepository repository;
     private final NchlReconciledService reconciledRepository;
-    private final AccEpaymentRepository epaymentRepository;
     private final RealTimeCheckStatusService realTime;
     private final IsProdService isProdService;
     private final StringToJsonNode jsonNode;
     private final DecimalFormat df = new DecimalFormat("#.00");
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+
 
     @Override
     public void pushPayment(EftPaymentRequestDetailProjection m, String creditorBranch) {
@@ -63,10 +62,9 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                 "\"cipsTransactionDetailList\":[{\"instructionId\":\"" + m.getInstructionId() + "\",\"endToEndId\":\"" + m.getEndToEndId() + "\",\"amount\":\"" + amount + "\",\"purpose\":\"" + m.getCategoryPurpose() + "\",\"creditorAgent\":\"" + creditorAgent + "\",\"creditorBranch\":\"" + creditorBranch + "\",\"creditorName\":\"" + creditorName + "\",\"creditorAccount\":\"" + creditorAccount + "\",\"addenda1\":\"" + m.getAddenda1() + "\",\"addenda2\":\"" + m.getAddenda2() + "\",\"addenda3\":\"" + isProdService.getProdIpAddress() + "\",\"addenda4\":\"" + m.getAddenda4() + "\",\"channelId\":\"IPS\",\"refId\":\"" + m.getRefId() + "\",\"remarks\":\"" + m.getRemarks() + "\"}]," +
                 "\"token\":\"" + token + "\"}";
         String instructionId = m.getInstructionId();
-        long eftNo = Long.parseLong(instructionId);
         String accessToken = oauthToken.getAccessToken();
         String apiUrl = url + "/api/postcipsbatch";
-        long dateTime = Long.parseLong(sdf.format(new Date()));
+        long dateTime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
         String response = webClient.post()
                 .uri(apiUrl)
                 .header("Authorization", "Bearer " + accessToken)
@@ -83,8 +81,15 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                                             String code = node.get("responseCode").asText();
                                             String message;
                                             if (getStatus(code)) {
-                                                JsonNode nMessage = node.get("responseMessage");
-                                                JsonNode nDescription = node.get("responseDescription");
+                                                JsonNode nMessage = null, nDescription = null;
+                                                try {
+                                                    nMessage = node.get("responseMessage");
+                                                } catch (Exception ignored) {
+                                                }
+                                                try {
+                                                    nDescription = node.get("responseDescription");
+                                                } catch (Exception ignored) {
+                                                }
                                                 if (nMessage != null) {
                                                     message = nMessage.asText();
                                                 } else if (nDescription != null) {
@@ -94,18 +99,15 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                                                     if (message.length() > 500) message = message.substring(0, 499);
                                                 }
                                                 log.info("{} {} {} {} ", code, message, instructionId, tryCount);
-                                                epaymentRepository.updateMessage(message, eftNo);
                                                 getErrorE0N(tryCount, code, message, instructionId, dateTime);
                                             } else {
                                                 log.info("{} {} {} {}", code, instructionId, tryCount, errorBody);
-                                                epaymentRepository.updateMessage(errorBody, eftNo);
                                                 realTime.checkStatusByInstructionId(instructionId, tryCount);
 
                                             }
                                         }
                                     } catch (Exception ex) {
                                         log.info("API Error: {} {} {} {}", errorBody, instructionId, tryCount, ex.getMessage());
-                                        epaymentRepository.updateMessage(errorBody, eftNo);
                                         realTime.checkStatusByInstructionId(instructionId, tryCount);
                                     }
                                 })
@@ -130,17 +132,14 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                                 success(finalTryCount, dateTime, instructionId, nd.get("id").asText());
                             } catch (Exception e) {
                                 log.info("{} {} {}", code, message, instructionId);
-                                epaymentRepository.updateMessage(message, eftNo);
                                 realTime.checkStatusByInstructionId(instructionId, tryCount);
                             }
                         }
                     });
                 } else if (getStatus(code)) {
-                    epaymentRepository.updateMessage(message, eftNo);
                     getErrorE0N(tryCount, code, message, instructionId, dateTime);
                 } else {
                     log.info("{} {} {}", code, message, instructionId);
-                    epaymentRepository.updateMessage(message, eftNo);
                     realTime.checkStatusByInstructionId(instructionId, tryCount);
                 }
             } catch (Exception ex) {
@@ -183,19 +182,12 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
         long eftNo = Long.parseLong(instructionId);
         if (description.length() > 500) description = description.substring(0, 490);
         reconciledRepository.save(eftNo, "EFT", "SuTRA", code, description, instructionId, new Date());
-
-        epaymentRepository.updateFailureEPayment(description, eftNo);
-        reconciledRepository.updateStatus(instructionId);
     }
 
     private void success(int finalTryCount, long dateTime, String instructionId, String id) {
         repository.updateRealTimeTransactionStatus("SENT", dateTime, (finalTryCount + 1), instructionId);
         long eftNo = Long.parseLong(instructionId);
-        NchlReconciled reconciled = reconciledRepository.save(eftNo, "000", "-", "000", "SUCCESS", id, new Date());
-        String message = reconciled.getCreditMessage();
-        if (message != null && message.length() > 500) message = message.substring(0, 500);
-        epaymentRepository.updateSuccessEPayment(message, reconciled.getRecDate(), eftNo);
-        reconciledRepository.updateStatus(instructionId);
+        reconciledRepository.save(eftNo, "000", "-", "000", "SUCCESS", id, new Date());
         log.info("REAL TIME TRANSACTION PUSHED IN NCHL {} SUCCESS", instructionId);
     }
 }

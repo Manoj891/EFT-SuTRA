@@ -1,5 +1,6 @@
 package com.fcgo.eft.sutra.service.impl;
 
+import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.EftStatus;
 import com.fcgo.eft.sutra.dto.res.EftPaymentRequestDetailProjection;
 import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
@@ -20,8 +21,7 @@ import java.util.Optional;
 public class CheckTransactionList {
     private final AccEpaymentRepository epaymentRepository;
     private final NchlReconciledRepository reconciledRepository;
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-
+    private final StringToJsonNode jsonNode;
     public synchronized List<EftPaymentRequestDetailProjection> getList(List<EftPaymentRequestDetailProjection> l1, List<EftPaymentRequestDetailProjection> l2) {
         List<EftPaymentRequestDetailProjection> list = new ArrayList<>();
         try {
@@ -93,7 +93,7 @@ public class CheckTransactionList {
                 reconciled.setDebitStatus("097");
                 reconciled.setDebitMessage("Not Found");
                 reconciledRepository.save(reconciled);
-                reconciledRepository.updateManualReject(Long.parseLong(sdf.format(new Date())), String.valueOf(instructionId));
+                reconciledRepository.updateManualReject(Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())), String.valueOf(instructionId));
             }
         }
     }

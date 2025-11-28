@@ -74,43 +74,7 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                 .onStatus(HttpStatusCode::isError, clientResponse ->
                         clientResponse.bodyToMono(String.class)
                                 .publishOn(Schedulers.boundedElastic())
-                                .doOnNext(errorBody -> {
-                                    try {
-                                        JsonNode node = jsonNode.toJsonNode(errorBody);
-                                        if (node != null) {
-                                            String code = node.get("responseCode").asText();
-                                            String message;
-                                            if (getStatus(code)) {
-                                                JsonNode nMessage = null, nDescription = null;
-                                                try {
-                                                    nMessage = node.get("responseMessage");
-                                                } catch (Exception ignored) {
-                                                }
-                                                try {
-                                                    nDescription = node.get("responseDescription");
-                                                } catch (Exception ignored) {
-                                                }
-                                                if (nMessage != null) {
-                                                    message = nMessage.asText();
-                                                } else if (nDescription != null) {
-                                                    message = nDescription.asText();
-                                                } else {
-                                                    message = errorBody;
-                                                    if (message.length() > 500) message = message.substring(0, 499);
-                                                }
-                                                log.info("{} {} {} {} ", code, message, instructionId, tryCount);
-                                                getErrorE0N(tryCount, code, message, instructionId, dateTime);
-                                            } else {
-                                                log.info("{} {} {} {}", code, instructionId, tryCount, errorBody);
-                                                realTime.checkStatusByInstructionId(instructionId, tryCount);
-
-                                            }
-                                        }
-                                    } catch (Exception ex) {
-                                        log.info("API Error: {} {} {} {}", errorBody, instructionId, tryCount, ex.getMessage());
-                                        realTime.checkStatusByInstructionId(instructionId, tryCount);
-                                    }
-                                })
+                                .doOnNext(errorBody -> handelError(errorBody, instructionId, tryCount, dateTime))
                                 .then(Mono.empty())    // do NOT throw exception
                 )
                 .bodyToMono(String.class)
@@ -148,6 +112,44 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
         }
     }
 
+    private void handelError(String errorBody, String instructionId, int tryCount, long dateTime) {
+
+        try {
+            JsonNode node = jsonNode.toJsonNode(errorBody);
+            if (node != null) {
+                String code = node.get("responseCode").asText();
+                String message;
+                if (getStatus(code)) {
+                    JsonNode nMessage = null, nDescription = null;
+                    try {
+                        nMessage = node.get("responseMessage");
+                    } catch (Exception ignored) {
+                    }
+                    try {
+                        nDescription = node.get("responseDescription");
+                    } catch (Exception ignored) {
+                    }
+                    if (nMessage != null) {
+                        message = nMessage.asText();
+                    } else if (nDescription != null) {
+                        message = nDescription.asText();
+                    } else {
+                        message = errorBody;
+                        if (message.length() > 500) message = message.substring(0, 499);
+                    }
+                    log.info("{} {} {} {} ", code, message, instructionId, tryCount);
+                    getErrorE0N(tryCount, code, message, instructionId, dateTime);
+                } else {
+                    log.info("{} {} {} {}", code, instructionId, tryCount, errorBody);
+                    realTime.checkStatusByInstructionId(instructionId, tryCount);
+
+                }
+            }
+        } catch (Exception ex) {
+            log.info("API Error: {} {} {} {}", errorBody, instructionId, tryCount, ex.getMessage());
+            realTime.checkStatusByInstructionId(instructionId, tryCount);
+        }
+    }
 
     private boolean getStatus(String code) {
         return (code.equalsIgnoreCase("E001")

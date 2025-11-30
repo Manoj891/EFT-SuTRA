@@ -70,8 +70,10 @@ public class TransactionCheckStatus {
             repository.updateMissingStatusSent();
             tryForNextAttempt();
 //            tryTimeOutToReject();
-            long datetime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
-            repository.findByPushed(datetime - 3000).forEach(nchlReconciled -> statusUpdate.update(nchlReconciled, datetime));
+
+            if (!statusUpdate.isStarted()) {
+                statusUpdate.statusUpdate();
+            }
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
         }
     }
@@ -98,8 +100,9 @@ public class TransactionCheckStatus {
                 tryForNextAttempt();
 //                tryTimeOutToReject();
                 repository.updateMissingStatusSent();
-                long datetime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
-                repository.findByPushed(datetime - 3000).forEach(nchlReconciled -> statusUpdate.update(nchlReconciled, datetime));
+                if (!statusUpdate.isStarted()) {
+                    statusUpdate.statusUpdate();
+                }
             });
         }
     }

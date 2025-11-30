@@ -3,6 +3,7 @@ package com.fcgo.eft.sutra.util;
 import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
 import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,9 +19,18 @@ public class TransactionStatusUpdate {
     private final NchlReconciledRepository repository;
     private final DbPrimary dbPrimary;
     private final StringToJsonNode jsonNode;
+    @Getter
+    private boolean started = false;
+
+    public void statusUpdate() {
+        started = true;
+        long datetime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
+        repository.findByPushed(datetime - 3000).forEach(nchlReconciled -> update(nchlReconciled, datetime));
+        started = false;
+    }
 
 
-    public void update(NchlReconciled reconciled, long datetime) {
+    private void update(NchlReconciled reconciled, long datetime) {
         try {
             long instructionId = reconciled.getInstructionId();
             String status = reconciled.getCreditStatus();

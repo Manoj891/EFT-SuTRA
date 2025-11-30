@@ -27,6 +27,7 @@ public class CheckTransactionList {
 
 
     public synchronized List<EftPaymentRequestDetailProjection> getList(List<EftPaymentRequestDetailProjection> l1, List<EftPaymentRequestDetailProjection> l2) {
+        log.info("getList {} {}", l1.size(), l2.size());
         List<EftPaymentRequestDetailProjection> list = new ArrayList<>();
         try {
             l1.forEach(d -> {

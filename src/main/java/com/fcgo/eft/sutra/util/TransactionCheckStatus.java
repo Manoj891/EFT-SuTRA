@@ -52,14 +52,15 @@ public class TransactionCheckStatus {
     @PostConstruct
     public void executePostConstruct() {
         poCodeMappedService.setDate();
-
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(eftNchlRbbBankMappingRepository.findBankMap());
         isProdService.init();
         loginService.init();
         tryForNextAttempt();
+        executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(0).onus(1).build()));;
+
         if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
-            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(0).onus(1).build()));
+            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
         }
     }
 

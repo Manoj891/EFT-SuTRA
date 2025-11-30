@@ -2,10 +2,13 @@ package com.fcgo.eft.sutra.util;
 
 import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
+import com.fcgo.eft.sutra.entity.oracle.PoCodeMapped;
 import com.fcgo.eft.sutra.repository.oracle.BankHeadOfficeRepository;
 import com.fcgo.eft.sutra.repository.oracle.EftNchlRbbBankMappingRepository;
 import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
+import com.fcgo.eft.sutra.repository.oracle.PoCodeMappedRepository;
 import com.fcgo.eft.sutra.service.*;
+import com.fcgo.eft.sutra.service.impl.PoCodeMappedService;
 import com.fcgo.eft.sutra.service.impl.SuTRAProcessingStatus;
 import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeCheckStatusService;
 import jakarta.annotation.PostConstruct;
@@ -41,11 +44,15 @@ public class TransactionCheckStatus {
     private final ThreadPoolExecutor executor;
     private final LoginService loginService;
     private final StringToJsonNode jsonNode;
+    private final PoCodeMappedService poCodeMappedService;
     @Value("${server.port}")
     private String port;
 
+
     @PostConstruct
     public void executePostConstruct() {
+        poCodeMappedService.setDate();
+
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(eftNchlRbbBankMappingRepository.findBankMap());
         isProdService.init();

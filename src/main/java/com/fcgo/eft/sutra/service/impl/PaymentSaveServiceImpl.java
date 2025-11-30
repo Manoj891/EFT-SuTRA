@@ -33,6 +33,7 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
     private final DbPrimary epaymentRepository;
     private final IsProdService isProdService;
     private final StringToJsonNode jsonNode;
+    private final PoCodeMappedService poCodeMappedService;
 
     private final Map<Long, Boolean> status = new HashMap<>();
     private final Map<String, String> bankMap = new HashMap<>();
@@ -76,13 +77,17 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
         }
         String batchId = b.getBatchId();
         Date now = new Date();
+        Integer poCode = poCodeMappedService.getPoCode(b.getPoCode());
+        if (poCode == null) {
+            throw new CustomException("PoCode Not Found");
+        }
         int date = Integer.parseInt(jsonNode.getYyMMdd().format(now));
         long time = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(now));
         int sn = repository.findMaxSn(date, b.getPoCode());
         String tempId;
-        if (sn < 10) tempId = date + "" + b.getPoCode() + "000" + sn;
-        else if (sn < 100) tempId = date + "" + b.getPoCode() + "00" + sn;
-        else tempId = date + "" + b.getPoCode() + "0" + sn;
+        if (sn < 10) tempId = date + "" + poCode + "000" + sn;
+        else if (sn < 100) tempId = date + "" + poCode + "00" + sn;
+        else tempId = date + "" + poCode + "0" + sn;
         BigInteger id = new BigInteger(tempId);
         String category = CategoryPurpose.get(b.getCategoryPurpose());
         boolean categoryUpdate = false;
@@ -154,14 +159,20 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
         }
         String batchId = receive.getBatchId();
         Date now = new Date();
+
+        Integer poCode = poCodeMappedService.getPoCode(receive.getPoCode());
+        if (poCode == null) {
+            throw new CustomException("PoCode Not Found");
+        }
         int date = Integer.parseInt(jsonNode.getYyMMdd().format(now));
         long time = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(now));
         int sn = repository.findMaxSn(date, receive.getPoCode());
         String tempId;
-        if (sn < 10) tempId = date + "" + receive.getPoCode() + "000" + sn;
-        else if (sn < 100) tempId = date + "" + receive.getPoCode() + "00" + sn;
-        else tempId = date + "" + receive.getPoCode() + "0" + sn;
+        if (sn < 10) tempId = date + "" + poCode + "000" + sn;
+        else if (sn < 100) tempId = date + "" + poCode + "00" + sn;
+        else tempId = date + "" + poCode + "0" + sn;
         BigInteger id = new BigInteger(tempId);
+
         String category = CategoryPurpose.get(receive.getCategoryPurpose());
         boolean categoryUpdate = false;
         repository.insert(id, batchId, category, user.getAppName(), debtorAccount, debtorAgent, debtorName, user.getDeploymentType(), 0, "N", receive.getPoCode(), date, time, sn);

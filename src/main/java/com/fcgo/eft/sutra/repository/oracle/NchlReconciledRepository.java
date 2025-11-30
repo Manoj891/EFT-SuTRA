@@ -30,8 +30,8 @@ public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, 
 
     Optional<NchlReconciled> findByInstructionId(long instructionId);
 
-    @Query(value = "SELECT * FROM NCHL_RECONCILED WHERE PUSHED='N'", nativeQuery = true)
-    List<NchlReconciled> findByPushed(String pushed);
+    @Query(value = "SELECT * FROM NCHL_RECONCILED WHERE PUSHED='N' AND (PUSHED_DATETIME IS NULL OR PUSHED_DATETIME<=?1) ", nativeQuery = true)
+    List<NchlReconciled> findByPushed(long datetime);
 
     @Modifying
     @Transactional
@@ -40,8 +40,13 @@ public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, 
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE NCHL_RECONCILED  SET PUSHED = 'Y' WHERE INSTRUCTION_ID = ?1", nativeQuery = true)
-    void updateStatus(String id);
+    @Query(value = "UPDATE NCHL_RECONCILED  SET PUSHED = 'Y',PUSHED_DATETIME=?1 WHERE INSTRUCTION_ID = ?2", nativeQuery = true)
+    void updateStatus(long dateTime, long id);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE NCHL_RECONCILED  SET PUSHED_DATETIME=?1 WHERE INSTRUCTION_ID = ?2", nativeQuery = true)
+    void updateDateTime(long dateTime, long id);
 
     @Modifying
     @Transactional

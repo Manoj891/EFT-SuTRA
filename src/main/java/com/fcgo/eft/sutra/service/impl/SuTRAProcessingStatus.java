@@ -1,5 +1,6 @@
 package com.fcgo.eft.sutra.service.impl;
 
+import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.entity.oracle.EftBatchPaymentDetail;
 import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
 import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Slf4j
@@ -20,12 +22,14 @@ public class SuTRAProcessingStatus {
     private final TransactionStatusUpdate statusUpdate;
     private final EftBatchPaymentDetailRepository detailRepository;
     private final DbPrimary dbPrimary;
+    private final StringToJsonNode jsonNode;
 
     public void check(long eftNo) {
         try {
+            long datetime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
             Optional<NchlReconciled> reconciled = reconciledRepository.findByInstructionId(eftNo);
             if (reconciled.isPresent()) {
-                statusUpdate.update(reconciled.get());
+                statusUpdate.update(reconciled.get(), datetime);
             } else {
                 String instructionId = String.valueOf(eftNo);
                 Optional<EftBatchPaymentDetail> batchPaymentDetail = detailRepository.findByInstructionId(instructionId);

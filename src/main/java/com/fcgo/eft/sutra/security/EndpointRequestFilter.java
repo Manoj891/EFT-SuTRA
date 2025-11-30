@@ -31,12 +31,10 @@ public class EndpointRequestFilter extends OncePerRequestFilter {
         String authToken = request.getHeader("Authorization");
         if (authToken != null && !authToken.isEmpty()) {
             if (!authToken.startsWith("Bearer ")) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "The request has not been applied because it lacks valid authentication credentials.");
                 throw new UnauthorizedException();
             }
             Claims claims = jwtHelper.decodeToken(authToken.substring(7));
             if (claims == null) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "The request has not been applied because it lacks valid authentication credentials.");
                 throw new UnauthorizedException();
             }
 

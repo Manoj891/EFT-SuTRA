@@ -47,7 +47,6 @@ public class NonRealTimeCheckStatusServiceImpl implements NonRealTimeCheckStatus
                         .creditMessage(detail.getReasonDesc())
                         .recDate(detail.getRecDate())
                         .transactionId(batch.getId() + "")
-                        .pushedDatetime(time)
                         .pushed("N")
                         .build()));
     }

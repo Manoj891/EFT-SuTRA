@@ -103,7 +103,8 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
                 long instructionId = d.path("instructionId").asLong();
                 String creditStatus = d.path("creditStatus").asText();
                 String reasonDesc = d.path("reasonDesc").asText();
-                reconciledRepository.save(NchlReconciled.builder().instructionId(instructionId).debitStatus(debitStatus).debitMessage(debitReasonDesc).creditStatus(creditStatus).creditMessage(reasonDesc).recDate(dRecDate).transactionId(id).pushed("N").pushedDatetime(pushedDatetime).build());
+                reconciledRepository.save(NchlReconciled.builder().instructionId(instructionId).debitStatus(debitStatus).debitMessage(debitReasonDesc).creditStatus(creditStatus).creditMessage(reasonDesc).recDate(dRecDate)
+                        .transactionId(id).pushed("N").build());
                 log.info("InstructionId: {} status: {} {}", instructionId, creditStatus, reasonDesc);
             });
 

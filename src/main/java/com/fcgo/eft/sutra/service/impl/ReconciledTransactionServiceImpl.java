@@ -32,7 +32,7 @@ public class ReconciledTransactionServiceImpl implements ReconciledTransactionSe
     @Override
     @Transactional(rollbackFor = RuntimeException.class)
     public void save(RealTimeTransaction rtt, RealTimeTransactionDetail detail, long time) {
-        repository.save(NchlReconciled.builder().instructionId(detail.getInstructionId()).debitStatus(rtt.getDebitStatus()).debitMessage(rtt.getDebitReasonDesc()).creditStatus(detail.getCreditStatus()).creditMessage(detail.getReasonDesc()).recDate(detail.getRecDate()).transactionId(detail.getInstructionId() + "").pushed("N").pushedDatetime(time).build());
+        repository.save(NchlReconciled.builder().instructionId(detail.getInstructionId()).debitStatus(rtt.getDebitStatus()).debitMessage(rtt.getDebitReasonDesc()).creditStatus(detail.getCreditStatus()).creditMessage(detail.getReasonDesc()).recDate(detail.getRecDate()).transactionId(detail.getInstructionId() + "").pushed("N").build());
         log.info("InstructionId: {} status: {} {}", detail.getInstructionId(), detail.getCreditStatus(), detail.getReasonDesc());
     }
 
@@ -54,7 +54,7 @@ public class ReconciledTransactionServiceImpl implements ReconciledTransactionSe
                         } catch (Exception ignored) {
                         }
                         detailRepository.save(ReconciledTransactionDetail.builder().entityId(id + "-" + detail.getId()).id(detail.getId()).recDate(detail.getRecDate()).instructionId(detail.getInstructionId()).endToEndId(detail.getEndToEndId()).chargeLiability(detail.getChargeLiability()).purpose(detail.getPurpose()).creditStatus(detail.getCreditStatus()).reasonCode(detail.getCreditStatus()).remarks(detail.getRemarks()).particulars(detail.getReasonDesc()).reasonDesc(detail.getReasonDesc()).amount(detail.getAmount()).chargeAmount(detail.getChargeAmount()).creditorAgent(detail.getCreditorAgent()).creditorBranch(detail.getCreditorBranch()).creditorName(detail.getCreditorName()).creditorAccount(detail.getCreditorAccount()).addenda1(detail.getAddenda1()).addenda2(detail.getAddenda2()).addenda3(detail.getAddenda3()).addenda4(detail.getAddenda4()).refId(detail.getRefId()).reconciledTransactionId(id).build());
-                        repository.save(NchlReconciled.builder().instructionId(detail.getInstructionId()).debitStatus(batch.getDebitStatus()).debitMessage(batch.getDebitReasonDesc()).creditStatus(detail.getCreditStatus()).creditMessage(detail.getReasonDesc()).recDate(detail.getRecDate()).transactionId(transactionId).pushed("N").pushedDatetime(time).build());
+                        repository.save(NchlReconciled.builder().instructionId(detail.getInstructionId()).debitStatus(batch.getDebitStatus()).debitMessage(batch.getDebitReasonDesc()).creditStatus(detail.getCreditStatus()).creditMessage(detail.getReasonDesc()).recDate(detail.getRecDate()).transactionId(transactionId).pushed("N").build());
                     } catch (Exception i) {
                         log.info(i.getMessage());
                     }

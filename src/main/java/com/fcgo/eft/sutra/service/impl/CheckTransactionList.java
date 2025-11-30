@@ -81,7 +81,7 @@ public class CheckTransactionList {
         } else if (status.getPstatus() == -1) {
             reject(eftNo);
         } else if (status.getPstatus() == 1) {
-            long datetime=Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
+            long datetime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
             reconciledRepository.save(NchlReconciled.builder().instructionId(eftNo).
                     debitStatus("000").
                     debitMessage("-").
@@ -91,9 +91,8 @@ public class CheckTransactionList {
                     pushed("N").
                     transactionId("NA").
                     updatedAt(LocalDateTime.now())
-                    .pushedDatetime(datetime)
                     .build());
-            reconciledRepository.updateManualReject(datetime,String.valueOf(eftNo));
+            reconciledRepository.updateManualReject(datetime, String.valueOf(eftNo));
         }
         return null;
     }
@@ -110,7 +109,6 @@ public class CheckTransactionList {
                     pushed("N").
                     transactionId("NA").
                     updatedAt(LocalDateTime.now())
-                    .pushedDatetime(Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())))
                     .build());
             reconciledRepository.updateManualReject(String.valueOf(instructionId));
         } else {
@@ -120,7 +118,7 @@ public class CheckTransactionList {
                 reconciled.setCreditMessage("Record Not found, Please Conform with bank before new transaction initialized");
                 reconciled.setDebitStatus("097");
                 reconciled.setDebitMessage("Not Found");
-                reconciled.setPushedDatetime(Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())));
+
                 reconciledRepository.save(reconciled);
                 reconciledRepository.updateManualReject(Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())), String.valueOf(instructionId));
             }

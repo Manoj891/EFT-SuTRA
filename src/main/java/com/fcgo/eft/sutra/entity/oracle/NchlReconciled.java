@@ -51,9 +51,6 @@ public class NchlReconciled {
     @PreUpdate
     public void setUpdatedAt() {
         this.updatedAt = LocalDateTime.now();
-        if (pushedDatetime == null) {
-            pushedDatetime = StringToJsonNodeImpl.getDateTimeLong();
-        }
     }
 
 }

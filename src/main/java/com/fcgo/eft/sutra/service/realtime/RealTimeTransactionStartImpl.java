@@ -5,6 +5,7 @@ import com.fcgo.eft.sutra.dto.res.EftPaymentRequestDetailProjection;
 import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.service.BankHeadOfficeService;
 import com.fcgo.eft.sutra.service.impl.CheckTransactionList;
+import com.fcgo.eft.sutra.util.TransactionStatusUpdate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,6 +26,8 @@ public class RealTimeTransactionStartImpl implements RealTimeTransactionStart {
     private final ThreadPoolExecutor executor;
     @Autowired
     private StringToJsonNode jsonNode;
+    @Autowired
+    private TransactionStatusUpdate statusUpdate;
     private boolean started = false;
 
     public RealTimeTransactionStartImpl(@Qualifier("realTime") ThreadPoolExecutor executor, EftBatchPaymentDetailRepository repository, RealTimeTransactionService service, BankHeadOfficeService ho, CheckTransactionList checkTransactionList) {
@@ -60,6 +63,12 @@ public class RealTimeTransactionStartImpl implements RealTimeTransactionStart {
                     log.error("Real Time Transaction Start ERROR:{}", e.getMessage());
                 }
             });
+            if (!statusUpdate.isStarted()) {
+                try {
+                    new Thread(() -> statusUpdate.statusUpdate()).start();
+                } catch (Exception ignored) {
+                }
+            }
             int activeThread = executor.getActiveCount();
             while (activeThread > 5) {
                 int sleep;

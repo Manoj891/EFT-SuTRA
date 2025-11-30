@@ -30,7 +30,7 @@ public class TransactionStatusUpdate {
     }
 
 
-    private void update(NchlReconciled reconciled, long datetime) {
+    public void update(NchlReconciled reconciled, long datetime) {
         try {
             long instructionId = reconciled.getInstructionId();
             String status = reconciled.getCreditStatus();

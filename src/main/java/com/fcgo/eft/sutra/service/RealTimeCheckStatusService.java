@@ -5,5 +5,5 @@ public interface RealTimeCheckStatusService {
 
     Object checkStatusByInstructionId(String instructionId, int times);
 
-    void convert(String res, long time);
+    void convert(String res);
 }

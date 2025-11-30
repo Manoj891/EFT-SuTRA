@@ -158,7 +158,6 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
                 } else {
                     log.info("{} {} {} {}", code, instructionId, tryCount, errorBody);
                     realTime.checkStatusByInstructionId(instructionId, tryCount);
-
                 }
             }
         } catch (Exception ex) {

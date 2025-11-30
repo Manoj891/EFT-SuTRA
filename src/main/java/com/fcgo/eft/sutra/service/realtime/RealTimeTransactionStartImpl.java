@@ -49,13 +49,11 @@ public class RealTimeTransactionStartImpl implements RealTimeTransactionStart {
             long start = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())) - 1500;
             List<EftPaymentRequestDetailProjection> list = repository.findRealTimePending();
             list.addAll(repository.findRealTimePending(start));
-//            List<EftPaymentRequestDetailProjection> list = checkTransactionList.getList(repository.findRealTimePending(), repository.findRealTimePending(start));
             if (list.isEmpty()) {
                 started = false;
                 break;
             }
             started = true;
-            System.out.println("Total size: " + list.size());
             list.forEach(d -> {
                 try {
                     long time = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));

@@ -2,11 +2,9 @@ package com.fcgo.eft.sutra.util;
 
 import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
-import com.fcgo.eft.sutra.entity.oracle.PoCodeMapped;
 import com.fcgo.eft.sutra.repository.oracle.BankHeadOfficeRepository;
 import com.fcgo.eft.sutra.repository.oracle.EftNchlRbbBankMappingRepository;
 import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
-import com.fcgo.eft.sutra.repository.oracle.PoCodeMappedRepository;
 import com.fcgo.eft.sutra.service.*;
 import com.fcgo.eft.sutra.service.impl.PoCodeMappedService;
 import com.fcgo.eft.sutra.service.impl.SuTRAProcessingStatus;
@@ -17,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
 
 import java.util.Calendar;
 import java.util.Date;

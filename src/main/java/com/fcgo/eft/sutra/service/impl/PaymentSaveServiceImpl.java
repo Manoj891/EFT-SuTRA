@@ -30,7 +30,7 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
     private final EftPaymentRequestRepository repository;
     private final EftBatchPaymentDetailRepository detailRepository;
     private final BankAccountWhitelistRepository bankAccountWhitelistRepository;
-    private final DbPrimary epaymentRepository;
+    private final DbPrimary dbPrimary;
     private final IsProdService isProdService;
     private final StringToJsonNode jsonNode;
     private final PoCodeMappedService poCodeMappedService;
@@ -97,10 +97,11 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
         long addenda1 = now.getTime();
         String addenda2 = jsonNode.getDateFormat().format(now);
         int offus = 0, onus = 0;
+
         for (EftPaymentRequestDetailReq dto : receive.getEftPaymentRequestDetail()) {
             Optional<EftBatchPaymentDetail> optional = detailRepository.findByInstructionId(dto.getInstructionId());
             if (optional.isPresent()) {
-                epaymentRepository.updateStatusProcessing(dto.getInstructionId());
+                dbPrimary.update("update acc_epayment set transtatus=2,pstatus=2,paymentdate=GETDATE() where eftno=" + dto.getInstructionId());
             } else {
                 String creditorAgent = bankMap.get(dto.getCreditorAgent().trim());
                 String creditorAccount = dto.getCreditorAccount().trim();
@@ -181,10 +182,11 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
         long addenda1 = now.getTime();
         String addenda2 = jsonNode.getDateFormat().format(now);
         int offus = 0, onus = 0;
+
         for (EftPaymentRequestDetailReq dto : receive.getDetails()) {
             Optional<EftBatchPaymentDetail> optional = detailRepository.findByInstructionId(dto.getInstructionId());
             if (optional.isPresent()) {
-                epaymentRepository.updateStatusProcessing(dto.getInstructionId());
+                dbPrimary.update("update acc_epayment set transtatus=2,pstatus=2,paymentdate=GETDATE() where eftno=" + dto.getInstructionId());
             } else {
                 String creditorAgent = bankMap.get(dto.getCreditorAgent().trim());
                 String creditorAccount = dto.getCreditorAccount().trim();

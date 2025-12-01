@@ -26,7 +26,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class PaymentReceiveServiceImpl implements PaymentReceiveService {
     private final AuthenticationFacade facade;
     private final PaymentSaveService service;
-    private final DbPrimary epaymentRepository;
     private final ThreadPoolExecutor executor;
 
 
@@ -47,15 +46,16 @@ public class PaymentReceiveServiceImpl implements PaymentReceiveService {
             throw new PermissionDeniedException();
         long poCode = receive.getPaymentRequest().getPoCode();
         waitResourcesBusy(poCode);
-        PaymentSaved saved = service.save(receive, user);
+             PaymentSaved saved = service.save(receive, user);
         service.busy(poCode, false);
         log.info("Commited. BATCH ID:{} {} ITEM RECEIVED", receive.getPaymentRequest().getBatchId(), saved.getDetails().size());
 
-        executor.submit(() -> {
-            for (EftBatchPaymentDetail detail : saved.getDetails()) {
-                epaymentRepository.updateStatusProcessing(detail.getInstructionId());
-            }
-        });
+//        executor.submit(() -> {
+//            for (EftBatchPaymentDetail detail : saved.getDetails()) {
+//                epaymentRepository.updateStatusProcessing(detail.getInstructionId());
+//            }
+//            epaymentRepository.closeStatusUpdateProcessing();
+//        });
 
         return PaymentReceiveStatus.builder().offus(saved.getOffus()).onus(saved.getOnus()).build();
     }
@@ -68,15 +68,10 @@ public class PaymentReceiveServiceImpl implements PaymentReceiveService {
             throw new PermissionDeniedException();
         long poCode = receive.getPoCode();
         waitResourcesBusy(poCode);
+//        epaymentRepository.initStatusUpdateProcessing();
         PaymentSaved saved = service.save(receive, user);
         service.busy(poCode, false);
         log.info("Commited. BATCH ID:{} {} ITEM RECEIVED", receive.getBatchId(), saved.getDetails().size());
-
-        executor.submit(() -> {
-            for (EftBatchPaymentDetail detail : saved.getDetails()) {
-                epaymentRepository.updateStatusProcessing(detail.getInstructionId());
-            }
-        });
 
         return PaymentReceiveStatus.builder().offus(saved.getOffus()).onus(saved.getOnus()).build();
 

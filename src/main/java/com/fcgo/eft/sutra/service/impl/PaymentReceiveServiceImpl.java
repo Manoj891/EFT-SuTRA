@@ -11,11 +11,13 @@ import com.fcgo.eft.sutra.security.AuthenticatedUser;
 import com.fcgo.eft.sutra.security.AuthenticationFacade;
 import com.fcgo.eft.sutra.service.PaymentReceiveService;
 import com.fcgo.eft.sutra.service.PaymentSaveService;
-import com.fcgo.eft.sutra.util.DbPrimary;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -46,17 +48,10 @@ public class PaymentReceiveServiceImpl implements PaymentReceiveService {
             throw new PermissionDeniedException();
         long poCode = receive.getPaymentRequest().getPoCode();
         waitResourcesBusy(poCode);
-             PaymentSaved saved = service.save(receive, user);
+        PaymentSaved saved = service.save(receive, user);
         service.busy(poCode, false);
         log.info("Commited. BATCH ID:{} {} ITEM RECEIVED", receive.getPaymentRequest().getBatchId(), saved.getDetails().size());
-
-//        executor.submit(() -> {
-//            for (EftBatchPaymentDetail detail : saved.getDetails()) {
-//                epaymentRepository.updateStatusProcessing(detail.getInstructionId());
-//            }
-//            epaymentRepository.closeStatusUpdateProcessing();
-//        });
-
+        statusUpdate(saved.getDetails());
         return PaymentReceiveStatus.builder().offus(saved.getOffus()).onus(saved.getOnus()).build();
     }
 
@@ -68,12 +63,36 @@ public class PaymentReceiveServiceImpl implements PaymentReceiveService {
             throw new PermissionDeniedException();
         long poCode = receive.getPoCode();
         waitResourcesBusy(poCode);
-//        epaymentRepository.initStatusUpdateProcessing();
         PaymentSaved saved = service.save(receive, user);
         service.busy(poCode, false);
         log.info("Commited. BATCH ID:{} {} ITEM RECEIVED", receive.getBatchId(), saved.getDetails().size());
-
+        statusUpdate(saved.getDetails());
         return PaymentReceiveStatus.builder().offus(saved.getOffus()).onus(saved.getOnus()).build();
+
+    }
+
+    private void statusUpdate(List<EftBatchPaymentDetail> details) {
+        executor.submit(() -> {
+            Connection connection = null;
+            Statement st = null;
+            try {
+                Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+                connection = DriverManager.getConnection("jdbc:sqlserver://10.100.199.148:1433;databaseName=SuTRA5;encrypt=false", "SuTRA_FCGO_LLG", "caPsKJSkD2-k38lEG4K");
+                st = connection.createStatement();
+                connection.setAutoCommit(true);
+                for (EftBatchPaymentDetail detail : details) {
+                    st.executeUpdate("update acc_epayment set transtatus=2,pstatus=2,paymentdate=GETDATE() where eftno=" + detail.getInstructionId());
+                }
+            } catch (Exception ignored) {
+            }
+            try {
+                assert connection != null;
+                connection.close();
+                assert st != null;
+                st.close();
+            } catch (Exception ignored) {
+            }
+        });
 
     }
 

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 @Service
 @RequiredArgsConstructor
@@ -43,5 +44,33 @@ public class DbPrimary {
         }
     }
 
+    private Connection realTime = null;
+    private Statement realTimeStatement = null;
+
+    public void realTimeInit() {
+        try {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            realTime = DriverManager.getConnection("jdbc:sqlserver://10.100.199.148:1433;databaseName=SuTRA5;encrypt=false", "SuTRA_FCGO_LLG", "caPsKJSkD2-k38lEG4K");
+            realTime.setAutoCommit(true);
+            realTimeStatement = realTime.createStatement();
+        } catch (Exception ignored) {
+        }
+    }
+
+    public void realTimeClose() {
+        try {
+            realTime.isClosed();
+            realTimeStatement.close();
+        } catch (Exception ignored) {
+        }
+    }
+
+    public int realTimeStatusUpdate(String sql) {
+        try {
+            return realTimeStatement.executeUpdate(sql);
+        } catch (Exception ignored) {
+        }
+        return 0;
+    }
 
 }

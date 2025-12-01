@@ -177,7 +177,7 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
             failure(code, description + ". Transaction reject after tried " + time + " times.", instructionId);
         } else {
             repository.updateNextTryInstructionId(count, dateTime, instructionId);
-            reconciledRepository.save(Long.parseLong(instructionId), "000", "N/A", "SENT", description + ". We Tried " + time + " times.", instructionId, new Date());
+            reconciledRepository.save(Long.parseLong(instructionId), "000", "-", "SENT", description + ". We Tried " + time + " times.", instructionId, new Date());
         }
     }
 

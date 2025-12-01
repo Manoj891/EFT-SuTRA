@@ -3,15 +3,11 @@ package com.fcgo.eft.sutra.util;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

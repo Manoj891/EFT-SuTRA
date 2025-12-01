@@ -3,7 +3,6 @@ package com.fcgo.eft.sutra.security;
 import com.fcgo.eft.sutra.exception.UnauthorizedException;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -14,7 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 @Component
@@ -26,27 +24,35 @@ public class EndpointRequestFilter extends OncePerRequestFilter {
 
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) {
+        try {
+            String authToken = request.getHeader("Authorization");
+            if (authToken != null && !authToken.isEmpty()) {
+                if (!authToken.startsWith("Bearer ")) {
+                    throw new UnauthorizedException();
+                }
+                Claims claims = jwtHelper.decodeToken(authToken.substring(7));
+                if (claims == null) {
+                    throw new UnauthorizedException();
+                }
 
-        String authToken = request.getHeader("Authorization");
-        if (authToken != null && !authToken.isEmpty()) {
-            if (!authToken.startsWith("Bearer ")) {
-                throw new UnauthorizedException();
-            }
-            Claims claims = jwtHelper.decodeToken(authToken.substring(7));
-            if (claims == null) {
-                throw new UnauthorizedException();
+                SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(AuthenticatedUser.builder()
+                        .id(claims.get("A", String.class))
+                        .username(claims.get("B", String.class))
+                        .ipAddress(claims.get("C", String.class))
+                        .paymentUser(claims.get("D", String.class))
+                        .appName(claims.get("E", String.class))
+                        .deploymentType(claims.get("F", String.class))
+                        .build(), "EFT", new ArrayList<>()));
             }
 
-            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(AuthenticatedUser.builder()
-                    .id(claims.get("A", String.class))
-                    .username(claims.get("B", String.class))
-                    .ipAddress(claims.get("C", String.class))
-                    .paymentUser(claims.get("D", String.class))
-                    .appName(claims.get("E", String.class))
-                    .deploymentType(claims.get("F", String.class))
-                    .build(), "EFT", new ArrayList<>()));
+        } catch (Exception ignored) {
+            if (!request.getRequestURI().toString().contains("/public/"))
+                throw new UnauthorizedException();
         }
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } catch (Exception ignored) {
+        }
     }
 }

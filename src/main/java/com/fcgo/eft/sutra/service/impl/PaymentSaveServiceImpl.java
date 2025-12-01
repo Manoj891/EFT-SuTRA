@@ -79,7 +79,7 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
         Date now = new Date();
         Integer poCode = poCodeMappedService.getPoCode(b.getPoCode());
         if (poCode == null) {
-            throw new CustomException("PoCode Not Found");
+            poCode = poCodeMappedService.savePoCode(b.getPoCode());
         }
         int date = Integer.parseInt(jsonNode.getYyMMdd().format(now));
         long time = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(now));

@@ -23,4 +23,10 @@ public class PoCodeMappedService {
     public Integer getPoCode(long id) {
         return map.get(id);
     }
+
+    public synchronized int savePoCode(Long poCode) {
+        int code = poCodeMappedRepository.findMaxCode();
+        poCodeMappedRepository.saveAndFlush(PoCodeMapped.builder().poCode(poCode).code(code).build());
+        return code;
+    }
 }

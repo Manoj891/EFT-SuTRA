@@ -4,7 +4,6 @@ import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.res.EftPaymentRequestDetailProjection;
 import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.service.BankHeadOfficeService;
-import com.fcgo.eft.sutra.service.impl.CheckTransactionList;
 import com.fcgo.eft.sutra.util.TransactionStatusUpdate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class RealTimeTransactionStartImpl implements RealTimeTransactionStart {
 
     private final EftBatchPaymentDetailRepository repository;
-    private final CheckTransactionList checkTransactionList;
     private final RealTimeTransactionService service;
     private final BankHeadOfficeService ho;
     private final ThreadPoolExecutor executor;
@@ -30,12 +28,11 @@ public class RealTimeTransactionStartImpl implements RealTimeTransactionStart {
     private TransactionStatusUpdate statusUpdate;
     private boolean started = false;
 
-    public RealTimeTransactionStartImpl(@Qualifier("realTime") ThreadPoolExecutor executor, EftBatchPaymentDetailRepository repository, RealTimeTransactionService service, BankHeadOfficeService ho, CheckTransactionList checkTransactionList) {
+    public RealTimeTransactionStartImpl(@Qualifier("realTime") ThreadPoolExecutor executor, EftBatchPaymentDetailRepository repository, RealTimeTransactionService service, BankHeadOfficeService ho) {
         this.repository = repository;
         this.service = service;
         this.ho = ho;
         this.executor = executor;
-        this.checkTransactionList = checkTransactionList;
     }
 
     @Override

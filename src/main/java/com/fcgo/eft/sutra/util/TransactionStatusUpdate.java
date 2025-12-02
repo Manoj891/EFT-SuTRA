@@ -17,21 +17,21 @@ import java.util.Date;
 @Transactional(rollbackFor = Exception.class)
 public class TransactionStatusUpdate {
     private final NchlReconciledRepository repository;
-    private final DbPrimary dbPrimary;
+
     private final StringToJsonNode jsonNode;
     @Getter
     private boolean started = false;
 
     public void statusUpdate() {
-        started = true;
-        long datetime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
-        if (dbPrimary.initStatusUpdate()) {
-            for (NchlReconciled nchlReconciled : repository.findByPushed(datetime - 3000)) {
-                update(nchlReconciled, datetime);
-            }
-            dbPrimary.closeStatusUpdate();
-        }
-        started = false;
+//        started = true;
+//        long datetime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
+//        if (dbPrimary.initStatusUpdate()) {
+//            for (NchlReconciled nchlReconciled : repository.findByPushed(datetime - 3000)) {
+//                update(nchlReconciled, datetime);
+//            }
+//            dbPrimary.closeStatusUpdate();
+//        }
+//        started = false;
     }
 
 
@@ -53,10 +53,10 @@ public class TransactionStatusUpdate {
                         status : reconciled.getCreditMessage()) + " DR. " + reconciled.getDebitMessage()
                         .replace("'", "");
                 log.info("Message updated {} {} ", message, instructionId);
-                if (dbPrimary.statusUpdate("update acc_epayment set StatusMessage='" + message + "' where eftno=" + instructionId) > 0) {
-                    repository.updateDateTime(datetime, instructionId);
-                    log.info("Updated reconciled status: {} failure", instructionId);
-                }
+//                if (dbPrimary.statusUpdate("update acc_epayment set StatusMessage='" + message + "' where eftno=" + instructionId) > 0) {
+//                    repository.updateDateTime(datetime, instructionId);
+//                    log.info("Updated reconciled status: {} failure", instructionId);
+//                }
 
             }
         } catch (Exception e) {
@@ -94,29 +94,29 @@ public class TransactionStatusUpdate {
     }
 
     private void updateFailureStatus(String creditMessage, long instructionId, long datetime) {
-        if (creditMessage == null || creditMessage.length() < 3) creditMessage = "Clearly message not found.";
-        else if (creditMessage.length() > 500) creditMessage = creditMessage.substring(0, 495);
-        try {
-            int i = dbPrimary.statusUpdate("update acc_epayment set pstatus=-1, StatusMessage='" + creditMessage + "' where eftno=" + instructionId);
-            if (i > 0) {
-                repository.updateStatus(datetime, instructionId);
-                log.info("Updated reconciled status: {} failure", instructionId);
-            }
-
-        } catch (Exception ex) {
-            log.error(ex.getMessage());
-        }
+//        if (creditMessage == null || creditMessage.length() < 3) creditMessage = "Clearly message not found.";
+//        else if (creditMessage.length() > 500) creditMessage = creditMessage.substring(0, 495);
+//        try {
+//            int i = dbPrimary.statusUpdate("update acc_epayment set pstatus=-1, StatusMessage='" + creditMessage + "' where eftno=" + instructionId);
+//            if (i > 0) {
+//                repository.updateStatus(datetime, instructionId);
+//                log.info("Updated reconciled status: {} failure", instructionId);
+//            }
+//
+//        } catch (Exception ex) {
+//            log.error(ex.getMessage());
+//        }
     }
 
     private void updateSuccessStatus(Date recDate, long instructionId, long datetime) {
-        try {
-            int i = dbPrimary.statusUpdate("update acc_epayment set transtatus=2,pstatus=1,StatusMessage='SUCCESS', paymentdate='" + jsonNode.getDateTime().format(recDate) + "' where eftno=" + instructionId);
-            if (i > 0) {
-                repository.updateStatus(datetime, instructionId);
-                log.info("Updated reconciled status: {} Success", instructionId);
-            }
-        } catch (Exception ex) {
-            log.error(ex.getMessage());
-        }
+//        try {
+//            int i = dbPrimary.statusUpdate("update acc_epayment set transtatus=2,pstatus=1,StatusMessage='SUCCESS', paymentdate='" + jsonNode.getDateTime().format(recDate) + "' where eftno=" + instructionId);
+//            if (i > 0) {
+//                repository.updateStatus(datetime, instructionId);
+//                log.info("Updated reconciled status: {} Success", instructionId);
+//            }
+//        } catch (Exception ex) {
+//            log.error(ex.getMessage());
+//        }
     }
 }

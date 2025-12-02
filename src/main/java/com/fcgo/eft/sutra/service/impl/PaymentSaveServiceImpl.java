@@ -12,7 +12,6 @@ import com.fcgo.eft.sutra.repository.oracle.EftPaymentRequestRepository;
 import com.fcgo.eft.sutra.security.AuthenticatedUser;
 import com.fcgo.eft.sutra.service.PaymentSaveService;
 import com.fcgo.eft.sutra.util.CategoryPurpose;
-import com.fcgo.eft.sutra.util.DbPrimary;
 import com.fcgo.eft.sutra.util.IsProdService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +29,6 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
     private final EftPaymentRequestRepository repository;
     private final EftBatchPaymentDetailRepository detailRepository;
     private final BankAccountWhitelistRepository bankAccountWhitelistRepository;
-    private final DbPrimary dbPrimary;
     private final IsProdService isProdService;
     private final StringToJsonNode jsonNode;
     private final PoCodeMappedService poCodeMappedService;
@@ -100,9 +98,8 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
 
         for (EftPaymentRequestDetailReq dto : receive.getEftPaymentRequestDetail()) {
             Optional<EftBatchPaymentDetail> optional = detailRepository.findByInstructionId(dto.getInstructionId());
-            if (optional.isPresent()) {
-                dbPrimary.update("update acc_epayment set transtatus=2,pstatus=2,paymentdate=GETDATE() where eftno=" + dto.getInstructionId());
-            } else {
+            if (optional.isEmpty()) {
+
                 String creditorAgent = bankMap.get(dto.getCreditorAgent().trim());
                 String creditorAccount = dto.getCreditorAccount().trim();
                 String creditorName = dto.getCreditorName().trim();
@@ -185,9 +182,7 @@ public class PaymentSaveServiceImpl implements PaymentSaveService {
 
         for (EftPaymentRequestDetailReq dto : receive.getDetails()) {
             Optional<EftBatchPaymentDetail> optional = detailRepository.findByInstructionId(dto.getInstructionId());
-            if (optional.isPresent()) {
-                dbPrimary.update("update acc_epayment set transtatus=2,pstatus=2,paymentdate=GETDATE() where eftno=" + dto.getInstructionId());
-            } else {
+            if (optional.isEmpty()) {
                 String creditorAgent = bankMap.get(dto.getCreditorAgent().trim());
                 String creditorAccount = dto.getCreditorAccount().trim();
                 String creditorName = dto.getCreditorName().trim();

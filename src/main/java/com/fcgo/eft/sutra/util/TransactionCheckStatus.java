@@ -36,7 +36,6 @@ public class TransactionCheckStatus {
     private final PaymentReceiveService bankMapService;
     private final EftPaymentReceiveService paymentReceiveService;
     private final SuTRAProcessingStatus suTRAProcessingStatus;
-    private final DB2nd epaymentRepository;
     private final IsProdService isProdService;
     private final ThreadPoolExecutor executor;
     private final LoginService loginService;
@@ -68,8 +67,6 @@ public class TransactionCheckStatus {
             headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
             headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
             headOfficeRepository.updatePaymentPendingStatusDetail();
-
-            epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
             repository.updateMissingStatusSent();
             tryForNextAttempt();
 //            tryTimeOutToReject();

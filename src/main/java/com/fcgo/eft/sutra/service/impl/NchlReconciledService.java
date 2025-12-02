@@ -1,8 +1,7 @@
 package com.fcgo.eft.sutra.service.impl;
 
-import com.fcgo.eft.sutra.configure.StringToJsonNode;
-import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
-import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
+import com.fcgo.eft.sutra.entity.NchlReconciled;
+import com.fcgo.eft.sutra.repository.NchlReconciledRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +34,6 @@ public class NchlReconciledService {
                 .recDate(recDate)
                 .transactionId(transactionId)
                 .pushed("N")
-
                 .build());
     }
 }

@@ -2,12 +2,11 @@ package com.fcgo.eft.sutra.util;
 
 import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
-import com.fcgo.eft.sutra.repository.oracle.BankHeadOfficeRepository;
-import com.fcgo.eft.sutra.repository.oracle.EftNchlRbbBankMappingRepository;
-import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
+import com.fcgo.eft.sutra.repository.BankHeadOfficeRepository;
+import com.fcgo.eft.sutra.repository.EftNchlRbbBankMappingRepository;
+import com.fcgo.eft.sutra.repository.NchlReconciledRepository;
 import com.fcgo.eft.sutra.service.*;
 import com.fcgo.eft.sutra.service.impl.PoCodeMappedService;
-import com.fcgo.eft.sutra.service.impl.SuTRAProcessingStatus;
 import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeCheckStatusService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 @RequiredArgsConstructor
 @Slf4j
 public class TransactionCheckStatus {
-
     private final NonRealTimeCheckStatusService nonRealTime;
     private final RealTimeCheckStatusService realTime;
     private final NchlReconciledRepository repository;
@@ -35,8 +33,6 @@ public class TransactionCheckStatus {
     private final EftNchlRbbBankMappingRepository eftNchlRbbBankMappingRepository;
     private final PaymentReceiveService bankMapService;
     private final EftPaymentReceiveService paymentReceiveService;
-    private final SuTRAProcessingStatus suTRAProcessingStatus;
-    private final DB2nd epaymentRepository;
     private final IsProdService isProdService;
     private final ThreadPoolExecutor executor;
     private final LoginService loginService;
@@ -45,19 +41,23 @@ public class TransactionCheckStatus {
     @Value("${server.port}")
     private String port;
 
-
     @PostConstruct
     public void executePostConstruct() {
+        statusUpdate.init();
         poCodeMappedService.setDate();
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(eftNchlRbbBankMappingRepository.findBankMap());
         isProdService.init();
         loginService.init();
-        tryForNextAttempt();
-        if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
-            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
+    }
+
+    @Scheduled(cron = "0 0/10 * * * *")
+    public void updateStatus() {
+        if (!statusUpdate.isStarted()) {
+            statusUpdate.statusUpdateApi();
         }
     }
+
 
     @Scheduled(cron = "0 30 08,09,10,11,12,13,14,15,16,17,18,20,22 * * *")
     public void executeEveryHour30Min() {
@@ -68,15 +68,7 @@ public class TransactionCheckStatus {
             headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
             headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
             headOfficeRepository.updatePaymentPendingStatusDetail();
-
-            epaymentRepository.updateSuccessEPayment().forEach(suTRAProcessingStatus::check);
             repository.updateMissingStatusSent();
-            tryForNextAttempt();
-//            tryTimeOutToReject();
-
-            if (!statusUpdate.isStarted()) {
-                statusUpdate.statusUpdate();
-            }
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
         }
     }
@@ -100,12 +92,9 @@ public class TransactionCheckStatus {
                     } catch (InterruptedException ignored) {
                     }
                 });
-                tryForNextAttempt();
-//                tryTimeOutToReject();
+//                tryForNextAttempt();
                 repository.updateMissingStatusSent();
-                if (!statusUpdate.isStarted()) {
-                    statusUpdate.statusUpdate();
-                }
+
             });
         }
     }
@@ -123,8 +112,7 @@ public class TransactionCheckStatus {
             realTime.checkStatusByDate(date);
             log.info("Non Real Time Status Completed {}", date);
             repository.updateMissingStatusSent();
-            tryForNextAttempt();
-//            tryTimeOutToReject();
+//            tryForNextAttempt();
         }
     }
 
@@ -135,21 +123,21 @@ public class TransactionCheckStatus {
         }
     }
 
-    private void tryForNextAttempt() {
-        repository.missingStatusSent();
-        repository.findTryForNextAttempt().forEach(id -> {
-            repository.missingStatusSent(id);
-            log.info("{} Trying For Next Attempt", id);
-        });
-    }
+//    private void tryForNextAttempt() {
+//        repository.missingStatusSent();
+//        repository.findTryForNextAttempt().forEach(id -> {
+//            repository.missingStatusSent(id);
+//            log.info("{} Trying For Next Attempt", id);
+//        });
+//    }
 
-    public void tryTimeOutToReject() {
-        repository.findTryTimeOutToReject().forEach(m -> {
-            long instructionId = Long.parseLong(m.get("INSTRUCTION_ID").toString());
-            String message = m.get("CREDIT_MESSAGE").toString();
-            message = (message.substring(0, message.indexOf(". We will try again"))) + " Reject after " + m.get("TRY_COUNT") + " times on " + m.get("TRY_TIME") + ".";
-            repository.updateRejectTransaction("1000", message, "997", "Reject", instructionId);
-            log.info("Reject Transaction: {}", instructionId);
-        });
-    }
+//    public void tryTimeOutToReject() {
+//        repository.findTryTimeOutToReject().forEach(m -> {
+//            long instructionId = Long.parseLong(m.get("INSTRUCTION_ID").toString());
+//            String message = m.get("CREDIT_MESSAGE").toString();
+//            message = (message.substring(0, message.indexOf(". We will try again"))) + " Reject after " + m.get("TRY_COUNT") + " times on " + m.get("TRY_TIME") + ".";
+//            repository.updateRejectTransaction("1000", message, "997", "Reject", instructionId);
+//            log.info("Reject Transaction: {}", instructionId);
+//        });
+//    }
 }

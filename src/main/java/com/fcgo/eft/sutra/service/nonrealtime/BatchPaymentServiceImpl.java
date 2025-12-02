@@ -2,7 +2,7 @@ package com.fcgo.eft.sutra.service.nonrealtime;
 
 import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.req.CipsFundTransfer;
-import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
+import com.fcgo.eft.sutra.repository.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
 import com.fcgo.eft.sutra.token.TokenGenerate;
 import lombok.RequiredArgsConstructor;

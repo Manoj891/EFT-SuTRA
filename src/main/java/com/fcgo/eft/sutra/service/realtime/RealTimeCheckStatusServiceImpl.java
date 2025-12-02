@@ -2,8 +2,8 @@ package com.fcgo.eft.sutra.service.realtime;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fcgo.eft.sutra.configure.StringToJsonNode;
-import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
-import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
+import com.fcgo.eft.sutra.entity.NchlReconciled;
+import com.fcgo.eft.sutra.repository.NchlReconciledRepository;
 import com.fcgo.eft.sutra.service.RealTimeCheckStatusService;
 import com.fcgo.eft.sutra.service.ReconciledTransactionService;
 import com.fcgo.eft.sutra.service.realtime.response.ByDatePostCipsByDateResponseWrapper;
@@ -70,16 +70,11 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
 
     @Override
     public Object checkStatusByInstructionId(String instructionId, int times) {
-
         String res = null;
-
         try {
-            long pushedDatetime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
             res = getRealTimeByBatch(instructionId);
             if (res != null && res.length() > 50) {
                 convert(res);
-            } else if (times >= 15) {
-                failure(instructionId);
             } else log.info(res);
         } catch (Exception e) {
             log.info(e.getMessage());
@@ -89,7 +84,6 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
 
     @Override
     public void convert(String res) {
-
         JsonNode node = jsonNode.toJsonNode(res);
         if (node != null) {
             String id = node.path("id").asText();
@@ -127,13 +121,13 @@ public class RealTimeCheckStatusServiceImpl implements RealTimeCheckStatusServic
     }
 
 
-    private void failure(String instructionId) {
-        reconciledRepository.findById(Long.parseLong(instructionId)).ifPresent(reconciled -> {
-            if (reconciled.getCreditStatus().equals("SENT")) {
-                reconciledRepository.updateManualReject(instructionId);
-                reconciledRepository.updateManualReject(Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())), instructionId);
-                log.info("Manually rejected {}", instructionId);
-            }
-        });
-    }
+//    private void failure(String instructionId) {
+//        reconciledRepository.findById(Long.parseLong(instructionId)).ifPresent(reconciled -> {
+//            if (reconciled.getCreditStatus().equals("SENT")) {
+//                reconciledRepository.updateManualReject(instructionId);
+//                reconciledRepository.updateManualReject(Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())), instructionId);
+//                log.info("Manually rejected {}", instructionId);
+//            }
+//        });
+//    }
 }

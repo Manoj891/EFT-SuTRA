@@ -1,7 +1,7 @@
 package com.fcgo.eft.sutra.service.impl;
 
-import com.fcgo.eft.sutra.entity.oracle.NchlToken;
-import com.fcgo.eft.sutra.repository.oracle.NchlTokenRepository;
+import com.fcgo.eft.sutra.entity.NchlToken;
+import com.fcgo.eft.sutra.repository.NchlTokenRepository;
 import com.fcgo.eft.sutra.service.CacheRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

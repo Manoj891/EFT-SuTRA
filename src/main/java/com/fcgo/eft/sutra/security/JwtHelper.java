@@ -1,7 +1,7 @@
 package com.fcgo.eft.sutra.security;
 
 import com.fcgo.eft.sutra.dto.res.LoginRes;
-import com.fcgo.eft.sutra.entity.oracle.ApplicationUser;
+import com.fcgo.eft.sutra.entity.ApplicationUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

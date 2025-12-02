@@ -5,7 +5,7 @@ import com.fcgo.eft.sutra.dto.req.EftPaymentReceive;
 import com.fcgo.eft.sutra.dto.req.PaymentRequestNew;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
 import com.fcgo.eft.sutra.dto.res.PaymentSaved;
-import com.fcgo.eft.sutra.entity.oracle.EftBatchPaymentDetail;
+import com.fcgo.eft.sutra.entity.EftBatchPaymentDetail;
 import com.fcgo.eft.sutra.exception.PermissionDeniedException;
 import com.fcgo.eft.sutra.security.AuthenticatedUser;
 import com.fcgo.eft.sutra.security.AuthenticationFacade;

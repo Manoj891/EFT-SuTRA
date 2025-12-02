@@ -1,7 +1,7 @@
 package com.fcgo.eft.sutra.service.impl;
 
-import com.fcgo.eft.sutra.entity.oracle.PoCodeMapped;
-import com.fcgo.eft.sutra.repository.oracle.PoCodeMappedRepository;
+import com.fcgo.eft.sutra.entity.PoCodeMapped;
+import com.fcgo.eft.sutra.repository.PoCodeMappedRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

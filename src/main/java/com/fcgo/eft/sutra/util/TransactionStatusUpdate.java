@@ -1,15 +1,22 @@
 package com.fcgo.eft.sutra.util;
 
 import com.fcgo.eft.sutra.configure.StringToJsonNode;
-import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
-import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
+import com.fcgo.eft.sutra.dto.res.NchlReconciledRes;
+import com.fcgo.eft.sutra.dto.res.ReconciledUpdateReq;
+import com.fcgo.eft.sutra.repository.NchlReconciledRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -17,106 +24,57 @@ import java.util.Date;
 @Transactional(rollbackFor = Exception.class)
 public class TransactionStatusUpdate {
     private final NchlReconciledRepository repository;
-    private final DbPrimary dbPrimary;
+    private final WebClient webClient;
     private final StringToJsonNode jsonNode;
+    private String token;
     @Getter
     private boolean started = false;
 
-    public void statusUpdate() {
-        started = true;
-        long datetime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
-        if (dbPrimary.initStatusUpdate()) {
-            for (NchlReconciled nchlReconciled : repository.findByPushed(datetime - 3000)) {
-                update(nchlReconciled, datetime);
-            }
-            dbPrimary.closeStatusUpdate();
-        }
-        started = false;
+    public void init() {
+        token = webClient.post()
+                .uri("https://sutrav3.fcgo.gov.np/SuTRAv3/public/api/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("{\"userId\":\"1\",\"sessionId\":\"1\",\"orgId\":\"1\",\"adminid\":\"1\"}")
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
     }
 
 
-    public void update(NchlReconciled reconciled, long datetime) {
+    public synchronized void statusUpdateApi() {
+        long datetime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
         try {
-            long instructionId = reconciled.getInstructionId();
-            String status = reconciled.getCreditStatus();
-            status = (status == null ? "" : status);
-            String debitStatus = reconciled.getDebitStatus();
-            debitStatus = (debitStatus == null ? "000" : debitStatus);
-            if (!debitStatus.equals("000")) {
-                updateFailureStatus("CR." + reconciled.getCreditMessage() + ", DR." + reconciled.getDebitMessage(), instructionId, datetime);
-            } else if (status.equals("000") || status.equals("ACSC")) {
-                updateSuccessStatus(reconciled.getRecDate(), instructionId, datetime);
-            } else if (getRejectStatus(status)) {
-                updateFailureStatus("CR. (" + status + ") " + reconciled.getCreditMessage() + " DR. " + reconciled.getDebitMessage(), instructionId, datetime);
-            } else {
-                String message = (reconciled.getCreditMessage() == null ?
-                        status : reconciled.getCreditMessage()) + " DR. " + reconciled.getDebitMessage()
-                        .replace("'", "");
-                log.info("Message updated {} {} ", message, instructionId);
-                if (dbPrimary.statusUpdate("update acc_epayment set StatusMessage='" + message + "' where eftno=" + instructionId) > 0) {
-                    repository.updateDateTime(datetime, instructionId);
-                    log.info("Updated reconciled status: {} failure", instructionId);
+            while (true) {
+                List<NchlReconciledRes> list = repository.findByPushed(datetime - 3000);
+                if (list.isEmpty()) {
+                    started = false;
+                    break;
                 }
-
+                started = true;
+                List<ReconciledUpdateReq> res = webClient.post()
+                        .uri("https://sutrav3.fcgo.gov.np/SuTRAv3/utility/eft-status")
+                        .header("Authorization", "Bearer " + token)
+                        .bodyValue(list)
+                        .retrieve()
+                        .onStatus(HttpStatusCode::isError, clientResponse ->
+                                clientResponse.bodyToMono(String.class)
+                                        .flatMap(errorBody -> {
+                                            log.info("Remote error: {}", errorBody);
+                                            return Mono.error(new RuntimeException("Remote API returned error"));
+                                        })
+                        )
+                        .bodyToMono(new ParameterizedTypeReference<List<ReconciledUpdateReq>>() {
+                        })
+                        .block();
+                assert res != null;
+                res.forEach(d -> {
+                    log.info("{} {}", d.getPushed(), d.getInstructionId());
+                    repository.updateStatus(d.getPushed(), datetime, d.getInstructionId());
+                });
             }
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Error during status update {}", e.getMessage());
         }
     }
 
-    private boolean getRejectStatus(String code) {
-        return (code.equals("RJCT")
-                || code.equals("1001")
-                || code.equals("1000")
-                || code.equals("909")
-                || code.equals("907")
-                || code.equals("906")
-                || code.equals("119")
-                || code.equals("099")
-                || code.equals("096")
-                || code.equals("030")
-                || code.equals("-0")
-                || code.equals("-01")
-                || code.equals("-02")
-                || code.equals("-04")
-                || code.equals("E001")
-                || code.equals("E002")
-                || code.equals("E003")
-                || code.equals("E004")
-                || code.equals("E005")
-                || code.equals("E006")
-                || code.equals("E007")
-                || code.equals("E008")
-                || code.equals("E009")
-                || code.equals("E010")
-                || code.equals("E011")
-                || code.equals("E012"));
-    }
-
-    private void updateFailureStatus(String creditMessage, long instructionId, long datetime) {
-        if (creditMessage == null || creditMessage.length() < 3) creditMessage = "Clearly message not found.";
-        else if (creditMessage.length() > 500) creditMessage = creditMessage.substring(0, 495);
-        try {
-            int i = dbPrimary.statusUpdate("update acc_epayment set pstatus=-1, StatusMessage='" + creditMessage + "' where eftno=" + instructionId);
-            if (i > 0) {
-                repository.updateStatus(datetime, instructionId);
-                log.info("Updated reconciled status: {} failure", instructionId);
-            }
-
-        } catch (Exception ex) {
-            log.error(ex.getMessage());
-        }
-    }
-
-    private void updateSuccessStatus(Date recDate, long instructionId, long datetime) {
-        try {
-            int i = dbPrimary.statusUpdate("update acc_epayment set transtatus=2,pstatus=1,StatusMessage='SUCCESS', paymentdate='" + jsonNode.getDateTime().format(recDate) + "' where eftno=" + instructionId);
-            if (i > 0) {
-                repository.updateStatus(datetime, instructionId);
-                log.info("Updated reconciled status: {} Success", instructionId);
-            }
-        } catch (Exception ex) {
-            log.error(ex.getMessage());
-        }
-    }
 }

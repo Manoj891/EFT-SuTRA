@@ -3,7 +3,7 @@ package com.fcgo.eft.sutra.service.realtime;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.res.EftPaymentRequestDetailProjection;
-import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
+import com.fcgo.eft.sutra.repository.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.service.RealTimeCheckStatusService;
 import com.fcgo.eft.sutra.service.impl.NchlReconciledService;
 import com.fcgo.eft.sutra.token.NchlOauthToken;
@@ -112,22 +112,6 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
             }
         }
     }
-
-    private boolean getStatus(String code) {
-        return (code.equalsIgnoreCase("E001")
-                || code.equalsIgnoreCase("E002")
-                || code.equalsIgnoreCase("E003")
-                || code.equalsIgnoreCase("E004")
-                || code.equalsIgnoreCase("E005")
-                || code.equalsIgnoreCase("E006")
-                || code.equalsIgnoreCase("E007")
-                || code.equalsIgnoreCase("E008")
-                || code.equalsIgnoreCase("E009")
-                || code.equalsIgnoreCase("E010")
-                || code.equalsIgnoreCase("E011")
-                || code.equalsIgnoreCase("E012"));
-    }
-
     private void handelError(String errorBody, String instructionId, int tryCount, long dateTime) {
         repository.updateRealTimeTransactionStatus("SENT", dateTime, (tryCount + 1), instructionId);
         try {
@@ -192,4 +176,22 @@ public class RealTimeTransactionServiceImpl implements RealTimeTransactionServic
         reconciledRepository.save(eftNo, "000", "-", "000", "SUCCESS", id, new Date());
         log.info("REAL TIME TRANSACTION PUSHED IN NCHL {} SUCCESS", instructionId);
     }
+
+
+
+    private boolean getStatus(String code) {
+        return (code.equalsIgnoreCase("E001")
+                || code.equalsIgnoreCase("E002")
+                || code.equalsIgnoreCase("E003")
+                || code.equalsIgnoreCase("E004")
+                || code.equalsIgnoreCase("E005")
+                || code.equalsIgnoreCase("E006")
+                || code.equalsIgnoreCase("E007")
+                || code.equalsIgnoreCase("E008")
+                || code.equalsIgnoreCase("E009")
+                || code.equalsIgnoreCase("E010")
+                || code.equalsIgnoreCase("E011")
+                || code.equalsIgnoreCase("E012"));
+    }
+
 }

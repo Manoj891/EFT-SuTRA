@@ -1,10 +1,9 @@
 package com.fcgo.eft.sutra.token;
 
 
-import com.fcgo.eft.sutra.entity.oracle.NchlToken;
+import com.fcgo.eft.sutra.entity.NchlToken;
 import com.fcgo.eft.sutra.exception.CustomException;
 import com.fcgo.eft.sutra.service.impl.CacheService;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

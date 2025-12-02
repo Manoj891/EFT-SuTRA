@@ -16,13 +16,6 @@ import java.util.Optional;
 @Repository
 public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, Long> {
 
-
-    @Query(value = "SELECT TRY_COUNT, TRY_TIME, R.CREDIT_MESSAGE, D.INSTRUCTION_ID FROM EFT_PAYMENT_BATCH_DETAIL D JOIN NCHL_RECONCILED R on D.INSTRUCTION_ID = R.INSTRUCTION_ID where PUSHED = 'N' AND R.CREDIT_STATUS = 'SENT' AND NCHL_TRANSACTION_TYPE = 'ONUS' AND TRY_COUNT >= 15", nativeQuery = true)
-    List<Map<String, Object>> findTryTimeOutToReject();
-
-    @Query(value = "SELECT D.ID FROM EFT_PAYMENT_BATCH_DETAIL D JOIN EFT_PAYMENT_BATCH M ON D.EFT_BATCH_PAYMENT_ID = M.ID JOIN NCHL_RECONCILED R ON D.INSTRUCTION_ID = R.INSTRUCTION_ID WHERE R.CREDIT_STATUS = 'SENT' AND PUSHED = 'N' AND D.NCHL_CREDIT_STATUS = 'SENT' AND D.NCHL_TRANSACTION_TYPE = 'ONUS' AND TRY_COUNT < 15 AND M.RECEIVE_DATE >= 251017", nativeQuery = true)
-    List<BigInteger> findTryForNextAttempt();
-
     @Query(value = "SELECT D.INSTRUCTION_ID AS INSTRUCTION_ID FROM EFT_PAYMENT_BATCH_DETAIL D LEFT JOIN NCHL_RECONCILED N on D.INSTRUCTION_ID = N.INSTRUCTION_ID WHERE D.NCHL_CREDIT_STATUS IS NOT NULL AND NCHL_TRANSACTION_TYPE = 'ONUS' AND (PUSHED is null OR PUSHED = 'N') ORDER BY INSTRUCTION_ID", nativeQuery = true)
     List<String> findRealTimePendingInstructionId();
 
@@ -34,43 +27,13 @@ public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, 
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE NCHL_RECONCILED  SET CREDIT_STATUS = ?1,CREDIT_MESSAGE=?2,DEBIT_STATUS=?3,DEBIT_MESSAGE=?4 WHERE INSTRUCTION_ID = ?5 AND CREDIT_STATUS='SENT'", nativeQuery = true)
-    void updateRejectTransaction(String creditStatus, String creditMessage, String debitStatus, String debitMessage, long instructionId);
-
-    @Modifying
-    @Transactional
     @Query(value = "UPDATE NCHL_RECONCILED  SET PUSHED = ?1,PUSHED_DATETIME=?2 WHERE INSTRUCTION_ID = ?3", nativeQuery = true)
-    void updateStatus(String pushed,long dateTime, long instructionId);
+    void updateStatus(String pushed, long dateTime, long instructionId);
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE NCHL_RECONCILED  SET PUSHED_DATETIME=?1 WHERE INSTRUCTION_ID = ?2", nativeQuery = true)
-    void updateDateTime(long dateTime, long id);
+    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL E SET E.NCHL_CREDIT_STATUS = 'SENT',NCHL_PUSHED_DATE_TIME=?1 WHERE (E.NCHL_CREDIT_STATUS IS NULL OR E.NCHL_CREDIT_STATUS = 'BUILD') AND EXISTS ( SELECT 1 FROM NCHL_RECONCILED R WHERE R.INSTRUCTION_ID = E.INSTRUCTION_ID )", nativeQuery = true)
+    void updateMissingStatusSent(long nowTime);
 
-    @Modifying
-    @Transactional
-    @Query(value = "UPDATE NCHL_RECONCILED  SET CREDIT_STATUS='1000',DEBIT_STATUS='1000',DEBIT_MESSAGE='Rejected' WHERE INSTRUCTION_ID = ?1", nativeQuery = true)
-    void updateManualReject(String id);
-
-    @Modifying
-    @Transactional
-    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL  SET NCHL_CREDIT_STATUS='SENT',NCHL_PUSHED_DATE_TIME=?1 WHERE INSTRUCTION_ID = ?1", nativeQuery = true)
-    void updateManualReject(long time, String id);
-
-    @Modifying
-    @Transactional
-    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL set NCHL_CREDIT_STATUS='SENT' WHERE ID IN( SELECT D.ID FROM EFT_PAYMENT_BATCH_DETAIL D join NCHL_RECONCILED R on D.INSTRUCTION_ID = R.INSTRUCTION_ID where (NCHL_CREDIT_STATUS IS NULL OR NCHL_CREDIT_STATUS='BUILD'))", nativeQuery = true)
-    void updateMissingStatusSent();
-
-    @Modifying
-    @Transactional
-    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS=null,NCHL_PUSHED_DATE_TIME=NULL WHERE ID =?1", nativeQuery = true)
-    void missingStatusSent(BigInteger id);
-
-
-    @Modifying
-    @Transactional
-    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS=NULL, NCHL_PUSHED_DATE_TIME=NULL WHERE (NCHL_CREDIT_STATUS IS NULL AND NCHL_PUSHED_DATE_TIME IS NOT NULL) OR (NCHL_CREDIT_STATUS IS NOT NULL AND NCHL_PUSHED_DATE_TIME IS NULL)", nativeQuery = true)
-    void missingStatusSent();
 
 }

@@ -59,20 +59,6 @@ public class TransactionCheckStatus {
     }
 
 
-    @Scheduled(cron = "0 30 08,09,10,11,12,13,14,15,16,17,18,20,22 * * *")
-    public void executeEveryHour30Min() {
-        if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
-            long startTime = 20251018000000L;
-            long dateTime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())) - (12000);
-
-            headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
-            headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
-            headOfficeRepository.updatePaymentPendingStatusDetail();
-            repository.updateMissingStatusSent();
-            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
-        }
-    }
-
     @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
     public void executeStatus() {
         if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
@@ -92,8 +78,8 @@ public class TransactionCheckStatus {
                     } catch (InterruptedException ignored) {
                     }
                 });
-//                tryForNextAttempt();
-                repository.updateMissingStatusSent();
+                long nowTime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
+                repository.updateMissingStatusSent(nowTime);
 
             });
         }
@@ -111,8 +97,17 @@ public class TransactionCheckStatus {
             log.info("Non Real Time Status Completed {} Real Time Status", date);
             realTime.checkStatusByDate(date);
             log.info("Non Real Time Status Completed {}", date);
-            repository.updateMissingStatusSent();
-//            tryForNextAttempt();
+
+            long startTime = 20251018000000L;
+            long dateTime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())) - (12000);
+            long nowTime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
+
+            headOfficeRepository.updatePaymentPendingToSent(nowTime, startTime, dateTime);
+            headOfficeRepository.updatePaymentPendingStatusDetail(startTime, dateTime);
+            headOfficeRepository.updatePaymentPendingStatusMaster();
+            repository.updateMissingStatusSent(nowTime);
+            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
+
         }
     }
 
@@ -123,21 +118,4 @@ public class TransactionCheckStatus {
         }
     }
 
-//    private void tryForNextAttempt() {
-//        repository.missingStatusSent();
-//        repository.findTryForNextAttempt().forEach(id -> {
-//            repository.missingStatusSent(id);
-//            log.info("{} Trying For Next Attempt", id);
-//        });
-//    }
-
-//    public void tryTimeOutToReject() {
-//        repository.findTryTimeOutToReject().forEach(m -> {
-//            long instructionId = Long.parseLong(m.get("INSTRUCTION_ID").toString());
-//            String message = m.get("CREDIT_MESSAGE").toString();
-//            message = (message.substring(0, message.indexOf(". We will try again"))) + " Reject after " + m.get("TRY_COUNT") + " times on " + m.get("TRY_TIME") + ".";
-//            repository.updateRejectTransaction("1000", message, "997", "Reject", instructionId);
-//            log.info("Reject Transaction: {}", instructionId);
-//        });
-//    }
 }

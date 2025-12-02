@@ -9,21 +9,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface BankHeadOfficeRepository extends JpaRepository<BankHeadOffice, String> {
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL E SET E.NCHL_CREDIT_STATUS = 'SENT', E.NCHL_PUSHED_DATE_TIME = ?1 WHERE E.NCHL_CREDIT_STATUS = 'BUILD' AND E.NCHL_PUSHED_DATE_TIME BETWEEN ?2 AND ?3 AND EXISTS ( SELECT 1 FROM NCHL_RECONCILED R WHERE R.INSTRUCTION_ID = E.INSTRUCTION_ID )", nativeQuery = true)
+    void updatePaymentPendingToSent(long nowTime ,long startTime, long dateTime);
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_CREDIT_STATUS = NULL WHERE NCHL_CREDIT_STATUS = 'BUILD' AND NCHL_PUSHED_DATE_TIME BETWEEN ?1 AND ?2", nativeQuery = true)
+    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL E SET E.NCHL_CREDIT_STATUS= NULL, E.NCHL_PUSHED_DATE_TIME=NULL WHERE E.NCHL_CREDIT_STATUS = 'BUILD' AND E.NCHL_PUSHED_DATE_TIME BETWEEN ?1 AND ?2 AND NOT EXISTS (SELECT 1 FROM NCHL_RECONCILED R WHERE R.INSTRUCTION_ID = E.INSTRUCTION_ID)", nativeQuery = true)
     void updatePaymentPendingStatusDetail(long startTime, long dateTime);
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE EFT_PAYMENT_BATCH M SET M.OFFUS_PUSHED = 'N' WHERE M.OFFUS_PUSHED = 'Y' AND M.OFFUS > 0 AND M.ID IN(SELECT D.EFT_BATCH_PAYMENT_ID  FROM EFT_PAYMENT_BATCH_DETAIL D WHERE NCHL_CREDIT_STATUS IS NULL AND NCHL_PUSHED_DATE_TIME BETWEEN ?1 AND ?2)", nativeQuery = true)
-    void updatePaymentPendingStatusMaster(long startTime, long dateTime);
+    @Query(value = "UPDATE EFT_PAYMENT_BATCH M SET M.OFFUS_PUSHED = 'N' WHERE M.OFFUS_PUSHED = 'Y' AND M.OFFUS > 0 AND EXISTS (SELECT 1 FROM EFT_PAYMENT_BATCH_DETAIL D WHERE D.EFT_BATCH_PAYMENT_ID = M.ID AND D.NCHL_CREDIT_STATUS IS NULL)", nativeQuery = true)
+    void updatePaymentPendingStatusMaster();
 
-    @Modifying
-    @Transactional
-    @Query(value = "UPDATE EFT_PAYMENT_BATCH_DETAIL SET NCHL_PUSHED_DATE_TIME=NULL WHERE NCHL_CREDIT_STATUS IS NULL AND NCHL_PUSHED_DATE_TIME IS NOT NULL", nativeQuery = true)
-    void updatePaymentPendingStatusDetail();
 
 
 }

@@ -7,7 +7,6 @@ import com.fcgo.eft.sutra.repository.EftNchlRbbBankMappingRepository;
 import com.fcgo.eft.sutra.repository.NchlReconciledRepository;
 import com.fcgo.eft.sutra.service.*;
 import com.fcgo.eft.sutra.service.impl.PoCodeMappedService;
-import com.fcgo.eft.sutra.service.impl.SuTRAProcessingStatus;
 import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeCheckStatusService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +51,6 @@ public class TransactionCheckStatus {
         bankMapService.setBankMaps(eftNchlRbbBankMappingRepository.findBankMap());
         isProdService.init();
         loginService.init();
-        tryForNextAttempt();
         if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
         }
@@ -94,7 +92,7 @@ public class TransactionCheckStatus {
                     } catch (InterruptedException ignored) {
                     }
                 });
-                tryForNextAttempt();
+//                tryForNextAttempt();
                 repository.updateMissingStatusSent();
 
             });
@@ -114,7 +112,7 @@ public class TransactionCheckStatus {
             realTime.checkStatusByDate(date);
             log.info("Non Real Time Status Completed {}", date);
             repository.updateMissingStatusSent();
-            tryForNextAttempt();
+//            tryForNextAttempt();
         }
     }
 
@@ -125,21 +123,21 @@ public class TransactionCheckStatus {
         }
     }
 
-    private void tryForNextAttempt() {
-        repository.missingStatusSent();
-        repository.findTryForNextAttempt().forEach(id -> {
-            repository.missingStatusSent(id);
-            log.info("{} Trying For Next Attempt", id);
-        });
-    }
+//    private void tryForNextAttempt() {
+//        repository.missingStatusSent();
+//        repository.findTryForNextAttempt().forEach(id -> {
+//            repository.missingStatusSent(id);
+//            log.info("{} Trying For Next Attempt", id);
+//        });
+//    }
 
-    public void tryTimeOutToReject() {
-        repository.findTryTimeOutToReject().forEach(m -> {
-            long instructionId = Long.parseLong(m.get("INSTRUCTION_ID").toString());
-            String message = m.get("CREDIT_MESSAGE").toString();
-            message = (message.substring(0, message.indexOf(". We will try again"))) + " Reject after " + m.get("TRY_COUNT") + " times on " + m.get("TRY_TIME") + ".";
-            repository.updateRejectTransaction("1000", message, "997", "Reject", instructionId);
-            log.info("Reject Transaction: {}", instructionId);
-        });
-    }
+//    public void tryTimeOutToReject() {
+//        repository.findTryTimeOutToReject().forEach(m -> {
+//            long instructionId = Long.parseLong(m.get("INSTRUCTION_ID").toString());
+//            String message = m.get("CREDIT_MESSAGE").toString();
+//            message = (message.substring(0, message.indexOf(". We will try again"))) + " Reject after " + m.get("TRY_COUNT") + " times on " + m.get("TRY_TIME") + ".";
+//            repository.updateRejectTransaction("1000", message, "997", "Reject", instructionId);
+//            log.info("Reject Transaction: {}", instructionId);
+//        });
+//    }
 }

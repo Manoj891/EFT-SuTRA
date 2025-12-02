@@ -27,7 +27,7 @@ public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, 
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE NCHL_RECONCILED  SET PUSHED = ?1,PUSHED_DATETIME=?2 WHERE INSTRUCTION_ID = ?3", nativeQuery = true)
+    @Query(value = "UPDATE NCHL_RECONCILED  SET PUSHED=?1,PUSHED_DATETIME=?2 WHERE INSTRUCTION_ID=?3", nativeQuery = true)
     void updateStatus(String pushed, long dateTime, long instructionId);
 
     @Modifying

@@ -1,6 +1,5 @@
 package com.fcgo.eft.sutra.entity;
 
-import com.fcgo.eft.sutra.configure.StringToJsonNodeImpl;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -38,14 +37,15 @@ public class NchlReconciled {
 
     @Column(name = "PUSHED", length = 1, updatable = false)
     private String pushed;
+    @Column(name = "PUSHED_DATETIME", updatable = false)
+    private Long pushedDatetime;
     @Column(name = "TRANSACTION_ID", length = 30, nullable = false)
     private String transactionId;
 
     @Column(name = "UPDATED_AT")
     private LocalDateTime updatedAt;
 
-    @Column(name = "PUSHED_DATETIME")
-    private Long pushedDatetime;
+
 
     @PrePersist
     @PreUpdate

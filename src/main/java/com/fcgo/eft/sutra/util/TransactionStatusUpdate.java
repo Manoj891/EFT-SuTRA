@@ -68,7 +68,7 @@ public class TransactionStatusUpdate {
                         .block();
                 assert res != null;
                 res.forEach(d -> {
-                    log.info("{} {}", d.getPushed(), d.getInstructionId());
+                    log.info("{} {} {}", d.getPushed(), datetime, d.getInstructionId());
                     repository.updateStatus(d.getPushed(), datetime, d.getInstructionId());
                 });
                 try {

@@ -43,33 +43,37 @@ public class TransactionStatusUpdate {
 
     public synchronized void statusUpdateApi() {
         long datetime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
-        while (true) {
-            List<NchlReconciledRes> list = repository.findByPushed(datetime - 3000);
-            if (list.isEmpty()) {
-                started = false;
-                break;
+        try {
+            while (true) {
+                List<NchlReconciledRes> list = repository.findByPushed(datetime - 3000);
+                if (list.isEmpty()) {
+                    started = false;
+                    break;
+                }
+                started = true;
+                List<ReconciledUpdateReq> res = webClient.post()
+                        .uri("https://sutrav3.fcgo.gov.np/SuTRAv3/utility/eft-status")
+                        .header("Authorization", "Bearer " + token)
+                        .bodyValue(list)
+                        .retrieve()
+                        .onStatus(HttpStatusCode::isError, clientResponse ->
+                                clientResponse.bodyToMono(String.class)
+                                        .flatMap(errorBody -> {
+                                            log.info("Remote error: {}", errorBody);
+                                            return Mono.error(new RuntimeException("Remote API returned error"));
+                                        })
+                        )
+                        .bodyToMono(new ParameterizedTypeReference<List<ReconciledUpdateReq>>() {
+                        })
+                        .block();
+                assert res != null;
+                res.forEach(d -> {
+                    log.info("{} {}", d.getPushed(), d.getInstructionId());
+                    repository.updateStatus(d.getPushed(), datetime, d.getInstructionId());
+                });
             }
-            started = true;
-            List<ReconciledUpdateReq> res = webClient.post()
-                    .uri("https://sutrav3.fcgo.gov.np/SuTRAv3/utility/eft-status")
-                    .header("Authorization", "Bearer " + token)
-                    .bodyValue(list)
-                    .retrieve()
-                    .onStatus(HttpStatusCode::isError, clientResponse ->
-                            clientResponse.bodyToMono(String.class)
-                                    .flatMap(errorBody -> {
-                                        log.info("Remote error: {}", errorBody);
-                                        return Mono.error(new RuntimeException("Remote API returned error"));
-                                    })
-                    )
-                    .bodyToMono(new ParameterizedTypeReference<List<ReconciledUpdateReq>>() {
-                    })
-                    .block();
-            assert res != null;
-            res.forEach(d -> {
-                log.info("{} {}", d.getPushed(), d.getInstructionId());
-                repository.updateStatus(d.getPushed(), datetime, d.getInstructionId());
-            });
+        } catch (Exception e) {
+            log.error("Error during status update {}", e.getMessage());
         }
     }
 

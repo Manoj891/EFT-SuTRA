@@ -22,24 +22,5 @@ public class SuTRAProcessingStatus {
     private final EftBatchPaymentDetailRepository detailRepository;
     private final StringToJsonNode jsonNode;
 
-    public void check(long eftNo) {
-        try {
-            long datetime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
-            Optional<NchlReconciled> reconciled = reconciledRepository.findByInstructionId(eftNo);
-            if (reconciled.isPresent()) {
-                statusUpdate.update(reconciled.get(), datetime);
-            } else {
-                String instructionId = String.valueOf(eftNo);
-                Optional<EftBatchPaymentDetail> batchPaymentDetail = detailRepository.findByInstructionId(instructionId);
-                if (batchPaymentDetail.isPresent()) {
-                    log.info("Transaction found in EftBatchPaymentDetail: {}", instructionId);
-                } else {
-//                    dbPrimary.update("update acc_epayment set transtatus=1,pstatus=0 where eftno=" + eftNo);
-                    log.info("EFT No. {} has been reverted to sutra", eftNo);
-                }
-            }
-        } catch (Exception e) {
-            log.info(e.getMessage());
-        }
-    }
+
 }

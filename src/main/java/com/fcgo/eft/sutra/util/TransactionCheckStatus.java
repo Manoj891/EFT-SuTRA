@@ -6,6 +6,7 @@ import com.fcgo.eft.sutra.repository.BankHeadOfficeRepository;
 import com.fcgo.eft.sutra.repository.EftNchlRbbBankMappingRepository;
 import com.fcgo.eft.sutra.repository.NchlReconciledRepository;
 import com.fcgo.eft.sutra.service.*;
+import com.fcgo.eft.sutra.service.impl.AccountWhiteListSave;
 import com.fcgo.eft.sutra.service.impl.PoCodeMappedService;
 import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeCheckStatusService;
 import jakarta.annotation.PostConstruct;
@@ -38,6 +39,7 @@ public class TransactionCheckStatus {
     private final LoginService loginService;
     private final StringToJsonNode jsonNode;
     private final PoCodeMappedService poCodeMappedService;
+    private final AccountWhiteListSave accountWhiteListSave;
     @Value("${server.port}")
     private String port;
 
@@ -49,6 +51,7 @@ public class TransactionCheckStatus {
         bankMapService.setBankMaps(eftNchlRbbBankMappingRepository.findBankMap());
         isProdService.init();
         loginService.init();
+        new Thread(accountWhiteListSave::pushInSuTRA).start();
     }
 
     @Scheduled(cron = "0 0/10 * * * *")

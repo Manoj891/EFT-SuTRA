@@ -71,6 +71,10 @@ public class TransactionStatusUpdate {
                     log.info("{} {}", d.getPushed(), d.getInstructionId());
                     repository.updateStatus(d.getPushed(), datetime, d.getInstructionId());
                 });
+                try {
+                    Thread.sleep(60000);
+                } catch (Exception ignored) {
+                }
             }
         } catch (Exception e) {
             log.error("Error during status update {}", e.getMessage());

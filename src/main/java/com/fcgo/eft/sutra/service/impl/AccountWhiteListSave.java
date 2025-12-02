@@ -54,7 +54,7 @@ public class AccountWhiteListSave {
             update.init();
             token = update.getToken();
         }
-        Pageable limit = PageRequest.of(0, 1000);
+        Pageable limit = PageRequest.of(0, 100);
         for (int i = 1; i < 100; i++) {
             List<BankAccountWhitelistPushed> list = whitelistRepository.findByPushedOrPushedNull("N", limit);
             if (list.isEmpty()) {
@@ -85,6 +85,10 @@ public class AccountWhiteListSave {
                     log.info(ex.getMessage());
                 }
             });
+            try {
+                Thread.sleep(60000);
+            } catch (Exception ignored) {
+            }
         }
     }
 }

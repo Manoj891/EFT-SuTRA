@@ -41,7 +41,6 @@ public class TransactionCheckStatus {
     @Value("${server.port}")
     private String port;
 
-
     @PostConstruct
     public void executePostConstruct() {
         statusUpdate.init();

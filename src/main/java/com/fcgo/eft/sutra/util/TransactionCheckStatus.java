@@ -56,9 +56,16 @@ public class TransactionCheckStatus {
             } catch (InterruptedException ignored) {
             }
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
-            executor.submit(statusUpdate::statusUpdateApi);
         }
     }
+
+    @Scheduled(cron = "0 0/10 * * * *")
+    public void updateStatus() {
+        if (!statusUpdate.isStarted()) {
+            statusUpdate.statusUpdateApi();
+        }
+    }
+
 
     @Scheduled(cron = "0 30 08,09,10,11,12,13,14,15,16,17,18,20,22 * * *")
     public void executeEveryHour30Min() {
@@ -70,9 +77,6 @@ public class TransactionCheckStatus {
             headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
             headOfficeRepository.updatePaymentPendingStatusDetail();
             repository.updateMissingStatusSent();
-            if (statusUpdate.isStarted()) {
-                statusUpdate.statusUpdateApi();
-            }
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
         }
     }

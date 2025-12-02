@@ -68,9 +68,7 @@ public class TransactionCheckStatus {
             headOfficeRepository.updatePaymentPendingStatusMaster(startTime, dateTime);
             headOfficeRepository.updatePaymentPendingStatusDetail();
             repository.updateMissingStatusSent();
-            tryForNextAttempt();
-
-            if (!statusUpdate.isStarted()) {
+            if (statusUpdate.isStarted()) {
                 statusUpdate.statusUpdateApi();
             }
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));

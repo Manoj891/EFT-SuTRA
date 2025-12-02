@@ -23,7 +23,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 @RequiredArgsConstructor
 @Slf4j
 public class TransactionCheckStatus {
-
     private final NonRealTimeCheckStatusService nonRealTime;
     private final RealTimeCheckStatusService realTime;
     private final NchlReconciledRepository repository;
@@ -52,7 +51,12 @@ public class TransactionCheckStatus {
         isProdService.init();
         loginService.init();
         if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
+            try {
+                Thread.sleep(60000);
+            } catch (InterruptedException ignored) {
+            }
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
+            executor.submit(statusUpdate::statusUpdateApi);
         }
     }
 

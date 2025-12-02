@@ -34,7 +34,6 @@ public class NchlReconciledService {
                 .recDate(recDate)
                 .transactionId(transactionId)
                 .pushed("N")
-
                 .build());
     }
 }

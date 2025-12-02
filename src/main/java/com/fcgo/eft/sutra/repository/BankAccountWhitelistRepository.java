@@ -30,6 +30,6 @@ public interface BankAccountWhitelistRepository extends JpaRepository<BankAccoun
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE BANK_ACCOUNT_WHITELIST  SET PUSHED ='Y' WHERE ACCOUNT_ID = ?1 AND BANK_ID=?2", nativeQuery = true)
-    void updateStatus(String accountId, String bankId);
+    @Query(value = "UPDATE BANK_ACCOUNT_WHITELIST  SET PUSHED ='Y' WHERE  BANK_ID= ?1 AND ACCOUNT_ID=?2", nativeQuery = true)
+    void updateStatus(String bankId,String accountId);
 }

@@ -1,6 +1,7 @@
 package com.fcgo.eft.sutra.service.impl;
 
 
+import com.fcgo.eft.sutra.dto.res.BankAccountWhitelistPushed;
 import com.fcgo.eft.sutra.entity.BankAccountWhitelist;
 import com.fcgo.eft.sutra.entity.BankAccountWhitelistPk;
 import com.fcgo.eft.sutra.repository.BankAccountWhitelistRepository;
@@ -54,30 +55,36 @@ public class AccountWhiteListSave {
             token = update.getToken();
         }
         Pageable limit = PageRequest.of(0, 1000);
-        List<String> res = webClient.post()
-                .uri("https://sutrav3.fcgo.gov.np/SuTRAv3/utility/bank-account-whitelist?username=" + username)
-                .header("Authorization", "Bearer " + token)
-                .bodyValue(whitelistRepository.findByPushedOrPushedNull("N", limit))
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, clientResponse ->
-                        clientResponse.bodyToMono(String.class)
-                                .flatMap(errorBody -> {
-                                    log.info("Remote error: {}", errorBody);
-                                    return Mono.error(new RuntimeException("Remote API returned error"));
-                                })
-                )
-                .bodyToMono(new ParameterizedTypeReference<List<String>>() {
-                })
-                .block();
-        assert res != null;
-        res.forEach(d -> {
-            try {
-                String[] acc = d.split("-");
-                log.info("{}", d);
-                whitelistRepository.updateStatus(acc[0], acc[1]);
-            } catch (Exception ex) {
-                log.info(ex.getMessage());
+        for (int i = 1; i < 100; i++) {
+            List<BankAccountWhitelistPushed> list = whitelistRepository.findByPushedOrPushedNull("N", limit);
+            if (list.isEmpty()) {
+                break;
             }
-        });
+            List<String> res = webClient.post()
+                    .uri("https://sutrav3.fcgo.gov.np/SuTRAv3/utility/bank-account-whitelist?username=" + username)
+                    .header("Authorization", "Bearer " + token)
+                    .bodyValue(list)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, clientResponse ->
+                            clientResponse.bodyToMono(String.class)
+                                    .flatMap(errorBody -> {
+                                        log.info("Remote error: {}", errorBody);
+                                        return Mono.error(new RuntimeException("Remote API returned error"));
+                                    })
+                    )
+                    .bodyToMono(new ParameterizedTypeReference<List<String>>() {
+                    })
+                    .block();
+            assert res != null;
+            res.forEach(d -> {
+                try {
+                    String[] acc = d.split("-");
+                    log.info("{} {}.", acc[0], acc[1]);
+                    whitelistRepository.updateStatus(acc[0], acc[1]);
+                } catch (Exception ex) {
+                    log.info(ex.getMessage());
+                }
+            });
+        }
     }
 }

@@ -51,7 +51,7 @@ public class NonRealTimeTransactionStartImpl implements NonRealTimeTransactionSt
 
     @Override
     public void start() {
-        while (true) {
+        while (isProdService.isStarted()) {
             List<PaymentBatchPendingRes> list = repository.findPaymentNonRealPendingRes();
             if (list.isEmpty()) {
                 started = false;

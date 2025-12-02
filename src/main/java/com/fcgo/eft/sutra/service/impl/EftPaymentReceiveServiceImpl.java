@@ -27,10 +27,14 @@ public class EftPaymentReceiveServiceImpl implements EftPaymentReceiveService {
 
     @Override
     public void paymentReceive(EftPaymentReceive receive) {
-        if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
-            startTransactionThread(service.paymentReceive(receive));
+        if (isProdService.isStarted()) {
+            if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
+                startTransactionThread(service.paymentReceive(receive));
+            } else {
+                throw new CustomException("Prod service not supported");
+            }
         } else {
-            throw new CustomException("Prod service not supported");
+            throw new CustomException("New Transaction is stopped, Please try after some time");
         }
     }
 

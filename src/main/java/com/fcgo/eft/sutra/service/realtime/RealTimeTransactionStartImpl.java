@@ -4,6 +4,7 @@ import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.res.EftPaymentRequestDetailProjection;
 import com.fcgo.eft.sutra.repository.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.service.BankHeadOfficeService;
+import com.fcgo.eft.sutra.util.IsProdService;
 import com.fcgo.eft.sutra.util.TransactionStatusUpdate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,8 @@ public class RealTimeTransactionStartImpl implements RealTimeTransactionStart {
     private final ThreadPoolExecutor executor;
     @Autowired
     private StringToJsonNode jsonNode;
+    @Autowired
+    private IsProdService isProdService;
     private boolean started = false;
 
     public RealTimeTransactionStartImpl(@Qualifier("realTime") ThreadPoolExecutor executor, EftBatchPaymentDetailRepository repository, RealTimeTransactionService service, BankHeadOfficeService ho) {
@@ -40,7 +43,7 @@ public class RealTimeTransactionStartImpl implements RealTimeTransactionStart {
 
     @Override
     public synchronized void start() {
-        while (true) {
+        while (isProdService.isStarted()) {
             long start = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date())) - 1500;
             List<EftPaymentRequestDetailProjection> list = repository.findRealTimePending();
             list.addAll(repository.findRealTimePending(start));

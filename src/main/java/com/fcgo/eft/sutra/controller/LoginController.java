@@ -9,6 +9,7 @@ import com.fcgo.eft.sutra.service.EftPaymentReceiveService;
 import com.fcgo.eft.sutra.service.LoginService;
 import com.fcgo.eft.sutra.service.RealTimeCheckStatusService;
 import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeStatusFromNchl;
+import com.fcgo.eft.sutra.util.IsProdService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ public class LoginController {
     private final NonRealTimeStatusFromNchl statusFromNchl;
     private final RealTimeCheckStatusService realTimeCheckStatusService;
     private final BankAccountDetailsService bankAccountDetailsService;
+    private final IsProdService isProdService;
 
     @PostMapping("/login")
     public ResponseEntity<LoginRes> login(@RequestBody LoginReq req, HttpServletRequest request) {
@@ -56,12 +58,18 @@ public class LoginController {
         for (String s : instructionId.split(",")) {
             try {
                 if (s.length() > 5) {
-                    resp.add(realTimeCheckStatusService.checkStatusByInstructionId(s,0));
+                    resp.add(realTimeCheckStatusService.checkStatusByInstructionId(s, 0));
                 }
             } catch (Exception ex) {
                 resp.add(s + " " + ex.getMessage());
             }
         }
         return ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+
+    @GetMapping("/transaction")
+    public ResponseEntity<String> realTransaction(@RequestParam boolean status) {
+        isProdService.setStarted(status);
+        return ResponseEntity.status(HttpStatus.OK).body("Success");
     }
 }

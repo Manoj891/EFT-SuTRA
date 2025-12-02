@@ -1,6 +1,7 @@
 package com.fcgo.eft.sutra.util;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.stereotype.Service;
 
 import java.net.InetAddress;
@@ -11,6 +12,9 @@ import java.util.Enumeration;
 @Service
 public class IsProdService {
     private boolean isProdService = false;
+    @Getter
+    @Setter
+    private boolean started = true;
     private String prodIpAddress = "";
 
     public void init() {

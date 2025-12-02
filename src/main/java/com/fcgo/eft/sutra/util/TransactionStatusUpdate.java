@@ -26,6 +26,7 @@ public class TransactionStatusUpdate {
     private final NchlReconciledRepository repository;
     private final WebClient webClient;
     private final StringToJsonNode jsonNode;
+    @Getter
     private String token;
     @Getter
     private boolean started = false;

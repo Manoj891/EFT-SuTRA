@@ -33,8 +33,6 @@ import java.util.Objects;
 public class BankAccountDetailsServiceImpl implements BankAccountDetailsService {
     @Value("${nchl.npi.url}")
     private String url;
-    @Value("${nchl.npi.username}")
-    private String username;
 
     private final NchlOauthToken oauthToken;
     private final WebClient webClient;
@@ -63,8 +61,7 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
 
     @Override
     public Object getTransactionDetailByInstructionId(String instructionId) {
-        TransactionId type = whitelistRepository.findNchlTransactionType(instructionId)
-                .orElseThrow(() -> new CustomException("Invalid INSTRUCTION ID " + instructionId));
+        TransactionId type = whitelistRepository.findNchlTransactionType(instructionId).orElseThrow(() -> new CustomException("Invalid INSTRUCTION ID " + instructionId));
         if (type.getTransactionType().equals("OFFUS")) {
             String batchId = whitelistRepository.findBatchId(type.getPaymentId());
             return nonRealTimeStatusFromNchl.checkByBatchNonRealTime(batchId);
@@ -103,31 +100,19 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
             }
             log.info("Fetching Bank Account Details: {}/api/bank-account/details", url);
             accountWhiteListSave.setSetDate(new Date().getTime());
-            Objects.requireNonNull(webClient.post()
-                            .uri(url + "/api/bank-account/details")
-                            .header(HttpHeaders.AUTHORIZATION, "Bearer " + access_token)
-                            .retrieve()
-                            .onStatus(HttpStatusCode::isError, clientResponse ->
-                                    clientResponse.bodyToMono(String.class)
-                                            .publishOn(Schedulers.boundedElastic())
-                                            .flatMap(errorBody -> {
-                                                whitelistErrorRepository.saveAndFlush(BankAccountWhitelistError.builder().id(1).error(errorBody).build());
-                                                log.error("Error fetching bank account details: {}", errorBody);
-                                                return Mono.error(new CustomException(errorBody));
-                                            })
-                            )
-                            .bodyToMono(BankAccountDetailsRes.class)
-                            .block())
-                    .getData()
-                    .forEach(d -> {
-                        log.info("{} {} {}", d.getAccountId(), d.getBankId(), d.getAccountName());
-                        try {
-                            accountWhiteListSave.save(d.getAccountId(), username, d.getBankId(), d.getBranchId(), d.getAccountName(), d.getStatus(), d.getRcreTime(), d.getBankName());
-                        } catch (Exception e) {
-                            log.error("Account No:{} Bank:{} Save Error: {}", d.getAccountId(), d.getBankId(), e.getMessage(), e);
-                        }
-                    });
-
+            Objects.requireNonNull(webClient.post().uri(url + "/api/bank-account/details").header(HttpHeaders.AUTHORIZATION, "Bearer " + access_token).retrieve().onStatus(HttpStatusCode::isError, clientResponse -> clientResponse.bodyToMono(String.class).publishOn(Schedulers.boundedElastic()).flatMap(errorBody -> {
+                whitelistErrorRepository.saveAndFlush(BankAccountWhitelistError.builder().id(1).error(errorBody).build());
+                log.error("Error fetching bank account details: {}", errorBody);
+                return Mono.error(new CustomException(errorBody));
+            })).bodyToMono(BankAccountDetailsRes.class).block()).getData().forEach(d -> {
+                log.info("{} {} {}", d.getAccountId(), d.getBankId(), d.getAccountName());
+                try {
+                    accountWhiteListSave.save(d.getAccountId(), d.getBankId(), d.getBranchId(), d.getAccountName(), d.getStatus(), d.getRcreTime(), d.getBankName());
+                } catch (Exception e) {
+                    log.error("Account No:{} Bank:{} Save Error: {}", d.getAccountId(), d.getBankId(), e.getMessage(), e);
+                }
+            });
+            accountWhiteListSave.pushInSuTRA();
         } catch (Exception e) {
             log.info(e.getMessage());
         }

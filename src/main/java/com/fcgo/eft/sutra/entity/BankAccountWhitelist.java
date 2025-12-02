@@ -37,6 +37,8 @@ public class BankAccountWhitelist {
     private String bankId;
     @Column(name = "ACCOUNT_ID", length = 20, insertable = false, updatable = false)
     private String accountId;
+    @Column(name = "PUSHED", length = 1)
+    private String pushed;
 
 
 }

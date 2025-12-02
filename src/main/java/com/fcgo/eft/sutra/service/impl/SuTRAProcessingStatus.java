@@ -1,10 +1,10 @@
 package com.fcgo.eft.sutra.service.impl;
 
 import com.fcgo.eft.sutra.configure.StringToJsonNode;
-import com.fcgo.eft.sutra.entity.oracle.EftBatchPaymentDetail;
-import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
-import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
-import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
+import com.fcgo.eft.sutra.entity.EftBatchPaymentDetail;
+import com.fcgo.eft.sutra.entity.NchlReconciled;
+import com.fcgo.eft.sutra.repository.EftBatchPaymentDetailRepository;
+import com.fcgo.eft.sutra.repository.NchlReconciledRepository;
 import com.fcgo.eft.sutra.util.TransactionStatusUpdate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

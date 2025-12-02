@@ -1,17 +1,15 @@
 package com.fcgo.eft.sutra.service.impl;
 
 import com.fcgo.eft.sutra.entity.mssql.NCHLWhiteList;
-import com.fcgo.eft.sutra.entity.oracle.BankAccountWhitelist;
-import com.fcgo.eft.sutra.entity.oracle.BankAccountWhitelistPk;
+import com.fcgo.eft.sutra.entity.BankAccountWhitelist;
+import com.fcgo.eft.sutra.entity.BankAccountWhitelistPk;
 import com.fcgo.eft.sutra.repository.mssql.NCHLWhiteListRepository;
-import com.fcgo.eft.sutra.repository.oracle.BankAccountWhitelistRepository;
+import com.fcgo.eft.sutra.repository.BankAccountWhitelistRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Date;
 
 @Service
 @Slf4j

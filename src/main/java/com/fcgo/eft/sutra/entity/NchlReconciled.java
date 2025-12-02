@@ -1,4 +1,4 @@
-package com.fcgo.eft.sutra.entity.oracle;
+package com.fcgo.eft.sutra.entity;
 
 import com.fcgo.eft.sutra.configure.StringToJsonNodeImpl;
 import jakarta.persistence.*;

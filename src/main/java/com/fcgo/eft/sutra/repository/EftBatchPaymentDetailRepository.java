@@ -1,8 +1,8 @@
-package com.fcgo.eft.sutra.repository.oracle;
+package com.fcgo.eft.sutra.repository;
 
 import com.fcgo.eft.sutra.dto.res.EftPaymentRequestDetailProjection;
 import com.fcgo.eft.sutra.dto.res.PaymentBatchPendingRes;
-import com.fcgo.eft.sutra.entity.oracle.EftBatchPaymentDetail;
+import com.fcgo.eft.sutra.entity.EftBatchPaymentDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

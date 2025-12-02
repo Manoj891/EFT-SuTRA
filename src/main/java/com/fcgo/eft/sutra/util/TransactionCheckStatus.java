@@ -2,9 +2,9 @@ package com.fcgo.eft.sutra.util;
 
 import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.res.PaymentReceiveStatus;
-import com.fcgo.eft.sutra.repository.oracle.BankHeadOfficeRepository;
-import com.fcgo.eft.sutra.repository.oracle.EftNchlRbbBankMappingRepository;
-import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
+import com.fcgo.eft.sutra.repository.BankHeadOfficeRepository;
+import com.fcgo.eft.sutra.repository.EftNchlRbbBankMappingRepository;
+import com.fcgo.eft.sutra.repository.NchlReconciledRepository;
 import com.fcgo.eft.sutra.service.*;
 import com.fcgo.eft.sutra.service.impl.PoCodeMappedService;
 import com.fcgo.eft.sutra.service.impl.SuTRAProcessingStatus;

@@ -1,7 +1,7 @@
-package com.fcgo.eft.sutra.repository.oracle;
+package com.fcgo.eft.sutra.repository;
 
 import com.fcgo.eft.sutra.dto.req.BankMap;
-import com.fcgo.eft.sutra.entity.oracle.EftNchlRbbBankMapping;
+import com.fcgo.eft.sutra.entity.EftNchlRbbBankMapping;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

@@ -2,7 +2,7 @@ package com.fcgo.eft.sutra.service.realtime;
 
 import com.fcgo.eft.sutra.configure.StringToJsonNode;
 import com.fcgo.eft.sutra.dto.res.EftPaymentRequestDetailProjection;
-import com.fcgo.eft.sutra.repository.oracle.EftBatchPaymentDetailRepository;
+import com.fcgo.eft.sutra.repository.EftBatchPaymentDetailRepository;
 import com.fcgo.eft.sutra.service.BankHeadOfficeService;
 import com.fcgo.eft.sutra.util.TransactionStatusUpdate;
 import lombok.extern.slf4j.Slf4j;

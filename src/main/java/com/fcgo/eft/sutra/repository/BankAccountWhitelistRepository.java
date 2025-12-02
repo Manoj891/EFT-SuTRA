@@ -1,8 +1,8 @@
-package com.fcgo.eft.sutra.repository.oracle;
+package com.fcgo.eft.sutra.repository;
 
 
 import com.fcgo.eft.sutra.dto.req.TransactionId;
-import com.fcgo.eft.sutra.entity.oracle.BankAccountWhitelist;
+import com.fcgo.eft.sutra.entity.BankAccountWhitelist;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

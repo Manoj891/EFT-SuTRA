@@ -1,6 +1,6 @@
-package com.fcgo.eft.sutra.repository.oracle;
+package com.fcgo.eft.sutra.repository;
 
-import com.fcgo.eft.sutra.entity.oracle.RemoteIp;
+import com.fcgo.eft.sutra.entity.RemoteIp;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

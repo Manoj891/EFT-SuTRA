@@ -1,7 +1,7 @@
 package com.fcgo.eft.sutra.service;
 
-import com.fcgo.eft.sutra.entity.oracle.BankHeadOffice;
-import com.fcgo.eft.sutra.repository.oracle.BankHeadOfficeRepository;
+import com.fcgo.eft.sutra.entity.BankHeadOffice;
+import com.fcgo.eft.sutra.repository.BankHeadOfficeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

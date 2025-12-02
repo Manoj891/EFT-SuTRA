@@ -1,6 +1,6 @@
 package com.fcgo.eft.sutra.dto.res;
 
-import com.fcgo.eft.sutra.entity.oracle.EftBatchPaymentDetail;
+import com.fcgo.eft.sutra.entity.EftBatchPaymentDetail;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

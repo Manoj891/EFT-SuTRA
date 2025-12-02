@@ -1,9 +1,8 @@
 package com.fcgo.eft.sutra.service.nonrealtime;
 
 import com.fcgo.eft.sutra.dto.nchlres.NonRealTimeBatch;
-import com.fcgo.eft.sutra.dto.res.NchlIpsBatchDetailRes;
-import com.fcgo.eft.sutra.entity.oracle.NchlReconciled;
-import com.fcgo.eft.sutra.repository.oracle.NchlReconciledRepository;
+import com.fcgo.eft.sutra.entity.NchlReconciled;
+import com.fcgo.eft.sutra.repository.NchlReconciledRepository;
 import com.fcgo.eft.sutra.service.ReconciledTransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

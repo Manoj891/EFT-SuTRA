@@ -1,8 +1,7 @@
-package com.fcgo.eft.sutra.entity.oracle;
+package com.fcgo.eft.sutra.entity;
 
 import lombok.*;
 import jakarta.persistence.*;
-import java.util.Date;
 
 @Getter
 @Setter

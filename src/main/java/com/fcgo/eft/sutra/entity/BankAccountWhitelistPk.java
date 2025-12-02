@@ -1,4 +1,4 @@
-package com.fcgo.eft.sutra.entity.oracle;
+package com.fcgo.eft.sutra.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

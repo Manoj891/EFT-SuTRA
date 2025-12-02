@@ -2,10 +2,10 @@ package com.fcgo.eft.sutra.service.impl;
 
 import com.fcgo.eft.sutra.dto.req.LoginReq;
 import com.fcgo.eft.sutra.dto.res.LoginRes;
-import com.fcgo.eft.sutra.entity.oracle.ApplicationUser;
+import com.fcgo.eft.sutra.entity.ApplicationUser;
 import com.fcgo.eft.sutra.exception.CustomException;
 import com.fcgo.eft.sutra.exception.PermissionDeniedException;
-import com.fcgo.eft.sutra.repository.oracle.ApplicationUserRepository;
+import com.fcgo.eft.sutra.repository.ApplicationUserRepository;
 import com.fcgo.eft.sutra.security.JwtHelper;
 import com.fcgo.eft.sutra.service.LoginService;
 import jakarta.servlet.http.HttpServletRequest;

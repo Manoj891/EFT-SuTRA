@@ -35,7 +35,7 @@ public class TransactionStatusUpdate {
         token = webClient.post()
                 .uri("https://sutrav3.fcgo.gov.np/SuTRAv3/public/api/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue("{\"userId\":\"1\",\"sessionId\":\"1\",\"orgId\":\"1\",\"adminid\":\"1\"}")
+                .bodyValue("{\"userId\":\"EFT\",\"sessionId\":\"1\",\"orgId\":\"1\",\"adminid\":\"1\"}")
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();

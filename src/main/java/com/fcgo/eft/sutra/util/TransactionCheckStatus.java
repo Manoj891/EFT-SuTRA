@@ -11,13 +11,21 @@ import com.fcgo.eft.sutra.service.nonrealtime.NonRealTimeCheckStatusService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +52,58 @@ public class TransactionCheckStatus {
 
     @PostConstruct
     public void executePostConstruct() {
+        Workbook workbookWrite = new XSSFWorkbook();
+        Sheet sheetWrite = workbookWrite.createSheet("Sheet1");
+        Row rowWrite = sheetWrite.createRow(0);
+        // Create cells and set values
+        rowWrite.createCell(0).setCellValue("INSTRUCTION ID");
+        rowWrite.createCell(1).setCellValue("CREDIT STATUS");
+        rowWrite.createCell(2).setCellValue("DEBIT STATUS");
+        FileInputStream fis = null;
+        String filePath = "C:/Users/Manoj/Documents/ResendFailureEFT.xlsx";
+        try {
+            fis = new FileInputStream(filePath);
+            Workbook workbook = new XSSFWorkbook(fis);
+            Sheet sheet = workbook.getSheetAt(0);
+           AtomicInteger count= new AtomicInteger(1);
+            for (Row row : sheet) {
+                try {
+                    long eftNo = Long.parseLong(row.getCell(1).toString().replace("\"", ""));
+                    repository.findById(eftNo).ifPresent(e -> {
+                        if (e.getCreditStatus().equals("000") || e.getCreditStatus().equals("ACSC")) {
+                            Row newRow = sheetWrite.createRow(count.get());
+                            // Create cells and set values
+                            newRow.createCell(0).setCellValue("'"+eftNo);
+                            newRow.createCell(1).setCellValue("'"+ e.getCreditStatus());
+                            newRow.createCell(2).setCellValue("'"+e.getDebitStatus());
+                            count.getAndIncrement();
+                            System.out.println(eftNo + " " + e.getCreditStatus() + " " + e.getDebitStatus());
+                        }
+                    });
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                }
+
+
+            }
+            try (FileOutputStream fos = new FileOutputStream("C:/Users/Manoj/Documents/ResendSuccess.xlsx")) {
+                workbookWrite.write(fos);
+                workbookWrite.close();
+                System.out.println("Excel file created successfully!");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println("----------------------------------------------------");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        try {
+            fis.close();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+
         statusUpdate.init();
         poCodeMappedService.setDate();
         bankHeadOfficeService.setHeadOfficeId();

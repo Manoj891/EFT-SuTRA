@@ -50,13 +50,6 @@ public class TransactionCheckStatus {
         bankMapService.setBankMaps(eftNchlRbbBankMappingRepository.findBankMap());
         isProdService.init();
         loginService.init();
-        if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
-            try {
-                Thread.sleep(60000);
-            } catch (InterruptedException ignored) {
-            }
-            executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
-        }
     }
 
     @Scheduled(cron = "0 0/10 * * * *")

@@ -56,7 +56,7 @@ public class TransactionCheckStatus {
 
     @Scheduled(cron = "0 0/10 * * * *")
     public void updateStatus() {
-        if (!statusUpdate.isStarted()) {
+        if (!statusUpdate.isStarted() && isProdService.isStarted()) {
             statusUpdate.statusUpdateApi();
         }
     }

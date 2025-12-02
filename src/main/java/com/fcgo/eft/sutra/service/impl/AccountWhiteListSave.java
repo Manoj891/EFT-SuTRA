@@ -10,6 +10,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,11 +53,11 @@ public class AccountWhiteListSave {
             update.init();
             token = update.getToken();
         }
-
+        Pageable limit = PageRequest.of(0, 1000);
         List<String> res = webClient.post()
                 .uri("https://sutrav3.fcgo.gov.np/SuTRAv3/utility/bank-account-whitelist?username=" + username)
                 .header("Authorization", "Bearer " + token)
-                .bodyValue(whitelistRepository.findByPushedOrPushedNull("N"))
+                .bodyValue(whitelistRepository.findByPushedOrPushedNull("N", limit))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, clientResponse ->
                         clientResponse.bodyToMono(String.class)

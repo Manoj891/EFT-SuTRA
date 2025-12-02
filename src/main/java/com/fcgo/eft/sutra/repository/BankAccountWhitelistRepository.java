@@ -4,6 +4,7 @@ package com.fcgo.eft.sutra.repository;
 import com.fcgo.eft.sutra.dto.req.TransactionId;
 import com.fcgo.eft.sutra.dto.res.BankAccountWhitelistPushed;
 import com.fcgo.eft.sutra.entity.BankAccountWhitelist;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -24,7 +25,7 @@ public interface BankAccountWhitelistRepository extends JpaRepository<BankAccoun
 
     Optional<BankAccountWhitelist> findByAccountIdAndBankId(String accountId, String bankId);
 
-    List<BankAccountWhitelistPushed> findByPushedOrPushedNull(String pushed);
+    List<BankAccountWhitelistPushed> findByPushedOrPushedNull(String pushed, Pageable pageable);
 
 
     @Modifying

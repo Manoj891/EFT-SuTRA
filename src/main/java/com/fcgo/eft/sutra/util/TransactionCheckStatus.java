@@ -35,7 +35,6 @@ public class TransactionCheckStatus {
     private final EftNchlRbbBankMappingRepository eftNchlRbbBankMappingRepository;
     private final PaymentReceiveService bankMapService;
     private final EftPaymentReceiveService paymentReceiveService;
-    private final SuTRAProcessingStatus suTRAProcessingStatus;
     private final IsProdService isProdService;
     private final ThreadPoolExecutor executor;
     private final LoginService loginService;
@@ -47,6 +46,7 @@ public class TransactionCheckStatus {
 
     @PostConstruct
     public void executePostConstruct() {
+        statusUpdate.init();
         poCodeMappedService.setDate();
         bankHeadOfficeService.setHeadOfficeId();
         bankMapService.setBankMaps(eftNchlRbbBankMappingRepository.findBankMap());
@@ -69,10 +69,9 @@ public class TransactionCheckStatus {
             headOfficeRepository.updatePaymentPendingStatusDetail();
             repository.updateMissingStatusSent();
             tryForNextAttempt();
-//            tryTimeOutToReject();
 
             if (!statusUpdate.isStarted()) {
-                statusUpdate.statusUpdate();
+                statusUpdate.statusUpdateApi();
             }
             executor.submit(() -> paymentReceiveService.startTransactionThread(PaymentReceiveStatus.builder().offus(1).onus(1).build()));
         }
@@ -98,11 +97,8 @@ public class TransactionCheckStatus {
                     }
                 });
                 tryForNextAttempt();
-//                tryTimeOutToReject();
                 repository.updateMissingStatusSent();
-                if (!statusUpdate.isStarted()) {
-                    statusUpdate.statusUpdate();
-                }
+
             });
         }
     }
@@ -121,7 +117,6 @@ public class TransactionCheckStatus {
             log.info("Non Real Time Status Completed {}", date);
             repository.updateMissingStatusSent();
             tryForNextAttempt();
-//            tryTimeOutToReject();
         }
     }
 

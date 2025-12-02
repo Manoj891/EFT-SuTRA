@@ -1,5 +1,6 @@
 package com.fcgo.eft.sutra.repository;
 
+import com.fcgo.eft.sutra.dto.res.NchlReconciledRes;
 import com.fcgo.eft.sutra.entity.NchlReconciled;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -28,10 +29,8 @@ public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, 
     @Query(value = "SELECT BATCH_ID FROM EFT_PAYMENT_BATCH_DETAIL D JOIN EFT_PAYMENT_BATCH B ON D.EFT_BATCH_PAYMENT_ID = B.ID LEFT JOIN NCHL_RECONCILED N ON D.INSTRUCTION_ID = N.INSTRUCTION_ID WHERE D.NCHL_CREDIT_STATUS IS NOT NULL AND NCHL_TRANSACTION_TYPE = 'OFFUS' AND NCHL_CREDIT_STATUS='SENT' AND (PUSHED IS NULL OR PUSHED = 'N') GROUP BY BATCH_ID ORDER BY BATCH_ID", nativeQuery = true)
     List<String> findNonRealTimePendingBatchId();
 
-    Optional<NchlReconciled> findByInstructionId(long instructionId);
-
-    @Query(value = "SELECT * FROM NCHL_RECONCILED WHERE PUSHED='N' AND (PUSHED_DATETIME IS NULL OR PUSHED_DATETIME<=?1) ", nativeQuery = true)
-    List<NchlReconciled> findByPushed(long datetime);
+    @Query(value = "SELECT INSTRUCTION_ID instructionId,DEBIT_STATUS debitStatus,DEBIT_MESSAGE debitMessage,CREDIT_STATUS creditStatus,CREDIT_MESSAGE creditMessage FROM NCHL_RECONCILED WHERE PUSHED='N' AND (PUSHED_DATETIME IS NULL OR PUSHED_DATETIME<=?1) ORDER BY INSTRUCTION_ID FETCH FIRST 10 ROWS ONLY", nativeQuery = true)
+    List<NchlReconciledRes> findByPushed(long datetime);
 
     @Modifying
     @Transactional
@@ -40,8 +39,8 @@ public interface NchlReconciledRepository extends JpaRepository<NchlReconciled, 
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE NCHL_RECONCILED  SET PUSHED = 'Y',PUSHED_DATETIME=?1 WHERE INSTRUCTION_ID = ?2", nativeQuery = true)
-    void updateStatus(long dateTime, long id);
+    @Query(value = "UPDATE NCHL_RECONCILED  SET PUSHED = ?1,PUSHED_DATETIME=?2 WHERE INSTRUCTION_ID = ?3", nativeQuery = true)
+    void updateStatus(String pushed,long dateTime, long instructionId);
 
     @Modifying
     @Transactional

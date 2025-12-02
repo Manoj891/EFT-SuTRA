@@ -24,8 +24,6 @@ public class RealTimeTransactionStartImpl implements RealTimeTransactionStart {
     private final ThreadPoolExecutor executor;
     @Autowired
     private StringToJsonNode jsonNode;
-    @Autowired
-    private TransactionStatusUpdate statusUpdate;
     private boolean started = false;
 
     public RealTimeTransactionStartImpl(@Qualifier("realTime") ThreadPoolExecutor executor, EftBatchPaymentDetailRepository repository, RealTimeTransactionService service, BankHeadOfficeService ho) {
@@ -60,12 +58,7 @@ public class RealTimeTransactionStartImpl implements RealTimeTransactionStart {
                     log.error("Real Time Transaction Start ERROR:{}", e.getMessage());
                 }
             });
-            if (!statusUpdate.isStarted()) {
-                try {
-                    new Thread(() -> statusUpdate.statusUpdate()).start();
-                } catch (Exception ignored) {
-                }
-            }
+
             int activeThread = executor.getActiveCount();
             while (activeThread > 5) {
                 int sleep;

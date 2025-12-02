@@ -45,10 +45,9 @@ public class TransactionStatusUpdate {
     public synchronized void statusUpdateApi() {
         long datetime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
         try {
-            while (true) {
+            for (int i = 0; i < 100; i++) {
                 List<NchlReconciledRes> list = repository.findByPushed(datetime - 3000);
                 if (list.isEmpty()) {
-                    started = false;
                     break;
                 }
                 started = true;
@@ -76,6 +75,7 @@ public class TransactionStatusUpdate {
         } catch (Exception e) {
             log.error("Error during status update {}", e.getMessage());
         }
+        started = false;
     }
 
 }

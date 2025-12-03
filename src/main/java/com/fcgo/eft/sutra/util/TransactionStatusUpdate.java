@@ -68,6 +68,7 @@ public class TransactionStatusUpdate {
                         })
                         .block();
                 assert res != null;
+                System.out.println(res);
                 res.forEach(d -> update(d.getPushed(), datetime, d.getInstructionId()));
                 try {
                     Thread.sleep(60000);

@@ -10,4 +10,9 @@ import lombok.*;
 public class ReconciledUpdateReq {
     private long instructionId;
     private String pushed;
+
+    @Override
+    public String toString() {
+        return "{\"instructionId\":" + instructionId + ",\"pushed\":\"" + pushed + "\"}";
+    }
 }

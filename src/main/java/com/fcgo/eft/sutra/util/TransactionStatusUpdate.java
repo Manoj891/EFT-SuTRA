@@ -43,6 +43,7 @@ public class TransactionStatusUpdate {
 
 
     public synchronized void statusUpdateApi() {
+        started = true;
         long datetime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
         try {
             for (int i = 0; i < 100; i++) {
@@ -67,10 +68,7 @@ public class TransactionStatusUpdate {
                         })
                         .block();
                 assert res != null;
-                res.forEach(d -> {
-                    log.info("{} {} {}", d.getPushed(), datetime, d.getInstructionId());
-                    repository.updateStatus(d.getPushed(), datetime, d.getInstructionId());
-                });
+                res.forEach(d -> update(d.getPushed(), datetime, d.getInstructionId()));
                 try {
                     Thread.sleep(60000);
                 } catch (Exception ignored) {
@@ -82,4 +80,8 @@ public class TransactionStatusUpdate {
         started = false;
     }
 
+    public void update(String pushed, long datetime, long instructionId) {
+        log.info("{} {} {}", pushed, datetime, instructionId);
+        repository.updateStatus(pushed, datetime, instructionId);
+    }
 }

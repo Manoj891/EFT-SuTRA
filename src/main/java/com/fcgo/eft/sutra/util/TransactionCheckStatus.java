@@ -39,8 +39,7 @@ public class TransactionCheckStatus {
     private final LoginService loginService;
     private final StringToJsonNode jsonNode;
     private final PoCodeMappedService poCodeMappedService;
-    private final AccountWhiteListSave accountWhiteListSave;
-    @Value("${server.port}")
+     @Value("${server.port}")
     private String port;
 
     @PostConstruct
@@ -51,14 +50,7 @@ public class TransactionCheckStatus {
         bankMapService.setBankMaps(eftNchlRbbBankMappingRepository.findBankMap());
         isProdService.init();
         loginService.init();
-        new Thread(accountWhiteListSave::pushInSuTRA).start();
-    }
-
-    @Scheduled(cron = "0 0/10 * * * *")
-    public void updateStatus() {
-        if (!statusUpdate.isStarted() && isProdService.isStarted()) {
-            statusUpdate.statusUpdateApi();
-        }
+        statusUpdate.statusUpdateApi();
     }
 
 
@@ -84,6 +76,9 @@ public class TransactionCheckStatus {
                 long nowTime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
                 repository.updateMissingStatusSent(nowTime);
 
+                if (!statusUpdate.isStarted() && isProdService.isStarted()) {
+                    statusUpdate.statusUpdateApi();
+                }
             });
         }
     }

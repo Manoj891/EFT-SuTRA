@@ -53,7 +53,8 @@ public class TransactionStatusUpdate {
                 }
                 started = true;
                 List<ReconciledUpdateReq> res = webClient.post()
-                        .uri("https://sutrav3.fcgo.gov.np/SuTRAv3/utility/eft-status")
+                        .uri("http://localhost:8080/SuTRAv3/utility/eft-status")
+//                        .uri("https://sutrav3.fcgo.gov.np/SuTRAv3/utility/eft-status")
                         .header("Authorization", "Bearer " + token)
                         .bodyValue(list)
                         .retrieve()
@@ -69,11 +70,7 @@ public class TransactionStatusUpdate {
                         .block();
                 assert res != null;
                 System.out.println(res);
-                res.forEach(d -> update(d.getPushed(), datetime, d.getInstructionId()));
-                try {
-                    Thread.sleep(60000);
-                } catch (Exception ignored) {
-                }
+
             }
         } catch (Exception e) {
             log.error("Error during status update {}", e.getMessage());
@@ -81,8 +78,4 @@ public class TransactionStatusUpdate {
         started = false;
     }
 
-    public void update(String pushed, long datetime, long instructionId) {
-        log.info("{} {} {}", pushed, datetime, instructionId);
-        repository.updateStatus(pushed, datetime, instructionId);
-    }
 }

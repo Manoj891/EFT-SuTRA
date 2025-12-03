@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -31,6 +32,7 @@ public class TransactionStatusUpdate {
     @Getter
     private boolean started = false;
 
+    @Scheduled(cron = "0 01 01 * * *")
     public void init() {
         token = webClient.post()
                 .uri("https://sutrav3.fcgo.gov.np/SuTRAv3/public/api/login")
@@ -46,30 +48,32 @@ public class TransactionStatusUpdate {
         started = true;
         long datetime = Long.parseLong(jsonNode.getYyyyMMddHHmmss().format(new Date()));
         try {
-            for (int i = 0; i < 100; i++) {
-                List<NchlReconciledRes> list = repository.findByPushed(datetime - 3000);
-                if (list.isEmpty()) {
+            for (int i = 0; i < 1; i++) {
+                List<NchlReconciledRes> list = repository.findByPushed(datetime - 10000);
+                System.out.println(list.size());
+                if (!list.isEmpty()) {
+                    started = true;
+                    List<ReconciledUpdateReq> res = webClient.post()
+//                            .uri("http://localhost:8080/SuTRAv3/utility/eft-status?datetime=" + datetime)
+                            .uri("https://sutrav3.fcgo.gov.np/SuTRAv3/utility/eft-status?datetime=" + datetime)
+                            .header("Authorization", "Bearer " + token)
+                            .bodyValue(list)
+                            .retrieve()
+                            .onStatus(HttpStatusCode::isError, clientResponse ->
+                                    clientResponse.bodyToMono(String.class)
+                                            .flatMap(errorBody -> {
+                                                log.info("Remote error: {}", errorBody);
+                                                return Mono.error(new RuntimeException("Remote API returned error"));
+                                            })
+                            )
+                            .bodyToMono(new ParameterizedTypeReference<List<ReconciledUpdateReq>>() {
+                            })
+                            .block();
+                    assert res != null;
+                    System.out.println(res);
+                } else {
                     break;
                 }
-                started = true;
-                List<ReconciledUpdateReq> res = webClient.post()
-                        .uri("http://localhost:8080/SuTRAv3/utility/eft-status")
-//                        .uri("https://sutrav3.fcgo.gov.np/SuTRAv3/utility/eft-status")
-                        .header("Authorization", "Bearer " + token)
-                        .bodyValue(list)
-                        .retrieve()
-                        .onStatus(HttpStatusCode::isError, clientResponse ->
-                                clientResponse.bodyToMono(String.class)
-                                        .flatMap(errorBody -> {
-                                            log.info("Remote error: {}", errorBody);
-                                            return Mono.error(new RuntimeException("Remote API returned error"));
-                                        })
-                        )
-                        .bodyToMono(new ParameterizedTypeReference<List<ReconciledUpdateReq>>() {
-                        })
-                        .block();
-                assert res != null;
-                System.out.println(res);
 
             }
         } catch (Exception e) {

@@ -50,11 +50,12 @@ public class TransactionCheckStatus {
         bankMapService.setBankMaps(eftNchlRbbBankMappingRepository.findBankMap());
         isProdService.init();
         loginService.init();
-        statusUpdate.statusUpdateApi();
+        new Thread(statusUpdate::statusUpdateApi).start();
+
     }
 
 
-    @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
+//    @Scheduled(cron = "0 15 08,12,16,20,22 * * *")
     public void executeStatus() {
         if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
             executor.submit(() -> {
@@ -83,7 +84,7 @@ public class TransactionCheckStatus {
         }
     }
 
-    @Scheduled(cron = "0 05 00 * * *")
+//    @Scheduled(cron = "0 05 00 * * *")
     public void executeCheckTransactionStatus() {
         if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
             Calendar calendar = Calendar.getInstance();
@@ -109,7 +110,7 @@ public class TransactionCheckStatus {
         }
     }
 
-    @Scheduled(cron = "0 01 02 * * *")
+//    @Scheduled(cron = "0 01 02 * * *")
     public void fetchBankAccountDetails() {
         if (isProdService.isProdService() && port.equalsIgnoreCase("7891")) {
             bankAccountDetailsService.fetchBankAccountDetails();
